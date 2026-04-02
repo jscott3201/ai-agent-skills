@@ -3,6 +3,7 @@ name: skill-name
 description: >
   What this skill does and when to use it. Front-load the key use case.
   Claude uses this to decide when to apply the skill automatically.
+disable-model-invocation: true       # remove this line when the skill is ready
 # disable-model-invocation: true    # uncomment for manual-only skills
 # context: fork                      # uncomment to run in a subagent
 # agent: Explore                     # uncomment to specify subagent type

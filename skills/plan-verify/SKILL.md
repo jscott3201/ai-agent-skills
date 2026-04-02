@@ -1,9 +1,8 @@
 ---
 name: plan-verify
 description: >
-  Verify an implementation plan against the actual codebase before starting work.
-  Use when about to implement from a plan document or when a plan references
-  specific files, functions, or APIs.
+  Verify an implementation plan against the actual codebase before starting
+  implementation. Use when about to execute tasks from a plan document.
 ---
 
 ## Purpose
