@@ -3,6 +3,7 @@ name: sequential-bench
 description: >
   Run benchmarks sequentially (never parallel), track results, and flag
   regressions. Use when running cargo bench or any benchmarking task.
+argument-hint: "[crate names]"
 ---
 
 ## Purpose
@@ -16,7 +17,8 @@ and flag regressions.
 
 ### 1. Discover benchmark targets
 
-List available benchmark crates:
+If `$ARGUMENTS` specifies crate names, use those directly. Otherwise, list
+available benchmark crates:
 
 ```bash
 cargo bench --workspace --no-run 2>&1 | grep -i compiling

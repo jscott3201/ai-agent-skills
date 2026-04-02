@@ -4,6 +4,7 @@ description: >
   Run the full Rust CI verification sequence: fmt, clippy, test, deny.
   Always uses --all-features. Manual invocation only.
 disable-model-invocation: true
+allowed-tools: Bash(cargo *)
 ---
 
 ## Purpose
