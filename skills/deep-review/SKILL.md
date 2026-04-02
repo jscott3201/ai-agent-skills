@@ -4,8 +4,7 @@ description: >
   Deep code review after completing a feature or implementation phase.
   Cross-references all changes against the codebase and fixes all findings.
   Use after finishing a phase, feature, or significant implementation chunk.
-context: fork
-agent: Explore
+argument-hint: "[scope description]"
 ---
 
 ## Purpose
@@ -16,12 +15,16 @@ implementations, stale references, missed consumers, and inconsistencies.
 
 ## Instructions
 
-### Phase 1: Research (runs in Explore subagent)
+### Phase 1: Research
 
-Identify the scope of changes to review. Use recent commits, diff, or
-user-specified scope.
+Spawn an Explore subagent using the Agent tool to perform the research phase.
+This keeps the heavy codebase scanning out of the main conversation context.
 
-For every changed or added component, verify:
+If `$ARGUMENTS` was provided, use it to focus the review scope (e.g., a specific
+phase, module, or set of changes). Otherwise, identify scope from recent commits
+or ask the user.
+
+The Explore subagent should verify, for every changed or added component:
 
 1. **Routing/dispatch completeness**
    - Every new code path is reachable from its entry point
@@ -53,7 +56,7 @@ For every changed or added component, verify:
 
 ### Phase 2: Report
 
-Categorize all findings by severity:
+When the Explore subagent returns, categorize all findings by severity:
 
 - **Critical** - incorrect behavior, data loss, security issue
 - **High** - logic error, missing error handling, broken consumer
@@ -62,11 +65,11 @@ Categorize all findings by severity:
 
 Report every finding. Do not skip any severity level.
 
-### Phase 3: Fix (runs in main context)
+### Phase 3: Fix
 
-After findings are reported to the main context:
+Work through fixes in the main context:
 
-1. Work through fixes one at a time, starting with Critical
+1. Start with Critical, then High, Medium, Low
 2. Run verification after each fix to confirm it resolves the issue
    and does not introduce new problems
 3. After all fixes applied, do a final scan to confirm no remaining issues

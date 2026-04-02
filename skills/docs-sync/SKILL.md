@@ -3,8 +3,7 @@ name: docs-sync
 description: >
   Full scan of all documentation against the current codebase to find and fix
   stale references. Use after major code changes, refactors, or feature removals.
-context: fork
-agent: Explore
+argument-hint: "[focus area]"
 ---
 
 ## Purpose
@@ -15,12 +14,18 @@ renamed types, and outdated examples. Report what needs fixing, then fix it.
 
 ## Instructions
 
-### Phase 1: Discovery (runs in Explore subagent)
+### Phase 1: Discovery
 
-Scan the full documentation surface against the current codebase. Do not limit
-to recent changes - check everything.
+Spawn an Explore subagent using the Agent tool to perform the discovery phase.
+This keeps the heavy codebase scanning out of the main conversation context.
 
-#### Documentation surfaces to check
+If `$ARGUMENTS` was provided, use it to focus the scan (e.g., "removed federation
+module" or "renamed auth types"). Otherwise, do a full scan.
+
+The Explore subagent should scan these documentation surfaces against the
+current codebase:
+
+#### Surfaces to check
 
 - `README.md`
 - All files in `docs/` (recursive)
@@ -68,9 +73,9 @@ Fix: Remove the federation section and update the feature list
 
 Group by file. Include the specific line or section.
 
-### Phase 2: Fix (runs in main context)
+### Phase 2: Fix
 
-After findings are reported to the main context:
+When the Explore subagent returns findings to the main context:
 
 1. Work through fixes file by file
 2. Apply technical writing conventions to all updated content
