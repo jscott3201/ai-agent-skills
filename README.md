@@ -101,6 +101,7 @@ memory. They accumulate knowledge across sessions.
 | `debugger` | debug, safety-checks | Full | Systematic debugging |
 | `test-engineer` | test-strategy, technical-writing | Full | Test planning and generation |
 | `release-manager` | release-prep, docs-sync, technical-writing | Full | Release preparation |
+| `onboarder` | project-onboard, technical-writing | Full | New project onboarding |
 
 Invoke with `@agent-name` in your prompt, or Claude delegates automatically
 based on the task.
@@ -134,6 +135,27 @@ _agentskills/
 
 This directory should be gitignored. Files are not committed unless
 explicitly requested.
+
+## Onboarding a New Project
+
+When using justin-tools on an existing project for the first time:
+
+```
+/justin-tools:project-onboard
+```
+
+Or delegate to the onboarding agent:
+
+```
+@onboarder set up this project for justin-tools
+```
+
+The onboarder will:
+1. Explore the project (languages, build system, conventions, CI)
+2. Assess what is already in place
+3. Walk through gaps one step at a time (gitignore, CLAUDE.md, etc.)
+4. Highlight the most relevant skills for the project
+5. Suggest concrete next steps
 
 ## Development
 
