@@ -26,12 +26,16 @@ Apply these rules during all implementation work:
 
 ### Before every commit
 
-Run CI verification per the `rust-ci-check` skill for Rust projects, or the
-equivalent for the project's language:
+Run CI verification for the project's language. For Rust projects:
 
-- Format check/fix
-- Lint with zero warnings
-- Full test suite
+```bash
+cargo fmt --all
+cargo clippy --workspace --all-features --all-targets -- -D warnings
+cargo test --workspace --all-features
+```
+
+For other languages, the equivalent: format, lint (zero warnings), full test
+suite.
 
 Do not commit if verification fails. Fix the issue first.
 
