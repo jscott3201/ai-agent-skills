@@ -21,8 +21,8 @@ list and identify items ready to tackle.
 When work is explicitly deferred during planning or implementation, capture
 it immediately.
 
-1. Look for `DEFERRED.md` in the project root. If it does not exist, create
-   it with this structure:
+1. Look for `_agentskills/DEFERRED.md`. If it does not exist, create the
+   directory and file with this structure:
 
 ```markdown
 # Deferred Work
@@ -55,13 +55,13 @@ it immediately.
 
 3. Update the **Last updated** date and the **Summary** counts.
 
-4. Do not commit DEFERRED.md if it is in `.gitignore` (check first).
+4. Do not commit files in `_agentskills/` unless the user explicitly asks.
 
 ### Reviewing deferred items (manual invocation)
 
 When invoked manually (e.g., `/justin-tools:deferred-tracking review`):
 
-1. Read the current `DEFERRED.md`
+1. Read `_agentskills/DEFERRED.md`
 2. For each item, evaluate whether the gate has been met:
    - Dependencies resolved? Check if the blocking work is complete.
    - Effort feasible now? Consider current project state and priorities.

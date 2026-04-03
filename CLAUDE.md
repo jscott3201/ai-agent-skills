@@ -24,7 +24,8 @@ _agentskills/
 ├── design/         # design documents (feature-design formal path)
 ├── research/       # technical deep-dives, landscape analyses (research)
 ├── debates/        # multi-perspective debate findings (debate)
-└── reviews/        # deep-review and security audit reports (when saved)
+├── reviews/        # deep-review and security audit reports (when saved)
+└── DEFERRED.md     # deferred work tracking (deferred-tracking)
 ```
 
 Create subdirectories as needed. Name files with date and topic:
