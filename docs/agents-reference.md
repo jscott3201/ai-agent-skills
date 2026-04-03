@@ -1,6 +1,6 @@
 # Agents Reference
 
-Complete reference for all 8 agents in the justin-tools plugin.
+Complete reference for all 9 agents in the justin-tools plugin.
 
 ## How Agents Work
 
@@ -151,6 +151,27 @@ ordering, runs pre-release checklist.
 
 Does not push tags or publish. The user handles that. Persistent memory
 tracks release conventions and multi-crate ordering per workspace.
+
+### onboarder
+
+| Field | Value |
+|:--|:--|
+| Skills | project-onboard, technical-writing |
+| Tools | Full access |
+| Memory | Persistent (user scope) |
+| Color | Green |
+
+Guides users through setting up an existing project to work with
+justin-tools. Explores the project first, then walks through gaps one
+step at a time: gitignore setup, CLAUDE.md creation, relevant skills
+introduction, CI alignment.
+
+Persistent memory tracks which projects have been onboarded, user
+preferences from other projects, and common patterns that speed up
+future onboarding.
+
+Conversational approach: explore first, summarize, one step at a time,
+respect existing conventions, target 5-10 minutes.
 
 ## Agent Teams
 

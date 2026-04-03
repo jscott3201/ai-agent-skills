@@ -25,6 +25,31 @@ After making changes to skills, agents, or hooks:
 2. Run: `claude plugin update justin-tools@justin-tools-marketplace`
 3. In your session: `/reload-plugins`
 
+## Onboard a Project
+
+When using justin-tools on an existing project for the first time, run
+the onboarding skill:
+
+```
+/justin-tools:project-onboard
+```
+
+Or delegate to the onboarding agent:
+
+```
+@onboarder set up this project for justin-tools
+```
+
+The onboarder will:
+1. Explore the project (languages, build system, conventions, CI, tests)
+2. Present an assessment of what is already in place and what is missing
+3. Walk through setup one step at a time (gitignore, CLAUDE.md, etc.)
+4. Highlight the 4-6 skills most relevant to the project
+5. Suggest concrete next steps
+
+This takes about 5-10 minutes and ensures the project is set up to get
+the most from the plugin's skills and agents.
+
 ## Quick Tour
 
 ### Start a new feature

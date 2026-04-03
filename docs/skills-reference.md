@@ -1,8 +1,34 @@
 # Skills Reference
 
-Complete reference for all 27 skills in the justin-tools plugin.
+Complete reference for all 28 skills in the justin-tools plugin.
 
 ## Skill Categories
+
+### Onboarding (1 skill)
+
+#### project-onboard
+
+**Invocation:** Manual (`/justin-tools:project-onboard`)
+**Agent:** `onboarder`
+
+Guided onboarding for existing projects. 5 stages:
+
+1. **Explore** - reads the project: languages, build system, conventions,
+   CI, tests, documentation, existing CLAUDE.md
+2. **Assess** - presents a ready/gap checklist showing what is in place
+   and what is missing
+3. **Setup** - walks through gaps one step at a time, highest impact first:
+   `_agentskills/` in .gitignore, CLAUDE.md creation/enhancement, relevant
+   skills introduction per language, CI alignment, optional health checks
+4. **Save** - stores project profile in agent persistent memory
+5. **Next steps** - suggests 3-4 concrete skills to try based on project state
+
+One step at a time, asks before changing, respects existing conventions.
+Targets 5-10 minutes, not a lengthy setup wizard.
+
+Supporting files: `claude-md-template.md`
+
+---
 
 ### Feature Lifecycle (4 skills)
 
