@@ -1,15 +1,18 @@
 ---
 name: dep-audit
 description: >
-  Audit dependencies before adoption. Checks health metrics and evaluates
-  build vs depend. Use when recommending or adding a new library or package.
+  Audit dependencies before adoption. Checks health metrics, license
+  compatibility, supply chain signals, and evaluates build vs depend.
+  Use when recommending or adding a new library or package.
 ---
 
 ## Purpose
 
-Prevent adopting unmaintained, abandoned, or unnecessary dependencies. Every
-external dependency is a liability - evaluate whether to depend at all, then
-verify the specific package is healthy before recommending it.
+Prevent adopting unmaintained, compromised, or unnecessary dependencies. Every
+external dependency is a liability: it introduces maintenance burden,
+potential vulnerabilities, license obligations, and supply chain risk.
+Evaluate whether to depend at all, then verify the specific package is
+healthy and safe before recommending it.
 
 ## Instructions
 
@@ -19,81 +22,145 @@ Before evaluating any specific package, answer this question:
 
 **Does this belong in-house or as a dependency?**
 
-- **Build in-house** if the data structure or algorithm sits on the critical
-  path of the product's core value proposition. Full control over integration,
-  memory layout, serialization, and future evolution outweighs the cost of
-  implementation.
+**Build in-house** when:
+- The code sits on the critical path of the product's core value proposition
+- You need full control over integration, memory layout, serialization, and
+  future evolution
+- The implementation is straightforward (could you build it in an afternoon?)
+- The candidate dependency pulls in a large transitive tree for a small feature
 
-- **Depend externally** if it is infrastructure or utility code: serialization
-  formats, compression, cryptography, HTTP frameworks, test harnesses. These
-  are well-solved problems where external packages provide better quality than
-  hand-rolling.
+**Depend externally** when:
+- The problem is complex and well-solved (cryptography, compression, HTTP,
+  serialization formats, parser generators)
+- The library is a de facto ecosystem standard with corporate backing
+- Building it yourself would take weeks and produce an inferior result
+- The dependency has few transitive dependencies itself
 
-The decision boundary: does this code define what makes the product unique,
-or does it support the product's unique code?
+**Quantitative check:** Run `cargo tree -p <crate>` / `npm ls <pkg>` /
+`pipdeptree -p <pkg>` before adopting. If a dependency pulls in >20
+transitive packages for a simple feature, reconsider.
 
 If in-house is the right call, state that and stop. Do not audit packages.
 
-### 2. Audit the package
+### 2. Health audit
 
-For each candidate package, check:
+For each candidate package, evaluate these dimensions. See
+[ecosystem-audit.md](ecosystem-audit.md) for ecosystem-specific tools,
+thresholds, and commands.
 
-#### Health metrics
+#### Adoption and maintenance
 
-**Rust (crates.io):**
-- Recent 90-day downloads: must be >10K
-- Last release date: must be within ~12 months
-- Check `cargo deny` compatibility if the project uses it
+- **Recent downloads:** growing or stable, not declining
+- **Last release:** within 12 months (18 months is caution, >24 is reject)
+- **Maintainer count:** 2+ active maintainers (bus factor > 1)
+- **Issue triage:** are issues being responded to? Are PRs reviewed?
+- **OpenSSF Scorecard:** aim for 6+ overall (below 4 is a red flag)
 
-**JavaScript (npm):**
-- Weekly downloads: check for active usage
-- Last publish date: must be within ~12 months
-- Check for known vulnerabilities via `npm audit`
+#### Vulnerability status
 
-**Python (PyPI):**
-- Recent download stats via pypistats.org or similar
-- Last release date: must be within ~12 months
-- Check for active maintenance
+- No known unpatched CVEs in the package or its transitive tree
+- Run the ecosystem's audit tool: `cargo-audit`, `npm audit`, `pip-audit`
+- Check vulnerability response history: how quickly does the maintainer
+  address reported issues?
 
-#### Repository activity
+#### Transitive dependency risk
 
-For any ecosystem:
-- Open issues: reasonable count, some recent triage activity
-- Recent commits: at least some activity in the last 6 months
-- Maintainer responsiveness: are issues and PRs being addressed?
+- Count transitive dependencies (fewer is better)
+- Check for single-maintainer transitives (high abandonment risk)
+- Verify no duplicate versions of the same transitive (version conflicts)
+- Aim for dependency depth of 4 or fewer levels
 
-### 3. Report findings
+### 3. License check
 
-Present a clear recommendation:
+Verify license compatibility with your project. See
+[license-compatibility.md](license-compatibility.md) for the full matrix.
+
+Key risks:
+- **GPL in a non-GPL project:** combined work becomes GPL
+- **AGPL in SaaS:** requires source disclosure to all network users
+- **No license:** legally unusable, treat as all-rights-reserved
+
+Run: `cargo deny check licenses` / `npx license-checker` / `pip-licenses`
+
+### 4. Supply chain signals
+
+Check for red flags that indicate a compromised or risky package:
+
+- **Sudden release burst** after long dormancy (months/years inactive, then
+  rapid releases)
+- **New maintainer** added shortly before a suspicious release
+- **Install scripts** with network calls, encoded strings, or code execution
+  (`preinstall`/`postinstall` in npm)
+- **Package name** is a near-miss of a popular package (typosquatting)
+- **Package age** less than 30 days with no established community
+- **Binary artifacts** bundled without explanation
+- **Lockfile manipulation:** integrity hash changes without version bumps,
+  registry URL changes
+
+### 5. Report findings
+
+Present a clear recommendation for each candidate:
 
 ```
 Package: sketches-ddsketch v0.3
-90-day downloads: 54M
+Downloads: 54M (90-day), trending stable
 Last release: 2025-11-14 (5 months ago)
-GitHub: active, 12 open issues, last commit 3 weeks ago
-Recommendation: ADOPT - healthy, widely used, well-maintained
+Maintainers: 3 active
+License: Apache-2.0 (compatible)
+Transitive deps: 2
+Vulnerabilities: none known
+OpenSSF Scorecard: 7.2
+Recommendation: ADOPT
 ```
 
 Or:
 
 ```
 Package: tsz-compress v0.2
-90-day downloads: 1.2K
+Downloads: 1.2K (90-day), declining
 Last release: 2023-08-01 (2.5 years ago)
-GitHub: 4 open issues, no commits in 18 months
-Recommendation: REJECT - low adoption, unmaintained
+Maintainers: 1 (inactive)
+License: MIT (compatible)
+Transitive deps: 0
+Vulnerabilities: none known
+OpenSSF Scorecard: 2.1
+Recommendation: REJECT - unmaintained, low adoption
 Alternative: hand-roll Gorilla encoding (~200 lines)
+```
+
+When auditing multiple candidates, present them side by side:
+
+```
+| Metric | Option A | Option B | Option C |
+|--------|----------|----------|----------|
+| Downloads (90d) | 54M | 12K | 890K |
+| Last release | 5 months | 2.5 years | 3 months |
+| Maintainers | 3 | 1 | 2 |
+| License | Apache-2.0 | MIT | GPL-3.0 |
+| Transitive deps | 2 | 0 | 14 |
+| Recommendation | ADOPT | REJECT | CAUTION (GPL) |
 ```
 
 If rejecting, always suggest an alternative (another package or hand-rolling).
 
+## Supporting files
+
+- [ecosystem-audit.md](ecosystem-audit.md) - tools, thresholds, and commands per ecosystem
+- [license-compatibility.md](license-compatibility.md) - license contamination matrix and rules
+
 ## Guidance
 
-Total download count is misleading - a package with 10M total downloads but
-200 recent downloads is likely abandoned. Always check recent activity.
+**Total downloads are misleading.** A package with 10M all-time downloads but
+200 recent downloads is likely abandoned. Always check recent trends.
 
-When auditing multiple candidates for the same need, present them side by side
-so the tradeoffs are visible. Do not just recommend the first one found.
+**Transitive dependencies are invisible risk.** 70% of critical security debt
+originates from third-party code. Run the dependency tree before adopting.
 
-For Rust specifically: check if the crate uses `#![forbid(unsafe_code)]` or
-has significant unsafe blocks. Unsafe in a dependency is risk you inherit.
+**Corporate backing matters for longevity.** Corporate-backed libraries have
+3x the survival rate over 5 years. Weight maintainer stability heavily for
+dependencies you will use long-term.
+
+**The 80% rule:** 80% of software's total cost occurs after initial adoption.
+A dependency that saves a week of development but requires ongoing
+vulnerability monitoring, version conflict resolution, and update churn may
+cost more than building it yourself.
