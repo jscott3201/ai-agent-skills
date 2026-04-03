@@ -154,7 +154,7 @@ conventions. Supports Rust, Python, and JavaScript/TypeScript.
 #### deep-review
 
 **Invocation:** Auto after phases/features
-**Agent:** `code-reviewer`
+**Agent:** `deep-reviewer`
 
 Post-implementation code review with 13 categories across 4 groups:
 structural completeness, correctness, concurrency/performance, integration.

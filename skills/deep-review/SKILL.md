@@ -22,7 +22,7 @@ system-level impact.
 
 ### Phase 1: Research
 
-Delegate to the `code-reviewer` agent using the Agent tool. This agent has
+Delegate to the `deep-reviewer` agent using the Agent tool. This agent has
 the deep-review methodology preloaded in its system prompt and uses read-only
 tools to keep the main conversation context clean.
 

@@ -71,7 +71,7 @@ bias check).
 
 Saves findings to `_agentskills/debates/`.
 
-### code-reviewer
+### deep-reviewer
 
 | Field | Value |
 |:--|:--|
@@ -179,7 +179,7 @@ When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is available, agents can be
 used as teammate types for parallel work:
 
 ```
-Create a team to review this phase. Spawn a code-reviewer teammate
+Create a team to review this phase. Spawn a deep-reviewer teammate
 and a security-auditor teammate. Have them review independently.
 ```
 

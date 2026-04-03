@@ -134,7 +134,7 @@ Agents are invoked with `@agent-name` or Claude delegates automatically:
 - `@feature-architect` - feature design sessions
 - `@researcher` - technical research
 - `@debate-lead` - structured debates
-- `@code-reviewer` - post-phase code review
+- `@deep-reviewer` - post-phase code review
 - `@security-auditor` - security audit
 - `@debugger` - systematic debugging
 - `@test-engineer` - test planning and generation

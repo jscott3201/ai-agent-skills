@@ -137,7 +137,7 @@ focused tasks rather than one large task.
   assigned to separate teammates. Annotate each task with its assigned
   teammate and verify no file overlap within a wave. Wave boundaries are
   synchronization points where the lead reviews before the next wave.
-  Reference agent types (code-reviewer, researcher, etc.) for specialized
+  Reference agent types (deep-reviewer, researcher, etc.) for specialized
   teammates.
 
 ### Commit discipline

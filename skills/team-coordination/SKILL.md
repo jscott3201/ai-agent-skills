@@ -52,11 +52,11 @@ Spawn specialized reviewers that examine the same codebase from different
 angles. Each reviewer uses a different agent type.
 
 **Available agent types for review:**
-- `code-reviewer` - structural completeness, error handling, API consumers
+- `deep-reviewer` - structural completeness, error handling, API consumers
 - `security-auditor` - STRIDE analysis, auth, input validation, secrets
 
 **Example prompt to lead:**
-> "Create a team to review the changes in this phase. Spawn a code-reviewer
+> "Create a team to review the changes in this phase. Spawn a deep-reviewer
 > teammate and a security-auditor teammate. Have them review independently,
 > then synthesize findings."
 
@@ -123,13 +123,13 @@ These plugin agents are available as teammate types:
 
 | Agent | Role | Tools | Memory |
 |:--|:--|:--|:--|
-| `code-reviewer` | Post-phase code review | Read-only | Persistent |
+| `deep-reviewer` | Post-phase code review | Read-only | Persistent |
 | `security-auditor` | STRIDE security audit | Read-only | Persistent |
 | `researcher` | Technical research | Full access | Persistent |
 | `feature-architect` | Feature design and planning | Full access | Persistent |
 
 Reference by name when spawning teammates:
-> "Spawn a teammate using the code-reviewer agent type."
+> "Spawn a teammate using the deep-reviewer agent type."
 
 ## Keeping agents productive
 

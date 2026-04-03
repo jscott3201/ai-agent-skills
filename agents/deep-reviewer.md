@@ -1,5 +1,5 @@
 ---
-name: code-reviewer
+name: deep-reviewer
 description: >
   Deep code review after completing a feature or implementation phase.
   Cross-references all changes against the codebase. Use proactively

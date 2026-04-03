@@ -91,7 +91,7 @@ genuinely parallel work.
 - The implementation plan has independent waves with tasks touching
   different files
 - Multiple review perspectives are needed simultaneously
-  (code-reviewer + security-auditor)
+  (deep-reviewer + security-auditor)
 - Research benefits from parallel investigation
 
 **Keep using sequential subagents when:**

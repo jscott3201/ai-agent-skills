@@ -96,7 +96,7 @@ memory. They accumulate knowledge across sessions.
 | `feature-architect` | feature-design, plan-verify, technical-writing | Full | Feature design and planning |
 | `researcher` | research, technical-writing | Full | Technical deep-dives and doc lookup |
 | `debate-lead` | debate, technical-writing | Full | Multi-perspective decision evaluation |
-| `code-reviewer` | deep-review | Read-only | Post-phase code review |
+| `deep-reviewer` | deep-review | Read-only | Post-phase code review |
 | `security-auditor` | safety-checks | Read-only | STRIDE security audit |
 | `debugger` | debug, safety-checks | Full | Systematic debugging |
 | `test-engineer` | test-strategy, technical-writing | Full | Test planning and generation |
