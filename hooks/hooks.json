@@ -1,3 +1,47 @@
 {
-  "hooks": {}
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "echo 'Blocked: git push is not allowed. Only the user pushes to remote.' >&2; exit 2"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git reset --hard*)",
+            "command": "echo 'Blocked: git reset --hard is destructive. Use a safer alternative or ask the user.' >&2; exit 2"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git checkout -- *)",
+            "command": "echo 'Blocked: git checkout -- discards uncommitted changes. Ask the user first.' >&2; exit 2"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git clean -f*)",
+            "command": "echo 'Blocked: git clean -f removes untracked files permanently. Ask the user first.' >&2; exit 2"
+          },
+          {
+            "type": "command",
+            "if": "Bash(rm -rf *)",
+            "command": "echo 'Blocked: rm -rf is destructive. Use a targeted rm or ask the user.' >&2; exit 2"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude Code needs your attention\" with title \"Claude Code\"'"
+          }
+        ]
+      }
+    ]
+  }
 }
