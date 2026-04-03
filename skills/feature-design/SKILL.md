@@ -11,29 +11,50 @@ argument-hint: "[feature description]"
 ## Purpose
 
 Drive a feature from idea to implementation-ready plan. Covers the full arc:
-understand the problem, capture workflow preferences, research and design
-(at a depth the user chooses), produce a phased implementation plan with
-complete code, verify the plan against the codebase, and hand off to execution.
+explore the codebase, understand the problem, capture workflow preferences,
+research and design (at a depth the user chooses), produce a phased
+implementation plan with complete code, self-review, verify against the
+codebase, iterate with the user, and hand off to execution.
 
 ## Instructions
 
 Work through these stages in order. Each stage builds on the previous one.
+Do not skip stages, but scale the depth of each stage to the feature's
+complexity.
 
-### Stage 1: Understand the feature
+### Stage 1: Explore and understand
 
-1. Explore the current project context - files, docs, recent commits, CLAUDE.md
-2. If `$ARGUMENTS` was provided, use it as the starting point
-3. Ask clarifying questions one at a time to understand:
-   - What problem this solves
-   - What constraints exist (performance, compatibility, scope)
-   - What success looks like
-4. Assess scope: if the feature spans multiple independent subsystems, flag it
-   immediately and help decompose into sub-features before continuing. Each
-   sub-feature gets its own pass through this skill.
+#### 1a. Codebase exploration
+
+Before asking any questions, build context. Follow the
+[exploration-checklist.md](exploration-checklist.md) to systematically
+understand the project state. Key areas:
+
+- Read CLAUDE.md and any decision logs or architectural docs
+- Identify existing patterns relevant to the feature (how similar things are done)
+- Check recent git history for ongoing work that might interact
+- Find the code areas that will be affected
+- Note test patterns, CI requirements, and project conventions
+
+Use an Explore subagent for large codebases to keep the main context clean.
+
+#### 1b. Understand the feature
+
+1. If `$ARGUMENTS` was provided, use it as the starting point
+2. Ask clarifying questions one at a time to understand:
+   - **Problem:** What problem does this solve? Who experiences it?
+   - **Success criteria:** What does "done" look like? How will we know it works?
+   - **Constraints:** Performance targets, compatibility requirements, scope limits
+   - **Non-goals:** What are we explicitly NOT building? What adjacent problems
+     are out of scope? (This prevents scope creep and over-engineering)
+3. Assess scope: if the feature spans multiple independent subsystems, flag it
+   immediately and help decompose into sub-features. Each sub-feature gets
+   its own pass through this skill.
 
 ### Stage 2: Capture workflow preferences
 
-Ask these questions before any planning work. The answers shape the plan format.
+Ask these questions before any planning work. The answers shape the plan
+format and task granularity.
 
 **Execution style:**
 - **Primary agent** - all code written by main Claude in this session
@@ -48,48 +69,46 @@ Ask these questions before any planning work. The answers shape the plan format.
 - Default: `_plans/` (gitignored, not committed)
 - Or specify an alternative path
 
+**Complexity check:**
+After gathering requirements, provide a brief complexity estimate:
+- **Small** (1 phase, 3-5 tasks, hours of work) - skip formal research
+- **Medium** (2-3 phases, 10-20 tasks, days of work) - conversational or formal
+- **Large** (4+ phases with sub-phases, weeks of work) - formal research recommended
+
+Get the user's agreement on scope before proceeding.
+
 ### Stage 3: Research and design
 
 Present the user with a choice:
 
-> "This feature needs some design work. Two options:
-> 1. **Conversational** - we discuss the design here, I confirm the approach, and move to planning
-> 2. **Formal** - I produce a research/findings document and decision log entries before planning
+> "Two depth options for the design phase:
+> 1. **Conversational** - we discuss the design here, confirm the approach, move to planning
+> 2. **Formal** - I produce a research/design document with decision records before planning
 >
 > Which depth?"
 
 #### If conversational:
 
-- Propose 2-3 approaches with tradeoffs
-- Lead with your recommendation and explain why
-- Discuss until the user confirms an approach
-- Move to Stage 4
+1. Propose 2-3 approaches with concrete tradeoffs:
+   - Lead with your recommendation and explain why
+   - For each alternative, state what it does better AND what it does worse
+   - Include a "do nothing / minimal" option when relevant
+2. Explicitly state non-goals and what was rejected
+3. Identify risks: what could go wrong with the chosen approach?
+4. Discuss until the user confirms an approach
+5. Move to Stage 4
 
 #### If formal:
 
-Produce a structured findings document:
+Produce a structured document using the
+[research-template.md](research-template.md) format. Key sections:
 
-```markdown
-# [Feature] Research Findings
-
-**Date:** YYYY-MM-DD
-**Method:** [How the analysis was conducted]
-
-## Design Decisions
-
-| ID | Decision | Alternatives Rejected | Rationale | Impact |
-|----|----------|-----------------------|-----------|--------|
-| D-XX | [What was decided] | [What was not chosen] | [Why] | [What changes] |
-
-## Technical Analysis
-
-[Sections as needed - architecture, data structures, performance estimates,
-integration points, security considerations]
-
-## Not Recommended
-
-[What was explicitly considered and rejected, with rationale]
-```
+- Goals and non-goals
+- System context (how this fits the existing architecture)
+- Design decisions with alternatives rejected and rationale
+- Technical analysis (data structures, APIs, performance estimates)
+- Risks and mitigations
+- What was explicitly not recommended and why
 
 Save to the configured plan location. Get user approval before proceeding.
 
@@ -102,32 +121,93 @@ Key constraints:
 - Every task has complete code - no pseudocode, no placeholders
 - Every file path is exact - absolute within the project
 - Dependencies are explicit - blocks/blocked-by on every task
+- Each phase has exit criteria and a test strategy
 - Task granularity matches the execution style chosen in Stage 2
+- Risks and rollback strategy are documented
+
+**Task sizing rule:** Keep each task to a single logical unit (one function,
+one component, one API endpoint). Multi-file tasks that touch 4+ files with
+100+ lines of changes have significantly lower accuracy. When a change is
+inherently cross-cutting, structure it as a sequence of focused tasks rather
+than one large task.
 
 Save the plan to the configured location (default `_plans/`).
 
-### Stage 5: Verify and hand off
+#### Plan self-review
 
-After the plan is written:
+After writing the plan, review it with fresh eyes before involving the user:
 
-1. Invoke the `plan-verify` skill to check the plan against the codebase
-2. Present findings to the user
-3. Fix any inaccuracies in the plan
-4. Ask: "Plan verified and ready. Start execution?"
-5. If yes, begin implementing per the chosen execution style from Stage 2
+1. **Placeholder scan:** Search for "TBD", "TODO", "implement later",
+   "similar to Task N", or any vague instructions. Fix them.
+2. **Internal consistency:** Do types, function names, and property names
+   used in later tasks match what was defined in earlier tasks?
+3. **Dependency check:** Does each task's "blocked-by" list actually
+   produce what the task needs? Are there circular dependencies?
+4. **Scope check:** Does every task trace back to a requirement from
+   Stage 1? Are there tasks that implement things nobody asked for?
+
+Fix any issues inline. No need to re-review - fix and move on.
+
+### Stage 5: Verify, review, and hand off
+
+#### 5a. Plan verification
+
+Invoke the `plan-verify` skill to check the plan against the codebase.
+Present findings to the user and fix any inaccuracies.
+
+#### 5b. User review cycle
+
+Present the plan to the user for review:
+
+> "Plan written and verified. Please review and let me know:
+> - Any sections that need changes
+> - Anything missing or out of scope
+> - Any concerns about the approach
+>
+> I'll incorporate your feedback and re-present."
+
+Iterate until the user approves. Each iteration:
+1. Incorporate the user's feedback
+2. Re-run the self-review checks
+3. Re-present the updated plan
+
+This review cycle is the highest-leverage step. A plan reviewed 2-3 times
+produces significantly better implementation results than a plan executed
+immediately.
+
+#### 5c. Execution handoff
+
+After the user approves:
+
+1. Ask: "Ready to start execution?"
+2. If yes, begin implementing per the chosen execution style from Stage 2
+
+## Supporting files
+
+- [exploration-checklist.md](exploration-checklist.md) - structured codebase exploration for Stage 1
+- [research-template.md](research-template.md) - formal research/design document format for Stage 3
+- [plan-template.md](plan-template.md) - implementation plan structure for Stage 4
 
 ## Guidance
 
-The most important stage is 4. A good plan prevents wasted implementation
-time. Invest the effort here - verify every API you reference, trace every
-data flow, and write complete code. A plan with complete, verified code blocks
-is essentially a guided implementation that executes reliably whether run by
-the primary agent or delegated to subagents.
+**Context first, questions second.** Read the codebase before asking the user
+anything. Half the clarifying questions answer themselves when you understand
+the existing code, patterns, and conventions.
 
-Scale the number of phases to the feature's complexity. A focused feature
-might be one phase with 3-5 tasks. A major initiative might be 5 phases
-with sub-phases. Let the scope dictate the structure, not a template.
+**Non-goals are as important as goals.** Explicitly stating what the feature
+does NOT do prevents scope creep during implementation and sets clear
+boundaries for the plan.
 
-When presenting approaches in Stage 3, YAGNI ruthlessly. Remove features
+**The review cycle is not optional ceremony.** Research shows that plans
+reviewed 2-3 times before implementation produce significantly better results
+than plans executed immediately. The cost of an extra review round is minutes;
+the cost of implementing a flawed plan is hours.
+
+**Scale to complexity.** A focused feature (small) might skip formal research
+and have one phase with 3 tasks. A major initiative (large) might need formal
+research with decision records and 5 phases with sub-phases. Let the scope
+dictate the structure.
+
+**YAGNI ruthlessly.** When presenting approaches in Stage 3, remove features
 that solve hypothetical future problems. The right amount of complexity is
 what the feature actually requires.
