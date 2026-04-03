@@ -110,10 +110,7 @@ Save the plan to the configured location (default `_plans/`).
 
 After the plan is written:
 
-1. Run the `plan-verify` process against the codebase:
-   - Verify all referenced files, functions, and APIs exist
-   - Check that signatures and data flow match reality
-   - Confirm dependency ordering is correct
+1. Invoke the `plan-verify` skill to check the plan against the codebase
 2. Present findings to the user
 3. Fix any inaccuracies in the plan
 4. Ask: "Plan verified and ready. Start execution?"
