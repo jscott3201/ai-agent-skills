@@ -1,0 +1,132 @@
+---
+name: refactor
+description: >
+  Structured refactoring: identify smell, plan transformation, execute with
+  verification at each step, confirm no behavioral changes. Includes a
+  Rust-specific refactoring catalog.
+disable-model-invocation: true
+argument-hint: "[what to refactor]"
+---
+
+## Purpose
+
+Guide safe refactoring through a structured process: identify the problem,
+plan the transformation, execute incrementally with verification at each
+step, and confirm no behavioral changes via tests.
+
+## Instructions
+
+### 1. Identify the smell
+
+From `$ARGUMENTS` or by analyzing the code, identify what needs refactoring:
+
+| Smell | Symptoms | Typical Fix |
+|:--|:--|:--|
+| **Long function** | >50 lines, multiple concerns | Extract functions |
+| **God module** | Module does too many things | Split into focused modules |
+| **Duplicate logic** | Same pattern in 3+ places | Extract shared function/trait |
+| **Leaky abstraction** | Internal details exposed to consumers | Introduce interface/trait |
+| **Primitive obsession** | Strings/ints used instead of types | Introduce domain types |
+| **Deep nesting** | 4+ levels of if/match/for | Early returns, extract helpers |
+| **Large crate** | Crate has too many responsibilities | Split into workspace crates |
+| **Overly coupled** | Changes in A always require changes in B | Introduce abstraction boundary |
+
+### 2. Write characterization tests
+
+Before changing anything, ensure the current behavior is captured:
+
+1. Check existing test coverage for the code being refactored
+2. If coverage is thin, write characterization tests that capture
+   the current behavior (even if that behavior is wrong)
+3. Run all tests to establish a green baseline
+
+**Characterization tests protect against accidental behavior changes.**
+They can be updated after the refactoring if the behavior should change,
+but during the refactoring they must stay green.
+
+### 3. Plan the transformation
+
+Describe the refactoring as a sequence of small, independently verifiable
+steps. Each step should:
+
+- Make one logical change
+- Keep the code compiling at each step
+- Keep all tests passing at each step
+- Be small enough to revert if it goes wrong
+
+Example plan:
+```
+1. Extract helper function `validate_input()` from `process()`
+2. Move `validate_input()` to its own module `validation.rs`
+3. Replace duplicate validation in `process_batch()` with `validate_input()`
+4. Update tests to use `validate_input()` directly for edge cases
+```
+
+Get the user's approval on the plan before executing.
+
+### 4. Execute incrementally
+
+For each step:
+
+1. Make the change
+2. Run `cargo check` (or equivalent) to verify compilation
+3. Run the full test suite to verify no behavioral changes
+4. Commit the step with a descriptive message:
+   `refactor(module): extract validate_input from process`
+
+**If a step breaks tests:** revert immediately and re-examine the plan.
+Do not try to fix forward during a refactoring step.
+
+### 5. Verify the result
+
+After all steps are complete:
+
+1. Run the full CI verification sequence
+2. Compare the public API: has it changed? If so, was that intentional?
+3. Verify the code reads better: is the smell resolved?
+4. Check that no new smells were introduced
+
+### Rust-specific refactoring patterns
+
+| Pattern | From | To | Key Concern |
+|:--|:--|:--|:--|
+| **Extract module** | Large `lib.rs` | `mod x;` in separate file | Re-export public items |
+| **Split crate** | One crate with many concerns | Workspace with focused crates | Dependency direction |
+| **Sync to async** | `fn process()` | `async fn process()` | All callers must be updated |
+| **Concrete to trait** | `fn process(db: &Database)` | `fn process(db: &impl Storage)` | Define trait, impl for concrete |
+| **Error type redesign** | Scattered error types | Unified `Error` enum | Conversion chains, see `error-catalog` |
+| **String to newtype** | `fn process(id: String)` | `fn process(id: UserId)` | Validation, Display, From impls |
+| **Remove wildcard arms** | `_ => ...` in match | Explicit handling per variant | Use `no-shortcuts` skill |
+
+### Refactor vs rewrite
+
+| Factor | Refactor | Rewrite |
+|:--|:--|:--|
+| Tests exist for current behavior | Refactor | Either |
+| No tests exist | Write tests, then refactor | Rewrite may be faster |
+| Fundamental architecture is wrong | Cannot refactor around it | Rewrite |
+| 70%+ of the code is fine | Refactor the rest | Do not rewrite |
+| External API must be preserved | Refactor internals | Rewrite with same API |
+
+**Default to refactoring.** Rewrites look attractive but take 2-3x longer
+than expected and introduce new bugs. Refactoring preserves working code
+and existing tests.
+
+## Guidance
+
+**Never refactor without tests.** If tests do not exist, write
+characterization tests first. The cost of writing tests is less than the
+cost of introducing a subtle behavioral change during refactoring.
+
+**Small steps that compile.** Each step must leave the code in a
+compilable, test-passing state. If a step cannot be made small enough,
+the refactoring plan needs to be decomposed further.
+
+**One smell at a time.** Resist the urge to fix everything at once.
+Fix the identified smell, commit, and then decide if another pass is
+needed.
+
+**Refactoring is not the time to add features.** If a feature idea
+surfaces during refactoring, defer it (use `deferred-tracking`).
+Mixing refactoring and feature work makes it impossible to verify
+"no behavioral change."

@@ -1,0 +1,112 @@
+---
+name: migration-guide
+description: >
+  Manage breaking API changes: catalog changes, generate migration guides,
+  plan deprecation paths, and produce codemods. Use when making breaking
+  changes to library crates with downstream consumers.
+disable-model-invocation: true
+argument-hint: "[crate name or change description]"
+---
+
+## Purpose
+
+When making breaking API changes to library crates, ensure downstream
+consumers have a clear, structured path to migrate. Catalog all breaking
+changes, produce a migration guide, plan deprecation-first rollout when
+possible, and optionally generate transformation scripts.
+
+## Instructions
+
+### 1. Catalog breaking changes
+
+For the target crate or change (`$ARGUMENTS`):
+
+1. Run `cargo-semver-checks` if available:
+   ```bash
+   cargo semver-checks check-release
+   ```
+2. Supplement with manual analysis: grep for changed public signatures,
+   removed types, renamed functions, changed trait bounds
+3. Classify each change:
+
+| Type | Example | Migration Effort |
+|:--|:--|:--|
+| Removed | `pub fn old_name()` deleted | Find replacement or remove usage |
+| Renamed | `old_name` -> `new_name` | Find-and-replace |
+| Signature changed | New parameter, changed return type | Update call sites |
+| Semantic change | Same signature, different behavior | Review and adjust logic |
+| Type changed | `String` -> `&str`, enum variant added | Update types at call sites |
+| Trait bound added | `T: Clone` added to generic | Ensure implementors satisfy bound |
+
+### 2. Plan the migration path
+
+**Prefer deprecation-first when possible:**
+
+1. **Minor release (N.x):** Add the new API alongside the old. Mark old
+   with `#[deprecated(since = "N.x", note = "Use new_name instead")]`.
+2. **Next major (N+1.0):** Remove the deprecated API.
+
+This gives consumers one release cycle to migrate without breaking them.
+
+**When deprecation-first is not possible** (fundamental restructure):
+
+1. Document all changes in a migration guide
+2. Provide before/after code examples for each change
+3. Suggest a migration order (which changes to make first)
+
+### 3. Generate the migration guide
+
+Save to `_agentskills/design/YYYY-MM-DD-<crate>-migration-guide.md`:
+
+```markdown
+# [Crate] v[OLD] -> v[NEW] Migration Guide
+
+## Breaking Changes Summary
+
+| Change | Type | Migration |
+|--------|------|-----------|
+| `old_fn` removed | Removed | Use `new_fn` instead |
+| `Config::new` signature | Changed | Add `timeout` parameter |
+
+## Detailed Migration Steps
+
+### 1. [Change description]
+
+**Before:**
+[code example]
+
+**After:**
+[code example]
+
+**Why:** [rationale for the breaking change]
+```
+
+### 4. Generate transformation aids (optional)
+
+For simple renames and signature changes, offer:
+
+- `sed` one-liners for find-and-replace across a project
+- Rust deprecation attributes with migration notes
+- A checklist of all changes for manual verification
+
+### 5. Verify migration guide completeness
+
+- Every breaking change in the catalog has a migration path
+- Every migration path has before/after code examples
+- The guide is ordered by dependency (changes that must be made first)
+- The guide is tested: following the steps on example code produces
+  a working result
+
+## Guidance
+
+**Deprecation-first is always preferred.** It gives consumers time to
+migrate on their schedule rather than being forced by a major version bump.
+Only skip deprecation when the change is a fundamental restructure.
+
+**Semantic changes are the hardest to migrate.** A renamed function is
+easy to find-and-replace. A function that returns the same type but with
+different behavior requires careful review of every call site. Flag
+semantic changes prominently.
+
+**Test the migration guide.** If possible, apply the guide's steps to a
+sample consumer and verify the result compiles and passes tests.
