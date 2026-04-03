@@ -133,6 +133,12 @@ focused tasks rather than one large task.
   prior tasks.
 - **Parallel agents:** tasks must specify exactly which files are touched.
   No two parallel tasks can modify the same file.
+- **Team-based:** each wave maps to a team round. Tasks within a wave are
+  assigned to separate teammates. Annotate each task with its assigned
+  teammate and verify no file overlap within a wave. Wave boundaries are
+  synchronization points where the lead reviews before the next wave.
+  Reference agent types (code-reviewer, researcher, etc.) for specialized
+  teammates.
 
 ### Commit discipline
 

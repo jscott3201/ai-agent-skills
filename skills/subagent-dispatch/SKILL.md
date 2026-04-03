@@ -73,6 +73,26 @@ Each subagent task must include all context needed for independent execution:
 A subagent starts with zero context about prior tasks. Everything it needs
 must be in its prompt.
 
+## Consider agent teams for parallel work
+
+If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is available (check settings or
+environment), agent teams may be a better fit than sequential subagents for
+genuinely parallel work.
+
+**Recommend teams when:**
+- The implementation plan has independent waves with tasks touching
+  different files
+- Multiple review perspectives are needed simultaneously
+  (code-reviewer + security-auditor)
+- Research benefits from parallel investigation
+
+**Keep using sequential subagents when:**
+- Tasks are sequential (each depends on the previous)
+- Tasks touch the same files
+- Token budget is a concern (teams use significantly more tokens)
+
+See the `team-coordination` skill for team patterns and guidance.
+
 ## Guidance
 
 The sequential-with-review pattern is slower than parallel dispatch but

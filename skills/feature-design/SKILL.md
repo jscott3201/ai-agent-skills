@@ -82,6 +82,14 @@ brownfield follows the existing architecture and focuses on integration points.
 - **Primary agent** - all code written by main Claude in this session
 - **Subagent-driven** - sequential subagent dispatch, review between tasks
 - **Mixed** - research/review via subagent, implementation by primary agent
+- **Team-based** - parallel teammates per wave, each owning different files
+  (requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`; check availability
+  before offering this option)
+
+If agent teams are available and the feature has multiple independent waves
+with tasks touching different files, recommend team-based execution. The
+plan's wave structure maps directly to team coordination: tasks within a
+wave run in parallel, wave boundaries are synchronization points.
 
 **Commit strategy:**
 - Work on a branch, or directly on main?
