@@ -12,30 +12,34 @@ argument-hint: "[audit scope]"
 Enforce security, authentication, and memory safety when writing code that
 handles external input, manages authentication, or allocates resources based
 on user data. Auto-triggers as background knowledge during development. When
-invoked manually, performs a full codebase safety audit.
+invoked manually, performs a full codebase safety audit using STRIDE-based
+threat analysis.
 
 ## Principles
 
-These are non-negotiable. Apply them before consulting the checklist.
+Non-negotiable. Apply before consulting the checklist.
 
 1. **Never trust external input.** All data crossing a trust boundary is
-   hostile until validated. This includes HTTP bodies, query parameters,
-   WebSocket messages, deserialized payloads, and file uploads.
+   hostile until validated: HTTP bodies, query parameters, WebSocket messages,
+   deserialized payloads, file uploads, and DNS responses.
 
-2. **Auth is not optional.** Every endpoint that serves or mutates data
-   must verify identity and authorization. Anonymous access is an explicit
-   design choice, never a default.
+2. **Auth is not optional.** Every endpoint that serves or mutates data must
+   verify identity and authorization. Anonymous access is an explicit design
+   choice, never a default.
 
-3. **All allocations must be bounded.** No unbounded Vec, String, HashMap,
-   or equivalent grown from user-controlled input. Set hard limits and
-   reject input that exceeds them.
+3. **All allocations must be bounded.** No unbounded Vec, String, HashMap, or
+   equivalent grown from user-controlled input. Set hard limits and reject
+   input that exceeds them.
 
 4. **Secrets never appear in logs, source, or error messages.** Credentials,
    tokens, API keys, and private keys are redacted in debug output, never
    hardcoded, and zeroized when no longer needed.
 
-5. **Fail closed.** When validation, auth, or a safety check fails, deny
-   the request. Do not fall through to a permissive default.
+5. **Fail closed.** When validation, auth, or a safety check fails, deny the
+   request. Do not fall through to a permissive default.
+
+6. **Defense in depth.** No single layer is the only defense. Validate at the
+   boundary, re-validate at the data layer, and enforce at the auth layer.
 
 ## Checklist
 
@@ -48,59 +52,138 @@ When writing code that handles external input, verify each relevant category.
 - [ ] String length from external input is capped
 - [ ] Collection sizes from deserialization are capped (typical: 10K-1M items)
 - [ ] Concurrent connections/subscriptions have a hard limit
-- [ ] Timeouts are set on all external calls and long-running operations
+- [ ] Timeouts on all external calls and long-running operations
 - [ ] Query result sets are paginated or capped
+- [ ] File upload size, type, and content validated
 
 ### Input validation and sanitization
 
-- [ ] No string interpolation of user input into queries (SQL, GQL, shell)
+- [ ] No string interpolation of user input into queries (SQL, GQL, Cypher, shell)
 - [ ] Use parameterized queries or prepared statements
-- [ ] HTML output is escaped to prevent XSS
-- [ ] File paths from user input are canonicalized and checked against allowed roots
-- [ ] Regex from user input is rejected or sandboxed (ReDoS risk)
-- [ ] Numeric inputs are range-checked before use
+- [ ] Non-parameterizable query elements (labels, property names) validated
+      against allowlists
+- [ ] HTML output escaped to prevent XSS
+- [ ] File paths from user input canonicalized and checked against allowed roots
+- [ ] Regex from user input rejected or sandboxed (ReDoS risk)
+- [ ] Numeric inputs range-checked before use
+- [ ] URL inputs validated for scheme (http/https only) and destination
+      (block private IP ranges for SSRF prevention)
 
 ### Authentication and authorization
 
 - [ ] Every endpoint has explicit auth (no accidental anonymous access)
-- [ ] Auth tokens have expiry and are rotated
-- [ ] Password storage uses a strong KDF (bcrypt, scrypt, Argon2, PBKDF2 with high iterations)
+- [ ] Object-level authorization on every data access (BOLA/IDOR prevention)
+- [ ] No mass assignment - request bodies filtered to allowed fields
+- [ ] Auth tokens have expiry, are rotated, and use cryptographic randomness
+- [ ] Password storage uses a strong KDF (Argon2id preferred, bcrypt, scrypt)
 - [ ] Timing-safe comparison for token/password verification
-- [ ] Rate limiting on auth endpoints (login, token refresh)
-- [ ] CORS configured to allow only expected origins
+- [ ] Rate limiting on auth endpoints (login, token refresh, registration)
+- [ ] CORS configured to allow only expected origins (no wildcard with credentials,
+      no origin reflection, anchored regex patterns)
 - [ ] CSRF protection on state-changing requests
+- [ ] OAuth flows use PKCE (required by OAuth 2.1 for all clients)
+- [ ] JWT: `alg` validated (reject `none`), `exp`/`iss`/`aud` checked
 
 ### Secret handling
 
-- [ ] No credentials hardcoded in source (use env vars or secret managers)
+- [ ] No credentials hardcoded in source - see [secrets-patterns.md](secrets-patterns.md)
+      for detection patterns
 - [ ] Debug/Display impls redact sensitive fields
-- [ ] Sensitive data zeroized after use (not just dropped)
+- [ ] Sensitive data zeroized after use (not just dropped/garbage collected)
 - [ ] Secrets not logged at any log level
 - [ ] Error messages do not leak internal state or stack traces to clients
+- [ ] `.env` files in `.gitignore`, never committed
+- [ ] No secrets in Dockerfile ENV/ARG instructions or build layers
+
+### Cryptography
+
+- [ ] No deprecated algorithms - see [crypto-guidelines.md](crypto-guidelines.md)
+- [ ] No hardcoded IVs, nonces, or encryption keys
+- [ ] Nonces/IVs are never reused (especially critical for GCM mode)
+- [ ] AEAD mode for symmetric encryption (AES-256-GCM or ChaCha20-Poly1305)
+- [ ] Constant-time comparison for MAC/token verification
+- [ ] RSA keys at least 2048 bits (prefer 4096 or ECC P-256/P-384)
+
+### Supply chain
+
+- [ ] All dependencies pinned with integrity hashes in lockfiles
+- [ ] No lifecycle scripts from untrusted packages (`preinstall`, `postinstall`)
+- [ ] Security audit clean (`cargo-audit`, `npm audit`, `pip-audit`)
+- [ ] No `[patch]`/`[replace]` in Cargo.toml overriding published crates
+- [ ] No `--extra-index-url` pointing to non-standard registries
+- [ ] New dependencies reviewed for adoption health (see `dep-audit` skill)
 
 ### Memory safety
 
 - [ ] No unbounded allocation from user-controlled input
 - [ ] Slice/array indices validated before access
 - [ ] Deserialization of untrusted data has size and depth limits
-- [ ] No bare unwrap/expect on data from external sources (use proper error handling)
+- [ ] No bare unwrap/expect on data from external sources
 - [ ] Integer overflow checked on arithmetic with external values
+      (Rust: `checked_add`/`saturating_add`, not default operators in release)
+- [ ] No unsafe deserialization of untrusted data (use JSON or protobuf,
+      not language-native serialization formats)
+
+### Container and infrastructure
+
+- [ ] Containers run as non-root user
+- [ ] Base images pinned by digest, not `latest` tag
+- [ ] Multi-stage builds to minimize attack surface
+- [ ] No secrets in environment variables or build args
+- [ ] Only necessary ports exposed
+- [ ] `.dockerignore` excludes `.env`, `.git`, credentials, `node_modules`
+
+### Error handling
+
+- [ ] No stack traces or internal details in user-facing errors
+- [ ] Fail-closed on exceptions (deny access by default)
+- [ ] All error paths handled (no bare `except: pass`, no `.unwrap()` on
+      external data)
+- [ ] Security-relevant actions logged (auth failures, access denials,
+      input validation failures)
 
 ## Manual audit mode
 
-When invoked manually (e.g., `/justin-tools:safety-checks` or with a scope
-argument), perform a full audit:
+When invoked manually, perform a structured audit using STRIDE threat analysis.
+
+### Setup
 
 1. If `$ARGUMENTS` specifies a scope, focus on that area. Otherwise, scan
    the full codebase.
-2. Check every endpoint, parser, and handler against the checklist above.
-3. Report findings grouped by category with severity (Critical/High/Medium/Low).
-4. For each finding, include the file, line, and a specific fix recommendation.
+2. Identify all trust boundaries (external input entry points, auth boundaries,
+   service-to-service calls, data persistence layers).
 
-## Language-specific guidance
+### STRIDE analysis
 
-- For Python-specific patterns, see [python-safety.md](python-safety.md)
-- For Rust-specific patterns, see [rust-safety.md](rust-safety.md)
-- For JavaScript-specific patterns, see [javascript-safety.md](javascript-safety.md)
+For each trust boundary, evaluate:
 
-Load the relevant file when working in that language.
+| Threat | Question |
+|--------|----------|
+| **Spoofing** | Can users impersonate others? Are tokens validated on every request? |
+| **Tampering** | Can request data be modified? Are inputs validated server-side? |
+| **Repudiation** | Are security-relevant actions logged? Are logs tamper-proof? |
+| **Information Disclosure** | Do errors leak internals? Are secrets in code/logs? Data encrypted at rest/transit? |
+| **Denial of Service** | Unbounded queries? Missing rate limits? Algorithmic complexity attacks? |
+| **Elevation of Privilege** | Can users access admin functions? Is authorization checked at every layer? |
+
+### Report
+
+3. Run every item in the checklist above against the codebase.
+4. Report findings grouped by STRIDE category with severity:
+   - **Critical** - active exploitability, data exposure, auth bypass
+   - **High** - exploitable with effort, missing auth on endpoints
+   - **Medium** - defense-in-depth gaps, missing rate limits
+   - **Low** - hardening opportunities, best practice deviations
+5. For each finding, include: file, line, STRIDE category, and specific fix.
+6. Summarize: total findings by severity, top 3 priorities, and recommended
+   fix order.
+
+## Supporting files
+
+- [python-safety.md](python-safety.md) - Python-specific vulnerability patterns
+- [rust-safety.md](rust-safety.md) - Rust-specific vulnerability patterns
+- [javascript-safety.md](javascript-safety.md) - JavaScript/TypeScript vulnerability patterns
+- [secrets-patterns.md](secrets-patterns.md) - Regex patterns for detecting hardcoded secrets
+- [crypto-guidelines.md](crypto-guidelines.md) - Approved and deprecated cryptographic algorithms
+
+Load the relevant files when working in that language or domain.
