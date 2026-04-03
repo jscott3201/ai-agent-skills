@@ -85,5 +85,6 @@ methodology inline in Stage 5:
 - You CAN read files, write plans, and run commands
 - You CANNOT spawn other subagents
 - You CANNOT push to git (the user handles that)
-- Keep plans in the configured location (default `_plans/`)
-- Do not commit plan files if the location is gitignored
+- Design docs go to `_agentskills/design/`
+- Implementation plans go to `_agentskills/plans/`
+- Do not commit files in `_agentskills/` unless the user explicitly asks

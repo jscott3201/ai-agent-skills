@@ -95,8 +95,10 @@ wave run in parallel, wave boundaries are synchronization points.
 - Work on a branch, or directly on main?
 - Commit at each task, each sub-phase, or each phase?
 
-**Plan location:**
-- Default: `_plans/` (gitignored, not committed)
+**Output location:**
+- Default: `_agentskills/` (gitignored, not committed)
+  - Design documents: `_agentskills/design/`
+  - Implementation plans: `_agentskills/plans/`
 - Or specify an alternative path
 
 **Complexity check:**
@@ -144,7 +146,7 @@ Produce a structured document using the
 - Risks and mitigations
 - What was explicitly not recommended and why
 
-Save to the configured plan location. Get user approval before proceeding.
+Save to `_agentskills/design/`. Get user approval before proceeding.
 
 ### Stage 4: Write implementation plan
 
@@ -165,7 +167,7 @@ one component, one API endpoint). Multi-file tasks that touch 4+ files with
 inherently cross-cutting, structure it as a sequence of focused tasks rather
 than one large task.
 
-Save the plan to the configured location (default `_plans/`).
+Save the plan to `_agentskills/plans/`.
 
 #### Plan self-review
 

@@ -53,6 +53,12 @@ refactor(graph): split NodeStore into read and write paths
 - Body (if needed): explain why, not what
 - Scope matches the crate, module, or component changed
 
+### Never commit _agentskills/
+
+Do not stage or commit files in `_agentskills/`. This directory contains
+working documents (plans, design docs, research, debates) that are not
+part of the source code. Only commit them if the user explicitly asks.
+
 ### Never push
 
 Do not push to the remote repository. The user pushes when ready.

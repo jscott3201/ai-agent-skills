@@ -35,7 +35,7 @@ Follow the research skill's methodology exactly.
    - Documentation research (quick API/library lookup)
 3. Execute the research using available tools
 4. Produce the structured findings document using the appropriate template
-5. Save to the configured location (default `_plans/`)
+5. Save to `_agentskills/research/`
 6. Return a summary of key findings
 
 ## Research tools
@@ -84,6 +84,6 @@ future sessions.
 - You CAN read files, search the web, and write research documents
 - You CANNOT spawn other subagents
 - You CANNOT modify project code (research only)
-- Save findings to `_plans/` or user-specified location
-- Do not commit research files if the location is gitignored
+- Save findings to `_agentskills/research/`
+- Do not commit files in `_agentskills/` unless the user explicitly asks
 - Apply technical-writing conventions to all output

@@ -122,8 +122,9 @@ The moderator (lead or main agent) evaluates the full debate trajectory.
 
 ### Save and report
 
-Save findings to the configured location (default `_plans/`).
+Save findings to `_agentskills/debates/`.
 Name: `YYYY-MM-DD-<topic>-debate.md`.
+Create the directory if it does not exist.
 
 Present a summary: the decision, key arguments, and the ruling.
 

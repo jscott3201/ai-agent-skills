@@ -129,9 +129,9 @@ conversation or save to a file if the user requests.
 
 ### 3. Save and report
 
-For modes 1-3, save the findings document to the configured location
-(default `_plans/`, or ask the user). Name the file with the date and
-topic: `YYYY-MM-DD-<topic>-research.md`.
+For modes 1-3, save the findings document to `_agentskills/research/`.
+Name the file with the date and topic: `YYYY-MM-DD-<topic>-research.md`.
+Create the directory if it does not exist.
 
 For mode 4 (doc lookup), output directly unless the user asks to save.
 

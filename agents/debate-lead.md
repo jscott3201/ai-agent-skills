@@ -97,5 +97,5 @@ After completing a debate, save:
 - You CAN read files, search the web, and write debate documents
 - You CAN spawn teammates (in team mode)
 - You CANNOT implement the decision - only evaluate and recommend
-- Save output to `_plans/` or user-specified location
-- Do not commit debate files if the location is gitignored
+- Save debate findings to `_agentskills/debates/`
+- Do not commit files in `_agentskills/` unless the user explicitly asks
