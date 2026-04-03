@@ -153,6 +153,18 @@ Coverage Gaps:
 - batch(): no test for concurrent access
 ```
 
+### 8. Mutation testing (advanced)
+
+Use mutation testing to find tests that pass even when code is wrong:
+
+**Rust:** `cargo mutants` - finds functions whose body could be replaced
+without failing any test. No setup or nightly compiler needed.
+
+**Python:** `mutmut` - mutates code and checks if tests catch it.
+
+Run on changed files incrementally in CI, not on the full codebase.
+Focus on functions with complex logic, not getters or simple wrappers.
+
 ## Guidance
 
 **Test behavior, not implementation.** Tests that verify public behavior
@@ -165,6 +177,14 @@ and assertion should tell you exactly what broke without reading the test.
 **Property tests complement unit tests.** Unit tests cover known edge
 cases. Property tests discover unknown ones. Use both.
 
+**Mutation testing finds what coverage misses.** 85% statement coverage
+can have 60% branch coverage. Mutation testing reveals whether tests
+actually detect changes to behavior.
+
 **Follow existing test patterns.** Read how the project structures its
 tests (inline `#[cfg(test)]` vs separate files, fixtures, helpers) and
 match the convention.
+
+**Quarantine flaky tests immediately.** A flaky test that is normalized
+wastes developer hours and erodes trust in the entire suite. Fix or
+remove it.

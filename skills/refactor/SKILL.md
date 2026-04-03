@@ -44,6 +44,11 @@ Before changing anything, ensure the current behavior is captured:
 They can be updated after the refactoring if the behavior should change,
 but during the refactoring they must stay green.
 
+**Technique:** Write tests with guessed assertions, run to see actual
+outputs, update assertions to match observed behavior. In Rust, `insta`
+snapshot tests are effective for capturing complex output. The goal is to
+lock current behavior, whether correct or not.
+
 ### 3. Plan the transformation
 
 Describe the refactoring as a sequence of small, independently verifiable

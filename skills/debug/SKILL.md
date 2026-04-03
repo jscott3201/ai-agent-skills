@@ -47,16 +47,23 @@ and try to find a reliable trigger (load, timing, specific input).
 
 Form 2-4 hypotheses about the cause, ranked by likelihood:
 
-| # | Hypothesis | Likelihood | Test |
-|---|-----------|-----------|------|
-| 1 | [Most likely cause] | High | [How to confirm or eliminate] |
-| 2 | [Second possibility] | Medium | [How to confirm or eliminate] |
-| 3 | [Third possibility] | Low | [How to confirm or eliminate] |
+| # | Hypothesis | Prediction | Test | Result | Conclusion |
+|---|-----------|-----------|------|--------|-----------|
+| 1 | [Most likely] | [What you'd observe if true] | [How to check] | | |
+| 2 | [Second] | [What you'd observe if true] | [How to check] | | |
+| 3 | [Third] | [What you'd observe if true] | [How to check] | | |
 
 Test hypotheses in order of likelihood. For each:
 1. Predict what you would observe if this hypothesis is correct
 2. Run the test
 3. Record the result: confirmed, eliminated, or inconclusive
+4. **Eliminating a hypothesis is progress** - it narrows the search space.
+   Disproving is more valuable than confirming because it removes
+   multiple possibilities at once.
+
+Structure hypotheses as **binary divisions** that bisect the problem space:
+"The bug is in the client, not the server" rather than "maybe something
+is wrong with serialization."
 
 **Do not skip to fixing.** Confirm the cause before writing a fix. A fix
 based on an unconfirmed hypothesis is a guess.
@@ -134,12 +141,17 @@ Avoid these common traps:
 
 Concurrency bugs require special techniques:
 
-- **Add logging with timestamps** to trace execution order
+- **Use sanitizers first:** ThreadSanitizer detects data races. Miri detects
+  undefined behavior in unsafe Rust code.
 - **Reduce concurrency** to isolate (single thread, single task)
+- **Deterministic testing:** Use `tokio::time::pause()` and `advance()` to
+  control time. Provide `RngSeed` for deterministic scheduler in `select!`.
 - **Stress test** to reproduce intermittent issues (run 100x in a loop)
 - **Check lock ordering** across all code paths
 - **Check for `.await` across lock boundaries**
 - **Use `tokio-console`** for async Rust runtime inspection
+- **Noise injection:** insert random delays at synchronization points to
+  explore novel thread interleavings
 
 ## Guidance
 

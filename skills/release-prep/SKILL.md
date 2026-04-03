@@ -136,9 +136,21 @@ by 30%" is.
 **When in doubt, bump major.** An unnecessary major bump is inconvenient.
 A breaking change shipped as a minor bump breaks downstream consumers.
 
+**Pre-1.0 Cargo convention:** For `0.y.z`, changes in `y` are breaking
+(like major), changes in `z` are non-breaking (like minor). All `0.0.z`
+releases are treated as incompatible with each other.
+
 **Multi-crate releases are atomic.** Either all crates in the release
 succeed or none do. Tag all, then push all.
 
 **Test the release build.** Run `cargo package --list -p <crate>` to see
 what would be published. Check for accidentally included files (test
 fixtures, build artifacts, secrets).
+
+**Push tags before publishing.** Tags can be deleted if `cargo publish`
+fails. Published crates cannot be unpublished. Tag first, publish second.
+
+**Mitigation strategies for future releases:** Use `#[non_exhaustive]`
+early on enums and structs. Deprecate before removing. Use sealed traits
+to prevent external implementations. Provide builder patterns instead of
+struct literals.
