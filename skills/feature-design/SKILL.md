@@ -41,13 +41,19 @@ Use an Explore subagent for large codebases to keep the main context clean.
 #### 1b. Understand the feature
 
 1. If `$ARGUMENTS` was provided, use it as the starting point
-2. Ask clarifying questions one at a time to understand:
+2. Ask clarifying questions **one at a time**. For each question:
+   - Present 2-4 options when meaningful choices exist
+   - State your recommendation and explain why you favor that path
+   - Let the user pick, adjust, or override before moving to the next question
+   - If the answer is obvious from the codebase exploration, state your
+     assumption and ask the user to confirm rather than posing it as open-ended
+3. Cover these areas through your questions:
    - **Problem:** What problem does this solve? Who experiences it?
    - **Success criteria:** What does "done" look like? How will we know it works?
    - **Constraints:** Performance targets, compatibility requirements, scope limits
    - **Non-goals:** What are we explicitly NOT building? What adjacent problems
      are out of scope? (This prevents scope creep and over-engineering)
-3. Assess scope: if the feature spans multiple independent subsystems, flag it
+4. Assess scope: if the feature spans multiple independent subsystems, flag it
    immediately and help decompose into sub-features. Each sub-feature gets
    its own pass through this skill.
 
@@ -55,6 +61,17 @@ Use an Explore subagent for large codebases to keep the main context clean.
 
 Ask these questions before any planning work. The answers shape the plan
 format and task granularity.
+
+**Approach:**
+- **Greenfield** - building something new with freedom to choose patterns,
+  structure, and conventions from scratch. Major new features, new modules,
+  new services.
+- **Brownfield** - working within existing code. Surgical changes that
+  respect established patterns, minimize disruption, and integrate with
+  what exists. Bug fixes, incremental features, refactors.
+
+This choice shapes the entire plan: greenfield designs the architecture;
+brownfield follows the existing architecture and focuses on integration points.
 
 **Execution style:**
 - **Primary agent** - all code written by main Claude in this session
@@ -90,13 +107,17 @@ Present the user with a choice:
 #### If conversational:
 
 1. Propose 2-3 approaches with concrete tradeoffs:
-   - Lead with your recommendation and explain why
+   - Lead with your recommendation and explain why you favor it
    - For each alternative, state what it does better AND what it does worse
    - Include a "do nothing / minimal" option when relevant
-2. Explicitly state non-goals and what was rejected
-3. Identify risks: what could go wrong with the chosen approach?
-4. Discuss until the user confirms an approach
-5. Move to Stage 4
+2. Let the user pick an approach before continuing
+3. For the chosen approach, walk through design decisions one at a time:
+   - Present each decision as a question with options
+   - State your recommendation and reasoning for each
+   - Wait for the user's input before moving to the next decision
+4. Explicitly state non-goals and what was rejected
+5. Identify risks: what could go wrong with the chosen approach?
+6. Summarize the confirmed design and get final approval before Stage 4
 
 #### If formal:
 
