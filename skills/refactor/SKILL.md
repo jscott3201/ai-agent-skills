@@ -91,7 +91,7 @@ After all steps are complete:
 3. Verify the code reads better: is the smell resolved?
 4. Check that no new smells were introduced
 
-### Rust-specific refactoring patterns
+### Rust refactoring patterns
 
 | Pattern | From | To | Key Concern |
 |:--|:--|:--|:--|
@@ -102,6 +102,30 @@ After all steps are complete:
 | **Error type redesign** | Scattered error types | Unified `Error` enum | Conversion chains, see `error-catalog` |
 | **String to newtype** | `fn process(id: String)` | `fn process(id: UserId)` | Validation, Display, From impls |
 | **Remove wildcard arms** | `_ => ...` in match | Explicit handling per variant | Use `no-shortcuts` skill |
+
+### Python refactoring patterns
+
+| Pattern | From | To | Key Concern |
+|:--|:--|:--|:--|
+| **Extract function** | Long function with comments | Named functions per section | Keep parameter count low |
+| **Replace dict with dataclass** | `config["timeout"]` | `config.timeout` | Type safety, IDE support |
+| **Sync to async** | `def process()` | `async def process()` | All callers need `await` |
+| **Protocol instead of ABC** | `class Base(ABC)` | `class Proto(Protocol)` | Structural typing, no inheritance |
+| **Replace inheritance with composition** | Deep class hierarchy | Composed objects with protocols | Reduce coupling |
+| **Move to package** | Single `module.py` | `module/__init__.py` + files | Re-export from `__init__` |
+| **Type annotations** | Untyped code | Full type hints + `py.typed` | Gradual typing, run `mypy` |
+
+### JavaScript/TypeScript refactoring patterns
+
+| Pattern | From | To | Key Concern |
+|:--|:--|:--|:--|
+| **Extract module** | Large file | Named exports in separate files | Barrel file re-exports |
+| **JS to TypeScript** | `.js` files | `.ts` with type annotations | Gradual migration with `allowJs` |
+| **Callback to async/await** | Nested callbacks | `async/await` chain | Error handling with try/catch |
+| **Class to function** | `class Service` | Module with exported functions | Simpler testing, tree-shaking |
+| **Replace any with types** | `any` everywhere | Specific types and generics | Use `unknown` as intermediate |
+| **Monolith to packages** | Single package.json | Workspace with packages | Internal dependencies |
+| **Replace lodash with native** | `_.map`, `_.filter` | Array methods, `Object.entries` | Bundle size reduction |
 
 ### Refactor vs rewrite
 

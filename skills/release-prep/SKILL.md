@@ -29,7 +29,7 @@ From `$ARGUMENTS`:
 
 ### 2. Detect breaking changes
 
-**Rust (cargo-semver-checks):**
+**Rust:**
 ```bash
 cargo semver-checks check-release -p <crate>
 ```
@@ -40,6 +40,18 @@ If `cargo-semver-checks` is not available, manually check:
 - Changed trait bounds on public generics
 - Removed trait implementations
 - Changed default values or behavior
+
+**Python:**
+- No automated semver-checker; manually review public API changes
+- Check `__all__` exports, function signatures, class interfaces
+- Check `pyproject.toml` version and classifiers
+- Run `pip-audit` for security advisories before release
+
+**JavaScript/TypeScript:**
+- Review exported types and function signatures
+- Check `package.json` version, `exports` field, `types` field
+- Run `npm audit` for security advisories
+- If TypeScript: check `.d.ts` files for breaking type changes
 
 ### 3. Suggest version bump
 
@@ -105,16 +117,30 @@ For each crate:
 
 Before tagging:
 
-- [ ] Version bumped in Cargo.toml (or package.json, pyproject.toml)
+- [ ] Version bumped in manifest (Cargo.toml / package.json / pyproject.toml)
 - [ ] Internal dependency versions updated
 - [ ] CHANGELOG.md updated with new version section
-- [ ] `cargo-semver-checks` passes (or manual check complete)
+- [ ] Breaking change detection passes (cargo-semver-checks / manual review)
 - [ ] Documentation is current (README, API docs, migration guide)
-- [ ] All tests pass (`cargo test --workspace --all-features`)
-- [ ] All lints pass (`cargo clippy --workspace --all-features -- -D warnings`)
-- [ ] No known unfixed security vulnerabilities
+- [ ] All tests pass
+- [ ] All lints pass
+- [ ] Security audit clean (cargo-audit / npm audit / pip-audit)
 - [ ] Breaking changes have a migration guide
 - [ ] Git tag format: `v{version}` (e.g., `v1.3.0`)
+
+**Rust additional:**
+- [ ] `cargo publish --dry-run` succeeds
+- [ ] `cargo package --list` contains only intended files
+
+**Python additional:**
+- [ ] `python -m build` produces clean wheel and sdist
+- [ ] `twine check dist/*` passes
+- [ ] `py.typed` marker present if typed
+
+**JavaScript additional:**
+- [ ] `npm pack --dry-run` lists only intended files
+- [ ] `.npmignore` or `files` field in package.json is correct
+- [ ] `types` field points to valid `.d.ts` if TypeScript
 
 ### 8. Tag (do not push)
 

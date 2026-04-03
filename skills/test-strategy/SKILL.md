@@ -104,7 +104,7 @@ proptest! {
 }
 ```
 
-**Python test structure:**
+**Python test structure (pytest):**
 ```python
 def test_parse_valid_input():
     result = parse("valid input")
@@ -117,9 +117,28 @@ def test_parse_empty_input():
 @pytest.mark.parametrize("input,expected", [
     ("a", Result.A),
     ("b", Result.B),
-])
+], ids=["variant_a", "variant_b"])
 def test_parse_variants(input, expected):
     assert parse(input) == expected
+```
+
+**JavaScript/TypeScript test structure (Jest/Vitest):**
+```typescript
+test('parse valid input', () => {
+  const result = parse('valid input');
+  expect(result).toEqual({ ... });
+});
+
+test('parse empty input throws', () => {
+  expect(() => parse('')).toThrow('empty');
+});
+
+test.each([
+  ['a', Result.A],
+  ['b', Result.B],
+])('parse variant %s', (input, expected) => {
+  expect(parse(input)).toBe(expected);
+});
 ```
 
 ### 6. Property-based testing guidance
@@ -135,6 +154,27 @@ Use property-based tests when:
 - **Commutativity:** `f(a, b) == f(b, a)` (when expected)
 - **Invariant preservation:** `invariant(x)` implies `invariant(f(x))`
 - **No crash:** `f(random_input)` does not panic
+- **Oracle comparison:** compare fast implementation against known-correct slow one
+
+**Python (Hypothesis):**
+```python
+from hypothesis import given, strategies as st
+
+@given(data=st.binary())
+def test_roundtrip(data):
+    assert decode(encode(data)) == data
+```
+
+**JavaScript (fast-check):**
+```typescript
+import fc from 'fast-check';
+
+test('roundtrip', () => {
+  fc.assert(fc.property(fc.uint8Array(), (data) => {
+    expect(decode(encode(data))).toEqual(data);
+  }));
+});
+```
 
 ### 7. Coverage gap analysis
 

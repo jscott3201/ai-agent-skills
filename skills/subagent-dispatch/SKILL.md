@@ -48,18 +48,26 @@ Do not batch-dispatch multiple tasks without review between them.
 ### CI verification in every prompt
 
 Every implementation subagent prompt must include the full CI verification
-sequence. For Rust projects:
+sequence for the project's language:
 
+**Rust:**
 ```
-Before committing, run:
-1. cargo fmt --all
-2. cargo clippy --workspace --all-features --all-targets -- -D warnings
-3. cargo test --workspace --all-features
-Then commit.
+Before committing: cargo fmt --all && cargo clippy --workspace --all-features
+--all-targets -- -D warnings && cargo test --workspace --all-features
+```
+
+**Python:**
+```
+Before committing: ruff format . && ruff check . && pytest
+```
+
+**JavaScript/TypeScript:**
+```
+Before committing: npx prettier --write . && npx eslint . && npm test
 ```
 
 Subagents reliably run tests but frequently skip formatting. The explicit
-fmt step prevents follow-up formatting commits.
+format step prevents follow-up formatting commits.
 
 ### Self-contained tasks
 

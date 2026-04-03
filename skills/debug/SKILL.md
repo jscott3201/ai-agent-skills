@@ -32,9 +32,20 @@ From `$ARGUMENTS` and context, establish:
 
 Before investigating, confirm you can reproduce the bug:
 
+**Rust:**
 ```bash
-# Run the failing test or operation
 cargo test <test_name> -- --nocapture
+```
+
+**Python:**
+```bash
+pytest <test_file>::<test_name> -xvs
+```
+
+**JavaScript/TypeScript:**
+```bash
+npm test -- --testNamePattern="<test_name>"
+# or: npx jest <test_file> -t "<test_name>"
 ```
 
 If you cannot reproduce, gather more information. Do not guess at fixes
@@ -141,17 +152,28 @@ Avoid these common traps:
 
 Concurrency bugs require special techniques:
 
-- **Use sanitizers first:** ThreadSanitizer detects data races. Miri detects
-  undefined behavior in unsafe Rust code.
-- **Reduce concurrency** to isolate (single thread, single task)
-- **Deterministic testing:** Use `tokio::time::pause()` and `advance()` to
-  control time. Provide `RngSeed` for deterministic scheduler in `select!`.
-- **Stress test** to reproduce intermittent issues (run 100x in a loop)
-- **Check lock ordering** across all code paths
-- **Check for `.await` across lock boundaries**
-- **Use `tokio-console`** for async Rust runtime inspection
-- **Noise injection:** insert random delays at synchronization points to
-  explore novel thread interleavings
+**Rust:**
+- ThreadSanitizer for data races, Miri for undefined behavior in unsafe code
+- `tokio::time::pause()` and `advance()` for deterministic time control
+- `tokio-console` for async runtime inspection
+- Check for `.await` across lock boundaries
+
+**Python:**
+- `asyncio.run()` with `debug=True` for verbose async logging
+- `threading.settrace()` for thread execution tracing
+- `pytest-asyncio` with `asyncio_mode="strict"` for async test discipline
+- `freezegun` or `time-machine` for deterministic time control
+
+**JavaScript/TypeScript:**
+- `--inspect-brk` flag for Node.js debugger with async stack traces
+- `jest.useFakeTimers()` for deterministic time in tests
+- `AbortController` timeout patterns for async operations
+
+**All languages:**
+- Reduce concurrency to isolate (single thread, single task)
+- Stress test to reproduce intermittent issues (run 100x in a loop)
+- Check lock ordering across all code paths
+- Inject random delays at synchronization points to explore interleavings
 
 ## Guidance
 

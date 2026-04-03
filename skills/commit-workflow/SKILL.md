@@ -26,16 +26,28 @@ Apply these rules during all implementation work:
 
 ### Before every commit
 
-Run CI verification for the project's language. For Rust projects:
+Run CI verification for the project's language:
 
+**Rust:**
 ```bash
 cargo fmt --all
 cargo clippy --workspace --all-features --all-targets -- -D warnings
 cargo test --workspace --all-features
 ```
 
-For other languages, the equivalent: format, lint (zero warnings), full test
-suite.
+**Python:**
+```bash
+ruff format .
+ruff check . --fix
+pytest
+```
+
+**JavaScript/TypeScript:**
+```bash
+npx prettier --write .
+npx eslint .
+npm test
+```
 
 Do not commit if verification fails. Fix the issue first.
 

@@ -19,15 +19,22 @@ possible, and optionally generate transformation scripts.
 
 ### 1. Catalog breaking changes
 
-For the target crate or change (`$ARGUMENTS`):
+For the target package or change (`$ARGUMENTS`):
 
-1. Run `cargo-semver-checks` if available:
-   ```bash
-   cargo semver-checks check-release
-   ```
-2. Supplement with manual analysis: grep for changed public signatures,
-   removed types, renamed functions, changed trait bounds
-3. Classify each change:
+**Rust:**
+```bash
+cargo semver-checks check-release
+```
+
+**Python:** Review `__all__` exports, class/function signatures, removed modules.
+
+**JavaScript/TypeScript:** Diff exported types and function signatures.
+Check `package.json` `exports` and `types` fields.
+
+Supplement all ecosystems with manual analysis: grep for changed public
+signatures, removed types, renamed functions.
+
+Classify each change:
 
 | Type | Example | Migration Effort |
 |:--|:--|:--|
@@ -42,9 +49,18 @@ For the target crate or change (`$ARGUMENTS`):
 
 **Prefer deprecation-first when possible:**
 
-1. **Minor release (N.x):** Add the new API alongside the old. Mark old
-   with `#[deprecated(since = "N.x", note = "Use new_name instead")]`.
-2. **Next major (N+1.0):** Remove the deprecated API.
+**Rust:**
+1. Minor release: `#[deprecated(since = "N.x", note = "Use new_name instead")]`
+2. Next major: remove the deprecated API
+
+**Python:**
+1. Minor release: add `warnings.warn("Use new_name", DeprecationWarning, stacklevel=2)`
+2. Next major: remove the deprecated function
+
+**JavaScript/TypeScript:**
+1. Minor release: add `/** @deprecated Use newName instead */` JSDoc tag
+   and `console.warn('Deprecated: use newName')` at runtime
+2. Next major: remove the deprecated export
 
 This gives consumers one release cycle to migrate without breaking them.
 
