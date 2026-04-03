@@ -1,0 +1,16 @@
+{
+  "name": "justin-tools-marketplace",
+  "owner": {
+    "name": "Justin Scott"
+  },
+  "metadata": {
+    "description": "Private marketplace for justin-tools plugin"
+  },
+  "plugins": [
+    {
+      "name": "justin-tools",
+      "source": "./",
+      "description": "Personal workflow skills, agents, and automation"
+    }
+  ]
+}
