@@ -16,6 +16,11 @@ research and design (at a depth the user chooses), produce a phased
 implementation plan with complete code, self-review, verify against the
 codebase, iterate with the user, and hand off to execution.
 
+**Preferred invocation:** Delegate to the `feature-architect` agent, which
+has this skill plus `plan-verify` and `technical-writing` preloaded with
+persistent memory. The agent runs the full methodology and retains design
+preferences across sessions.
+
 ## Instructions
 
 Work through these stages in order. Each stage builds on the previous one.
