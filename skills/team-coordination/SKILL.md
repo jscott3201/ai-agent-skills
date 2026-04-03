@@ -131,6 +131,48 @@ These plugin agents are available as teammate types:
 Reference by name when spawning teammates:
 > "Spawn a teammate using the code-reviewer agent type."
 
+## Keeping agents productive
+
+### Lead utilization (prevent idle lead)
+
+The lead must stay productive while teammates work. Idle leads waste
+context and miss opportunities to steer. While waiting for teammates:
+
+1. **Synthesize incrementally** - as findings arrive, start building the
+   synthesis document. Do not wait for all teammates to finish.
+2. **Prepare next steps** - if the work has multiple waves, prepare
+   the next wave's task assignments while the current wave executes.
+3. **Review completed tasks** - as teammates finish tasks, review their
+   output immediately. Catch issues early before they compound.
+4. **Monitor for drift** - check that teammates are on track. Redirect
+   any that are going off-scope before they waste more tokens.
+5. **Draft the summary** - start the final report structure so synthesis
+   is fast once all teammates complete.
+
+**Never:** sit idle waiting for all teammates to finish before doing
+anything. Always find productive work related to the team's goal.
+
+### Teammate utilization (prevent idle teammates)
+
+Teammates should self-claim the next available task when they finish.
+If a teammate goes idle:
+
+1. Check the task list for pending, unblocked tasks
+2. If tasks exist, claim and start the next one
+3. If no tasks remain, check with the lead for additional work
+4. If truly done, shut down gracefully
+
+The `TeammateIdle` hook in the plugin reinforces this by prompting idle
+teammates to check for pending tasks before going idle.
+
+### Task flow optimization
+
+- **5-6 tasks per teammate** keeps everyone productive
+- **Create more tasks than teammates** so no one runs out of work
+- **Unblock dependencies quickly** - review blocking tasks first
+- **Split large tasks** if one teammate is falling behind while others
+  are idle
+
 ## Guidance
 
 **Start with review and research.** These are the safest team patterns -
