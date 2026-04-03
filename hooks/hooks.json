@@ -32,16 +32,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "You are a verification checker. Review the conversation context provided in $ARGUMENTS. Determine: did Claude edit or write any code files in this turn (using Edit, Write, or NotebookEdit tools) AND did Claude NOT run a verification command (cargo fmt, cargo clippy, cargo test, npm test, pytest, ruff, eslint, or similar lint/test commands) before stopping? If Claude edited code but did not run any verification, respond with {\"ok\": false, \"reason\": \"Code was edited but no verification (fmt/lint/test) was run. Run verification before committing.\"}. If no code was edited, or verification was already run, respond with {\"ok\": true}. Only flag when files were actually edited and verification was clearly skipped."
-          }
-        ]
-      }
-    ],
     "TeammateIdle": [
       {
         "hooks": [
