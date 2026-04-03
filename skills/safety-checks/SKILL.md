@@ -144,14 +144,16 @@ When writing code that handles external input, verify each relevant category.
 
 ## Manual audit mode
 
-When invoked manually, perform a structured audit using STRIDE threat analysis.
+When invoked manually, delegate to the `security-auditor` agent using the
+Agent tool. This agent has the safety-checks methodology preloaded and uses
+read-only tools to scan the codebase without modifying it.
 
 ### Setup
 
-1. If `$ARGUMENTS` specifies a scope, focus on that area. Otherwise, scan
-   the full codebase.
-2. Identify all trust boundaries (external input entry points, auth boundaries,
-   service-to-service calls, data persistence layers).
+1. If `$ARGUMENTS` specifies a scope, include it in the delegation prompt.
+   Otherwise, the auditor scans the full codebase.
+2. The auditor identifies all trust boundaries (external input entry points,
+   auth boundaries, service-to-service calls, data persistence layers).
 
 ### STRIDE analysis
 

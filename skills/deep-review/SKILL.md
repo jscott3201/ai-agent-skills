@@ -22,11 +22,13 @@ system-level impact.
 
 ### Phase 1: Research
 
-Spawn an Explore subagent using the Agent tool for the research phase. This
-keeps heavy codebase scanning out of the main conversation context.
+Delegate to the `code-reviewer` agent using the Agent tool. This agent has
+the deep-review methodology preloaded in its system prompt and uses read-only
+tools to keep the main conversation context clean.
 
-If `$ARGUMENTS` was provided, use it to focus the review scope. Otherwise,
-identify scope from recent commits or ask the user.
+If `$ARGUMENTS` was provided, include it in the delegation prompt to focus
+the review scope. Otherwise, identify scope from recent commits or ask the
+user.
 
 #### Review navigation order
 
