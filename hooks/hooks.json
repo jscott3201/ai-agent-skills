@@ -32,16 +32,6 @@
         ]
       }
     ],
-    "TeammateIdle": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "A teammate is about to go idle. Check: are there pending, unblocked tasks in the shared task list that this teammate could claim? If yes, respond with {\"ok\": false, \"reason\": \"There are pending tasks available. Check the task list and claim the next unblocked task before going idle.\"}. If no pending tasks exist or all remaining tasks are blocked, respond with {\"ok\": true}."
-          }
-        ]
-      }
-    ],
     "Notification": [
       {
         "matcher": "",
