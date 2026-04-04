@@ -77,8 +77,9 @@ When the code-analyzer report returns:
 
 ### 4. Create refactoring plan
 
-For approved items, produce a step-by-step refactoring plan. Load the
-relevant language patterns file for language-specific guidance:
+For approved items, produce a step-by-step refactoring plan. Detect the
+project's primary language from file extensions. Load ONLY the single
+patterns file for that language:
 
 - [rust-patterns.md](rust-patterns.md) - Module splitting, crate extraction,
   compose structs, visibility tightening
@@ -165,4 +166,5 @@ methodology with characterization tests.
 - [javascript-patterns.md](javascript-patterns.md) - JS/TS file splitting,
   barrel file removal, feature-based reorg
 
-Load the relevant file when working in that language.
+Load ONLY the file matching the detected project language. Never load
+all three. For polyglot projects, load one file per analysis pass.

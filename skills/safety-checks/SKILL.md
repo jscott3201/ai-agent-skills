@@ -182,10 +182,17 @@ For each trust boundary, evaluate:
 
 ## Supporting files
 
+Language-specific (load ONLY the one matching the project language):
 - [python-safety.md](python-safety.md) - Python-specific vulnerability patterns
 - [rust-safety.md](rust-safety.md) - Rust-specific vulnerability patterns
 - [javascript-safety.md](javascript-safety.md) - JavaScript/TypeScript vulnerability patterns
-- [secrets-patterns.md](secrets-patterns.md) - Regex patterns for detecting hardcoded secrets
-- [crypto-guidelines.md](crypto-guidelines.md) - Approved and deprecated cryptographic algorithms
 
-Load the relevant files when working in that language or domain.
+Scope-conditional (load only when the audit covers the relevant domain):
+- [secrets-patterns.md](secrets-patterns.md) - Regex patterns for detecting
+  hardcoded secrets. Load when checking secret handling or running a full audit.
+- [crypto-guidelines.md](crypto-guidelines.md) - Approved and deprecated
+  cryptographic algorithms. Load when the codebase uses cryptographic
+  operations or running a full audit.
+
+Never load all five files at once. For a typical single-language audit,
+load one language file plus only the domain files relevant to the scope.

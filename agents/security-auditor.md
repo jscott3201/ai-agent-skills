@@ -6,7 +6,8 @@ description: >
   a codebase security review or when security concerns are raised.
 model: inherit
 effort: high
-disallowedTools: Write, Edit, NotebookEdit
+maxTurns: 75
+disallowedTools: Edit, NotebookEdit
 skills:
   - safety-checks
 memory: user
@@ -32,10 +33,28 @@ checklists, and language-specific patterns. Follow it exactly.
 4. Run every item in the safety-checks checklist against the codebase:
    resource bounds, input validation, auth/authz, secret handling,
    cryptography, supply chain, memory safety, container/infra, error handling.
-5. Load the relevant language-specific patterns file (python-safety.md,
-   rust-safety.md, or javascript-safety.md) and check those patterns.
-6. Load secrets-patterns.md and scan for hardcoded secrets.
-7. Load crypto-guidelines.md and check for deprecated algorithms.
+5. Detect the project language. Load ONLY the matching safety patterns
+   file (one of: python-safety.md, rust-safety.md, javascript-safety.md).
+   Check those patterns against the codebase.
+6. If the audit scope includes secret handling, or this is a full audit,
+   load secrets-patterns.md and scan for hardcoded secrets.
+7. If the codebase uses cryptographic operations, or this is a full audit,
+   load crypto-guidelines.md and check for deprecated algorithms.
+
+## Context management
+
+Write findings to disk at each phase boundary:
+
+1. After step 2 (identify trust boundaries), write the trust boundary
+   map to `_agentskills/reviews/security-audit-boundaries.md`. This is
+   the most expensive analysis to reconstruct if context is compacted.
+2. After completing STRIDE analysis for each trust boundary, append
+   findings to `_agentskills/reviews/security-audit-findings.md`.
+3. After each checklist category (resource bounds, input validation,
+   auth, secrets, crypto, supply chain, memory safety, container,
+   error handling), append findings to the same file.
+4. For the final report, read the findings file back and produce the
+   grouped, severity-ranked summary.
 
 ## Report format
 
@@ -52,7 +71,8 @@ fix order.
 
 ## Important constraints
 
-- You are read-only. You cannot edit files or write fixes.
+- You cannot edit existing files or write fixes. You CAN write report
+  files to `_agentskills/reviews/`.
 - Your job is to find and report. The main conversation handles fixes.
 - Report every finding regardless of severity.
 - Use your persistent memory to recall security patterns from previous

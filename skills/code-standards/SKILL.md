@@ -30,7 +30,8 @@ These apply across all three languages:
 
 ### Language-specific standards
 
-Load the relevant file when writing or reviewing code in that language:
+Detect the project language. Load ONLY the single standards file for
+that language:
 
 - [rust-standards.md](rust-standards.md) - Naming, visibility, error handling,
   clippy configuration, idiomatic patterns
@@ -106,4 +107,5 @@ address the root cause.
 - [javascript-standards.md](javascript-standards.md) - JS/TS naming, types,
   ESLint config, framework conventions
 
-Load the relevant file when working in that language.
+Load ONLY the file matching the detected project language. Never load
+all three. For polyglot projects, load one file per analysis pass.

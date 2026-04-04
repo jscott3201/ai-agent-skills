@@ -5,8 +5,9 @@ description: >
   oversized files, complexity hotspots, circular dependencies, god classes,
   and visibility over-exposure. Produces a structured report.
 model: inherit
-effort: high
-disallowedTools: Write, Edit, NotebookEdit
+effort: medium
+maxTurns: 50
+disallowedTools: Edit, NotebookEdit
 skills:
   - modularize
   - code-standards
@@ -112,9 +113,21 @@ Structure the report as follows:
 3. [Third thing]
 ```
 
+## Context management
+
+Write findings to disk at each scan category rather than accumulating
+all findings in context:
+
+1. After each scan step (file sizes, complexity, circular deps, god
+   classes, visibility, coupling), append findings to
+   `_agentskills/reviews/code-analysis-findings.md`.
+2. For the final report, read the findings file back and assemble the
+   prioritized report in the required format.
+
 ## Important constraints
 
-- You are read-only. You cannot edit files or write fixes.
+- You cannot edit existing files or write fixes. You CAN write report
+  files to `_agentskills/reviews/`.
 - Your job is to find and report. The main conversation handles execution.
 - Report every finding regardless of priority. Do not skip low-priority items.
 - Be specific: include file paths, line numbers, and exact metrics.

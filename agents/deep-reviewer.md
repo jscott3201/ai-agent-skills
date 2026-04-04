@@ -6,7 +6,8 @@ description: >
   after finishing a phase, feature, or significant implementation chunk.
 model: inherit
 effort: high
-disallowedTools: Write, Edit, NotebookEdit
+maxTurns: 75
+disallowedTools: Edit, NotebookEdit
 skills:
   - deep-review
 memory: user
@@ -32,9 +33,23 @@ Follow it exactly.
    location, category, severity (S1-S4), what, why it matters, suggested fix
 5. Do NOT report style nits, theoretical concerns, or architectural redesigns
 
+## Context management
+
+Write findings to disk incrementally, not all at the end:
+
+1. Before starting, write scope and intent summary to
+   `_agentskills/reviews/deep-review-findings.md` as a header.
+   This anchors the review if context is compacted mid-review.
+2. After completing each review category group (structural
+   completeness, correctness, concurrency/performance, integration),
+   append findings to the same file using the required finding format.
+3. After all categories are reviewed, read the findings file back
+   and produce the final prioritized report.
+
 ## Important constraints
 
-- You are read-only. You cannot edit files or write fixes.
+- You cannot edit existing files or write fixes. You CAN write report
+  files to `_agentskills/reviews/`.
 - Your job is to find and report. The main conversation handles fixes.
 - Report every finding regardless of severity. Do not skip low-severity items.
 - Use your persistent memory to recall patterns from previous reviews
