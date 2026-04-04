@@ -1,7 +1,7 @@
 # justin-tools
 
 A Claude Code plugin providing a complete development lifecycle toolkit:
-27 skills, 8 agents, and 8 hooks covering research, design, implementation,
+30 skills, 10 agents, and 6 hooks covering research, design, implementation,
 testing, review, debugging, release, and team coordination.
 
 **Languages:** Rust, Python, JavaScript/TypeScript
@@ -43,6 +43,8 @@ Then run `/reload-plugins` in your session.
 | `rust-scaffold` | `/justin-tools:rust-scaffold [name]` | New Rust crate with layered architecture and conventions |
 | `error-catalog` | `/justin-tools:error-catalog [crate]` | Design error type hierarchies for Rust crates |
 | `refactor` | `/justin-tools:refactor [target]` | Structured refactoring with verification at each step |
+| `modularize` | `/justin-tools:modularize [scope]` | Codebase decomposition: file splitting, module hierarchy, dependency direction |
+| `code-standards` | Auto or manual | Language-specific best practices, anti-patterns, and linting rules |
 | `test-strategy` | Auto or manual | Test planning, coverage gap analysis, property-based testing |
 
 ### Quality and Safety
@@ -63,6 +65,7 @@ Then run `/reload-plugins` in your session.
 | `perf-profile` | `/justin-tools:perf-profile [target]` | Performance investigation with instrumentation guidance |
 | `incident-response` | `/justin-tools:incident-response [issue]` | Production triage, mitigation, postmortem |
 | `crate-health` | `/justin-tools:crate-health` | Rust workspace health dashboard |
+| `project-onboard` | `/justin-tools:project-onboard` | Guided project setup for justin-tools |
 
 ### Release and Documentation
 
@@ -96,10 +99,11 @@ memory. They accumulate knowledge across sessions.
 | `feature-architect` | feature-design, plan-verify, technical-writing | Full | Feature design and planning |
 | `researcher` | research, technical-writing | Full | Technical deep-dives and doc lookup |
 | `debate-lead` | debate, technical-writing | Full | Multi-perspective decision evaluation |
-| `deep-reviewer` | deep-review | Read-only | Post-phase code review |
-| `security-auditor` | safety-checks | Read-only | STRIDE security audit |
+| `code-analyzer` | modularize, code-standards | Reports-only | Codebase structure and complexity analysis |
+| `deep-reviewer` | deep-review | Reports-only | Post-phase code review |
+| `security-auditor` | safety-checks | Reports-only | STRIDE security audit |
 | `debugger` | debug, safety-checks | Full | Systematic debugging |
-| `test-engineer` | test-strategy, technical-writing | Full | Test planning and generation |
+| `test-engineer` | test-strategy | Full | Test planning and generation |
 | `release-manager` | release-prep, docs-sync, technical-writing | Full | Release preparation |
 | `onboarder` | project-onboard, technical-writing | Full | New project onboarding |
 
@@ -115,8 +119,6 @@ based on the task.
 | PreToolUse | Block `git checkout --` | Discards uncommitted changes |
 | PreToolUse | Block `git clean -f` | Removes untracked files permanently |
 | PreToolUse | Block `rm -rf` | Requires targeted rm or user consent |
-| Stop | Verification check | Catches code edits without running tests |
-| TeammateIdle | Task check | Redirects idle teammates to pending tasks |
 | Notification | Desktop alert | macOS notification when Claude needs input |
 
 ## Output Directory
