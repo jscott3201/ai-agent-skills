@@ -1,6 +1,6 @@
 # Skills Reference
 
-Complete reference for all 28 skills in the justin-tools plugin.
+Complete reference for all 30 skills in the justin-tools plugin.
 
 ## Skill Categories
 
@@ -108,7 +108,7 @@ Supporting files: `verification-checklist.md`
 
 ---
 
-### Implementation (4 skills)
+### Implementation (6 skills)
 
 #### rust-scaffold
 
@@ -127,6 +127,33 @@ Designs error type hierarchies for Rust crates. Analyzes failure modes,
 proposes thiserror enums, verifies From conversion chains, checks context
 propagation, and validates consumer handling. Prevents error handling
 problems that deep-review catches after the fact.
+
+#### modularize
+
+**Invocation:** Manual (`/justin-tools:modularize [scope]`)
+**Agent:** `code-analyzer`
+
+Analyzes and restructures codebases into well-organized modules. Three
+aggressiveness levels: conservative (within-file only), moderate (file
+splitting, internal boundaries), aggressive (full restructuring). Delegates
+read-only analysis to the code-analyzer agent, then guides incremental
+execution with verification at each step.
+
+Supporting files: `rust-patterns.md`, `python-patterns.md`,
+`javascript-patterns.md`
+
+#### code-standards
+
+**Invocation:** Auto (background) or manual for audit
+**Agent:** None (runs inline)
+
+Language-specific best practices, anti-patterns, and linting rules. Auto-
+applies as background knowledge during development. Manual mode audits
+a file or scope against the full checklist, reporting naming violations,
+complexity hotspots, structural anti-patterns, and non-idiomatic code.
+
+Supporting files: `rust-standards.md`, `python-standards.md`,
+`javascript-standards.md`
 
 #### refactor
 

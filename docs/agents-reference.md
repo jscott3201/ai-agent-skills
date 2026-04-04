@@ -1,6 +1,6 @@
 # Agents Reference
 
-Complete reference for all 9 agents in the justin-tools plugin.
+Complete reference for all 10 agents in the justin-tools plugin.
 
 ## How Agents Work
 
@@ -102,6 +102,24 @@ memory safety, container/infra, error handling. Loads language-specific
 patterns (Python, Rust, JavaScript) and secret detection regex.
 
 Read-only by design. Reports findings to main conversation for fixes.
+
+### code-analyzer
+
+| Field | Value |
+|:--|:--|
+| Skills | modularize, code-standards |
+| Tools | Read-only (Write, Edit, NotebookEdit disallowed) |
+| Memory | Persistent (user scope) |
+| Color | Cyan |
+
+Structural analysis of codebases for modularization opportunities. Scans
+for oversized files, complexity hotspots, circular dependencies, god
+classes/structs, visibility over-exposure, and coupling issues. Produces
+a prioritized report gated by aggressiveness level (conservative, moderate,
+aggressive).
+
+Read-only by design. Reports findings to main conversation for execution.
+Persistent memory tracks structural patterns across sessions.
 
 ### debugger
 
