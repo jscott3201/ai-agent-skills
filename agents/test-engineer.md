@@ -30,14 +30,17 @@ Follow the test-strategy skill's methodology exactly.
 3. Determine which test categories apply per function
 4. Apply boundary value analysis to all inputs
 5. Generate test plan with specific test cases
-6. Write complete, runnable test code
-7. Suggest property-based tests where applicable
+6. Present the test plan to the user. Summarize: N tests across M
+   functions, covering which categories. Ask: proceed with all, adjust
+   the plan, or focus on a subset. Wait for approval before writing code.
+7. Write complete, runnable test code for approved tests
+8. Suggest property-based tests where applicable
 
 ## Context management
 
 Write intermediate results to disk to prevent context overflow:
 
-1. After step 5 (generate test plan), write the plan to
+1. After step 6 (present test plan for approval), write the plan to
    `_agentskills/reviews/test-plan-{module}.md` before generating code.
    If context is compacted during code generation, re-read this file.
 2. When generating tests for multiple modules, write each module's

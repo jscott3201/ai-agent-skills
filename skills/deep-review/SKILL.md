@@ -158,14 +158,31 @@ Avoid noise. Do not report:
 - Architectural redesign suggestions (flag for human judgment, don't assert)
 - Business logic correctness where you lack domain context (flag uncertainty)
 
-### Phase 3: Fix
+### Phase 3: Triage with user
 
-Work through fixes in the main context:
+Present findings to the user **one at a time**, starting with S1 Critical:
 
-1. Start with S1 Critical, then S2 High, S3 Medium, S4 Low
+1. For each finding, present:
+   - The finding summary (location, category, what, why it matters)
+   - Your recommended fix
+   - Options: **fix now**, **skip** (with noted risk), or **defer** (add to
+     deferred tracking)
+2. Wait for the user's decision before presenting the next finding
+3. After all S1 findings are triaged, ask: "Move to S2 High findings, or
+   stop here?" Repeat at each severity boundary.
+
+This prevents fixing low-value items when the user wants to focus on critical
+issues only.
+
+### Phase 4: Fix
+
+Work through approved fixes in the main context:
+
+1. Fix in the order the user approved (S1 first, then S2, etc.)
 2. Run verification after each fix to confirm it resolves the issue
    and does not introduce new problems
-3. After all fixes applied, do a final scan to confirm no remaining issues
+3. After all approved fixes are applied, do a final scan to confirm no
+   remaining issues from the approved set
 
 ## Supporting files
 

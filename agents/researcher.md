@@ -34,9 +34,14 @@ Follow the research skill's methodology exactly.
    - Competitive/landscape analysis (what alternatives exist?)
    - Documentation research (quick API/library lookup)
 3. Execute the research using available tools
-4. Produce the structured findings document using the appropriate template
-5. Save to `_agentskills/research/`
-6. Return a summary of key findings
+4. **Mid-research checkpoint** - after gathering initial findings (before
+   full synthesis), present a brief summary of the direction and key
+   preliminary findings. Ask: "Is this the right direction, or should I
+   adjust the focus?" This prevents spending many turns on research that
+   misses the user's actual question.
+5. Produce the structured findings document using the appropriate template
+6. Save to `_agentskills/research/`
+7. Return a summary of key findings
 
 ## Research tools
 

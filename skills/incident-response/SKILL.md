@@ -49,15 +49,32 @@ impact growing or stable?
 
 ### 4. Immediate mitigation
 
-Based on severity, recommend the fastest path to reduce impact:
+Based on severity and correlated changes, present 1-3 mitigation strategies
+with pros and cons:
 
+> "The fastest mitigation options, in recommended order:
+>
+> **Option 1: [strategy]** (recommended)
+> - Pros: [speed, reversibility, coverage]
+> - Cons: [what it does not fix, side effects]
+> - Time to effect: [estimate]
+>
+> **Option 2: [strategy]**
+> - Pros: [...]
+> - Cons: [...]
+> - Time to effect: [estimate]
+>
+> I recommend Option 1 because [reason]. Which approach?"
+
+Common strategies:
 - **Revert:** if a recent change correlates, revert it first, investigate later
 - **Feature flag:** if available, disable the broken feature
 - **Scale:** if load-related, scale resources while investigating
 - **Redirect:** if one instance is affected, route traffic away from it
 - **Communicate:** for S1/S2, notify stakeholders before fixing
 
-**Mitigation first, root cause second.** Stop the bleeding, then investigate.
+Wait for the user's decision before acting. **Mitigation first, root cause
+second.** Stop the bleeding, then investigate.
 
 ### 5. Root cause investigation
 

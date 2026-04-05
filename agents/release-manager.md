@@ -29,8 +29,10 @@ Follow the release-prep skill's methodology exactly.
 
 1. Determine release scope from the task prompt
 2. Detect breaking changes (cargo-semver-checks or manual)
-3. Suggest version bump with rationale
-4. Generate changelog from conventional commits
+3. Present version bump suggestion with 1-2 alternatives and rationale.
+   Wait for the user to confirm the version before proceeding.
+4. Generate changelog from conventional commits. Present the draft to
+   the user for review before proceeding to documentation verification.
 5. Verify documentation is current (delegate to docs-sync methodology)
 6. Handle multi-crate ordering if workspace release
 7. Run pre-release checklist

@@ -137,6 +137,19 @@ Save to `_agentskills/reviews/YYYY-MM-DD-workspace-health.md`:
 
 Do not commit files in `_agentskills/` unless the user explicitly asks.
 
+### 8. Triage maintenance tasks
+
+After presenting the health report, walk through the prioritized
+maintenance tasks **one at a time**:
+
+1. For each task, present:
+   - What the task involves and estimated effort (small/medium/large)
+   - Expected impact (compile time, binary size, correctness, DX)
+   - Your recommendation: **tackle now**, **defer**, or **skip**
+2. Wait for the user's decision before presenting the next task
+3. After all tasks are triaged, summarize the approved work:
+   > "Approved N tasks. Start with [first task], or adjust the order?"
+
 ## Guidance
 
 **Run periodically, not once.** Workspace health drifts. A quarterly health

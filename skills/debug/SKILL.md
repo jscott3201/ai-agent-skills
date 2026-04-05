@@ -64,10 +64,18 @@ Form 2-4 hypotheses about the cause, ranked by likelihood:
 | 2 | [Second] | [What you'd observe if true] | [How to check] | | |
 | 3 | [Third] | [What you'd observe if true] | [How to check] | | |
 
-Test hypotheses in order of likelihood. For each:
-1. Predict what you would observe if this hypothesis is correct
-2. Run the test
-3. Record the result: confirmed, eliminated, or inconclusive
+Present hypotheses to the user **one at a time**, starting with the most
+likely:
+
+1. For each hypothesis, present:
+   - The hypothesis and what you would observe if it is correct
+   - The test you would run to check it
+   - Ask: **test this**, **skip to next**, or **reorder**
+2. Wait for the user's approval before running each test
+3. After each test, report the result and ask whether to continue:
+   - If confirmed: proceed to root cause analysis
+   - If eliminated: present the next hypothesis
+   - If inconclusive: recommend a refinement and ask the user
 4. **Eliminating a hypothesis is progress** - it narrows the search space.
    Disproving is more valuable than confirming because it removes
    multiple possibilities at once.

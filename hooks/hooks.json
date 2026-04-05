@@ -7,7 +7,7 @@
           {
             "type": "command",
             "if": "Bash(git push*)",
-            "command": "echo 'Blocked: git push is not allowed. Only the user pushes to remote.' >&2; exit 2"
+            "command": "echo 'Agent wants to push to remote. Approve to allow.' >&2; exit 1"
           },
           {
             "type": "command",

@@ -2,8 +2,9 @@
 name: sequential-bench
 description: >
   Run benchmarks sequentially (never parallel), track results, and flag
-  regressions. Use when running cargo bench or any benchmarking task.
-argument-hint: "[crate names]"
+  regressions. Use when running benchmarks for Rust, Python, or JavaScript
+  projects.
+argument-hint: "[package names]"
 ---
 
 ## Purpose
@@ -17,28 +18,56 @@ and flag regressions.
 
 ### 1. Discover benchmark targets
 
-If `$ARGUMENTS` specifies crate names, use those directly. Otherwise, list
-available benchmark crates:
+If `$ARGUMENTS` specifies package names, use those directly. Otherwise,
+discover available benchmarks for the project language.
 
+**Rust:**
 ```bash
 cargo bench --workspace --no-run 2>&1 | grep -i compiling
 ```
-
 Or check `Cargo.toml` workspace members for crates with `benches/` directories.
+
+**Python:**
+```bash
+# pytest-benchmark
+pytest --collect-only -q **/test_*bench*.py **/bench_*.py 2>/dev/null
+# Or check for benchmark files:
+find . -name "*bench*" -name "*.py" -not -path "*/node_modules/*"
+```
+
+**JavaScript/TypeScript:**
+```bash
+# vitest bench
+npx vitest bench --run --reporter=verbose 2>/dev/null || true
+# Or check for benchmark files:
+find . -name "*.bench.*" -not -path "*/node_modules/*"
+```
 
 Present the list and confirm execution order with the user.
 
 ### 2. Run sequentially
 
-Run one crate at a time. Never run `cargo bench --workspace` or launch
-multiple benchmark processes simultaneously.
+Run one package/suite at a time. Never run all benchmarks simultaneously.
 
+**Rust:**
 ```bash
 cargo bench -p crate-one
 cargo bench -p crate-two
 ```
 
-Chain with `&&` if running unattended. Report results after each crate
+**Python (pytest-benchmark):**
+```bash
+pytest tests/bench_module_one.py --benchmark-only
+pytest tests/bench_module_two.py --benchmark-only
+```
+
+**JavaScript/TypeScript (vitest):**
+```bash
+npx vitest bench src/module-one.bench.ts --run
+npx vitest bench src/module-two.bench.ts --run
+```
+
+Chain with `&&` if running unattended. Report results after each suite
 completes before proceeding to the next.
 
 ### 3. Compare against baselines
@@ -57,6 +86,19 @@ REGRESSION: expand_two_hop
 ```
 
 4. Also note significant improvements (>10% faster) for visibility
+
+### 3b. Triage regressions with user
+
+If regressions were found, present each one **one at a time**:
+
+1. For each regression, present:
+   - The benchmark, previous value, current value, and percentage change
+   - Possible causes (recent changes, environmental factors)
+   - Options: **investigate** (dig into the cause), **accept** (intentional
+     tradeoff), or **re-run** (confirm it is not noise)
+2. Wait for the user's decision before presenting the next regression
+3. After all regressions are triaged, proceed to update the results file
+   with annotations for accepted regressions
 
 ### 4. Update results file
 

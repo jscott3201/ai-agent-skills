@@ -64,7 +64,17 @@ Based on the changes since last release:
 | Breaking API changes | Major (X.0.0) | 1.2.3 -> 2.0.0 |
 | Pre-1.0 breaking changes | Minor (0.X.0) | 0.3.1 -> 0.4.0 |
 
-Present the suggestion with rationale and get user confirmation.
+Present the version bump as a decision with options:
+
+> "Based on the changes since [last version], I recommend a **[bump type]**
+> bump to **v[new version]**. Here is why:
+>
+> 1. **[Recommended bump]** - [rationale]
+> 2. **[Alternative bump]** - [when this would be appropriate instead]
+>
+> Which version?"
+
+Wait for the user to confirm before proceeding.
 
 ### 4. Generate changelog
 
@@ -84,6 +94,17 @@ Organize by Keep a Changelog categories:
 
 Write human-readable descriptions, not raw commit messages. The changelog
 is for users, not contributors.
+
+Present the generated changelog to the user for review:
+
+> "Here is the draft changelog for v[version]. Review and let me know:
+> - Any entries to add, remove, or reword
+> - Any entries miscategorized (e.g., marked as Added but should be Changed)
+>
+> I will incorporate your feedback before proceeding to documentation
+> verification."
+
+Wait for approval before proceeding.
 
 ### 5. Verify documentation
 

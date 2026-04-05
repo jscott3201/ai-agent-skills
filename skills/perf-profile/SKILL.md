@@ -86,6 +86,26 @@ For each hot spot, hypothesize why it is slow:
 
 Rank by expected impact. Start with the highest.
 
+### 4b. Confirm test order with user
+
+Present hypotheses to the user **one at a time**, starting with the highest
+expected impact:
+
+1. For each hypothesis, present:
+   - The hot spot and hypothesis
+   - Expected impact if confirmed
+   - What the test involves (effort, risk)
+2. Ask: **test this**, **skip**, or **reorder**
+3. Wait for the user's decision before proceeding
+
+> "I have N hypotheses ranked by expected impact. Starting with the highest:
+>
+> **Hypothesis 1:** [hot spot] - [hypothesis]
+> Expected impact: [estimate]
+> Test: [what you would do]
+>
+> Test this one first, skip, or reorder?"
+
 ### 5. Optimize and measure
 
 For each optimization:

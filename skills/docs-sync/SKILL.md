@@ -73,11 +73,24 @@ Fix: Remove the federation section and update the feature list
 
 Group by file. Include the specific line or section.
 
-### Phase 2: Fix
+### Phase 2: Triage with user
 
-When the Explore subagent returns findings to the main context:
+When the Explore subagent returns findings to the main context, present
+each stale reference **one at a time**, grouped by file, starting with the
+highest-impact issues:
 
-1. Work through fixes file by file
+1. For each stale reference, present:
+   - The file, line, and what is stale
+   - Your recommended fix (remove, update, rewrite)
+   - Ask: **fix**, **skip**, or **defer**
+2. Wait for the user's decision before presenting the next finding
+3. At file boundaries, ask: "Continue to next file, or stop here?"
+
+### Phase 3: Fix
+
+For approved fixes:
+
+1. Work through fixes file by file in the order approved
 2. Apply technical writing conventions to all updated content
 3. After all fixes, do a final grep for any remaining stale terms
 

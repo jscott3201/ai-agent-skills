@@ -70,6 +70,24 @@ For each untested or under-tested area:
 3. `test_[name]_[error_path]` - [what error it expects]
 ```
 
+### 4b. Present plan for approval
+
+Present the test plan to the user before writing any test code:
+
+> "Test plan ready. Summary:
+> - N new tests across M functions
+> - Covers: [categories included]
+> - Estimated: [rough count] lines of test code
+>
+> Options:
+> 1. **Proceed** - generate all test code as planned
+> 2. **Adjust** - modify the plan (add/remove tests, change priorities)
+> 3. **Subset** - focus on a specific function or category first
+>
+> I recommend proceeding with the full plan. Your call."
+
+Wait for the user's decision before generating test code.
+
 ### 5. Generate test code
 
 Write complete, runnable test code. Follow the project's existing test

@@ -143,6 +143,23 @@ When auditing multiple candidates, present them side by side:
 
 If rejecting, always suggest an alternative (another package or hand-rolling).
 
+### 6. User selection
+
+When auditing multiple candidates, present the comparison matrix from
+Step 5, then walk through each recommendation:
+
+1. For each candidate, present:
+   - The health audit summary (from Step 5 format)
+   - Your recommendation: ADOPT, CAUTION, or REJECT with rationale
+   - If CAUTION: what specific risk the user accepts by adopting
+2. After presenting the comparison, ask:
+   > "Based on the audit, I recommend [package]. Adopt it, or would you
+   > prefer to evaluate alternatives?"
+3. Wait for the user's decision before proceeding to integration.
+
+If only one candidate is being audited (not a comparison), present the
+report and ask: "Adopt, reject, or investigate alternatives?"
+
 ## Supporting files
 
 - [ecosystem-audit.md](ecosystem-audit.md) - tools, thresholds, and commands per ecosystem

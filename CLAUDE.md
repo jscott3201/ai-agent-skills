@@ -51,6 +51,30 @@ _agentskills/
 - Multi-language: include Rust, Python, and JS/TS examples where applicable
 - Output files go to `_agentskills/<subfolder>/`
 
+## User Interaction Convention
+
+Skills and agents that involve decisions, findings, or multi-step workflows
+must present topics one at a time and let the user drive. Follow this pattern
+at every decision point:
+
+1. **One topic at a time.** Never dump a list of findings, options, or tasks
+   all at once. Present the highest-priority item, resolve it, then move to
+   the next.
+2. **1-3 options with tradeoffs.** When meaningful choices exist, present
+   1-3 options. For each, state what it does well and what it does poorly.
+3. **State your recommendation.** For each decision point, say which option
+   you favor and why. The user can accept, adjust, or override.
+4. **Wait for the user.** Do not proceed to the next topic until the user
+   responds. Silence is not consent.
+5. **User drives, agent follows.** The user sets direction, scope, and pace.
+   The agent provides analysis, options, and recommendations.
+
+**Scope:** This convention applies to skills invoked in the main conversation
+and to primary agents (debugger, test-engineer, release-manager, researcher,
+feature-architect, onboarder, debate-lead). Read-only subagents (deep-reviewer,
+security-auditor, code-analyzer) return findings to their parent skill, which
+then applies this convention when presenting to the user.
+
 ## Agent Conventions
 
 - Plugin agents cannot use: `hooks`, `mcpServers`, `permissionMode`

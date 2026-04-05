@@ -45,6 +45,25 @@ Classify each change:
 | Type changed | `String` -> `&str`, enum variant added | Update types at call sites |
 | Trait bound added | `T: Clone` added to generic | Ensure implementors satisfy bound |
 
+### 1b. Confirm migration strategy
+
+Present the catalog to the user and ask for the overall strategy:
+
+> "I found N breaking changes. Two strategy options:
+> 1. **Deprecation-first** - add deprecation warnings in a minor release,
+>    remove in the next major. Safer for downstream consumers, takes two
+>    releases.
+> 2. **Immediate** - make all breaking changes in a single major release
+>    with a migration guide. Faster, but consumers must migrate all at once.
+>
+> I recommend [option] because [reason]. Which approach?"
+
+Then present each breaking change **one at a time**:
+
+1. Show the change (what, type, affected sites)
+2. Recommend a migration approach for this specific change
+3. Ask the user to confirm or adjust before moving to the next change
+
 ### 2. Plan the migration path
 
 **Prefer deprecation-first when possible:**

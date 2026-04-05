@@ -128,18 +128,25 @@ Flag items as stale if:
 - The gate condition is no longer meaningful (context changed)
 - A different approach has superseded the deferred work
 
-#### 4. Report
+#### 4. Triage with user
 
-Present findings in four groups, ordered by priority within each:
+Present each category **one at a time**, starting with Ready:
 
-- **Ready (gate met)** - can be tackled now. Include which gate was met
-  and recommended next step.
-- **Approaching (gate partially met)** - close to ready. Include what
-  remains and estimated timeline.
-- **Still deferred** - gate not yet met. Include current state of the
-  gate condition.
-- **Stale (recommend removal)** - no longer relevant. Include why and
-  recommend removing or updating.
+**Ready items (gate met):**
+For each ready item, present:
+- The item, its gate, and why the gate is now met
+- Recommended action: tackle now, re-defer with new gate, or remove
+- Wait for the user's decision before presenting the next item
+
+**Stale items (recommend removal):**
+For each stale item, present:
+- The item and why it is stale
+- Options: **keep** (with updated gate), **update** (revise scope/gate),
+  or **remove**
+- Wait for the user's decision before presenting the next item
+
+After Ready and Stale items are triaged, summarize Approaching and Still
+Deferred items as a group (these require no immediate decision).
 
 #### 5. Update the file
 

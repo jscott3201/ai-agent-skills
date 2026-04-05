@@ -38,6 +38,25 @@ tsc --noEmit 2>&1
 **Other languages:** Use the language's type checker, linter, or grep for the
 changed symbol name. The goal is a complete list, not a sample.
 
+### 2b. Confirm scope with user
+
+Present the list of affected sites and get confirmation:
+
+> "Found N affected sites across M files:
+>
+> [List the files and count of sites per file, grouped logically]
+>
+> This is a cross-cutting change. Options:
+> 1. **Proceed** - fix all N sites now
+> 2. **Review** - walk through sites one at a time before fixing
+> 3. **Abort** - the scope is larger than expected, reconsider the approach
+>
+> I recommend proceeding. The compiler found all sites, and partial changes
+> create inconsistency."
+
+Wait for the user's decision. If the user chooses "Review," present each
+affected site one at a time with the proposed change before applying it.
+
 ### 3. Fix every site
 
 Work through every affected site. For each one:

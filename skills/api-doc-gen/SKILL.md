@@ -29,6 +29,23 @@ For the target (`$ARGUMENTS`):
 
 Report: "Found N public items, M undocumented, K with incomplete docs."
 
+### 1b. Confirm scope with user
+
+Present the scan results and confirm scope before generating:
+
+> "Found N public items: M undocumented, K with incomplete docs.
+>
+> Grouped by priority:
+> 1. **Public API functions** (N items) - highest user impact
+> 2. **Public types and traits** (N items) - needed for API understanding
+> 3. **Module overviews** (N modules) - orientation and navigation
+>
+> I recommend starting with group 1. Generate docs for all groups, a
+> specific group, or a subset? You can also exclude items that are
+> intentionally undocumented."
+
+Wait for the user to confirm scope before generating any documentation.
+
 ### 2. Generate documentation
 
 For each undocumented or incomplete public item, generate documentation

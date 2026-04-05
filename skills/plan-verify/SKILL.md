@@ -95,15 +95,20 @@ Search the plan for incomplete content:
 
 ### 8. Present findings
 
-Report in four categories:
+Present inaccuracies and missing context **one at a time**, starting with
+the highest blast-radius items:
 
-- **Confirmed** - plan claims that match the codebase
-- **Inaccurate** - claims that are wrong, with the actual state and a
-  proposed correction
-- **Missing context** - things the plan does not mention but should (new
-  dependencies, side effects, migration needs)
-- **Stale** - claims that may have been correct when written but the
-  codebase has since changed
+1. For each inaccuracy, present:
+   - The plan claim vs the actual codebase state
+   - Your proposed correction
+   - Ask: **accept correction**, **adjust correction**, or **investigate
+     further**
+2. Wait for the user's decision before presenting the next finding
+3. After all inaccuracies are resolved, summarize confirmed items and stale
+   items as a group (these require no immediate decision)
+
+Summarize: "N confirmed, N inaccurate (N corrected), N missing context,
+N stale."
 
 ### 9. Quality gate
 

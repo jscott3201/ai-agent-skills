@@ -27,6 +27,28 @@ For the target crate or module (`$ARGUMENTS`):
 3. Group by source: which errors come from dependencies, which are
    domain-specific, which represent programming errors
 
+### 1b. Confirm design approach
+
+Before proposing the full error hierarchy, present 2-3 structural options
+with tradeoffs:
+
+> "For [crate/module], I see N failure modes across M sources. Design options:
+>
+> 1. **Single enum** (recommended) - one `Error` type per crate with
+>    variants per failure source. Simple, standard, good for most crates.
+> 2. **Split enums** - separate error types per domain (e.g., `ParseError`,
+>    `RuntimeError`). Better when failure domains never intersect.
+> 3. **Flat + context** - single enum with a generic context field for
+>    dynamic information. More flexible, less type-safe.
+>
+> I recommend [option] because [reason]. Which approach?"
+
+Also confirm the scope:
+- Per-crate or per-module error types?
+- Wrap dependency errors or expose them?
+
+Wait for the user's decisions before designing the hierarchy.
+
 ### 2. Design the error hierarchy
 
 Propose an error enum using `thiserror`:

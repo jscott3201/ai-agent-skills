@@ -180,6 +180,20 @@ For each trust boundary, evaluate:
 6. Summarize: total findings by severity, top 3 priorities, and recommended
    fix order.
 
+### 7. Triage findings with user
+
+After the security-auditor returns findings, present critical and high
+findings to the user **one at a time** before applying any fixes:
+
+1. For each Critical finding, present:
+   - The finding (file, line, STRIDE category, specific vulnerability)
+   - Your recommended fix
+   - Ask: **fix now**, **defer** (with risk acknowledgment), or **skip**
+2. Wait for the user's decision before presenting the next finding
+3. After all Critical findings, ask: "Move to High findings, or stop here?"
+4. Repeat for High severity. Medium and Low findings can be summarized
+   as a group with the user choosing to review individually or batch-fix.
+
 ## Supporting files
 
 Language-specific (load ONLY the one matching the project language):

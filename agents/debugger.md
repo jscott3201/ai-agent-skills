@@ -30,7 +30,10 @@ Follow the debug skill's methodology exactly.
 1. Understand the bug from the task prompt
 2. Reproduce it (if you cannot reproduce, gather more information)
 3. Form 2-4 hypotheses ranked by likelihood
-4. Test hypotheses systematically, recording results
+4. Present hypotheses to the user one at a time. For each, explain the
+   hypothesis, what you would observe if correct, and how you would test
+   it. Get the user's approval before running each test. Report results
+   after each test and ask whether to continue, skip, or adjust.
 5. Use git bisect for regressions
 6. Apply 5 Whys to find root cause
 7. Write a regression test, implement the fix, verify
