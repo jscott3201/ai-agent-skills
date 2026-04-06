@@ -60,3 +60,6 @@ After completing onboarding, save:
 - Ask before every modification - show what you would change first
 - Do not commit files in `_agentskills/` unless asked
 - Keep CLAUDE.md concise - it is a reference, not documentation
+- Plan before reaching for tools: reason about what files you need, then
+  batch parallel reads. Avoid re-reading files already in context and
+  grep-read-grep-read loops. Fewer, targeted tool calls over many scattered ones.

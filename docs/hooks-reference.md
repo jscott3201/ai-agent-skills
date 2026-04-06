@@ -1,6 +1,6 @@
 # Hooks Reference
 
-Complete reference for all 8 hooks in the justin-tools plugin.
+Complete reference for all 7 hooks in the justin-tools plugin.
 
 ## How Hooks Work
 
@@ -63,46 +63,22 @@ work.
 Prevents recursive forced deletion. Claude should use specific file
 removal or ask for confirmation.
 
-### Stop Hook (1)
-
-#### Verification check
-
-**Matcher:** none (fires on every stop)
-**Type:** prompt (Haiku evaluation)
-**Behavior:** checks if code was edited without running verification
-
-Uses a Claude Haiku model to evaluate: did Claude edit or write code files
-(Edit, Write, NotebookEdit) in this turn AND did Claude NOT run a
-verification command (cargo fmt/clippy/test, npm test, pytest, ruff, eslint)
-before stopping?
-
-If yes: returns `ok: false` with a reason, which Claude receives as its
-next instruction and continues working to run verification.
-
-If no edits were made, or verification was already run: returns `ok: true`
-and Claude stops normally.
-
-This prevents the most common CI failure: code committed without running
-format/lint/test.
-
 ### TeammateIdle Hook (1)
 
 #### Task check
 
 **Matcher:** none (fires for all teammates)
-**Type:** prompt (Haiku evaluation)
-**Behavior:** checks for pending unblocked tasks
+**Type:** command (additionalContext injection)
+**Behavior:** reminds teammate to check for pending tasks
 
-Fires when an agent team teammate is about to go idle. Uses Haiku to
-check if pending, unblocked tasks exist in the shared task list.
+Fires when an agent team teammate is about to go idle. Injects a reminder
+via `additionalContext` to check the task list for pending unblocked tasks
+before idling.
 
-If tasks exist: returns `ok: false`, prompting the teammate to claim the
-next task instead of going idle.
-
-If no tasks remain: returns `ok: true`, allowing the teammate to idle.
-
-This keeps teammates productive and prevents premature idling while work
-remains.
+This is advisory, not blocking. The teammate checks the task list and
+claims the next task if available. If no tasks remain, the teammate idles
+normally. This lightweight approach avoids forcing teammates into loops
+while keeping them productive.
 
 ### Notification Hook (1)
 
@@ -125,9 +101,9 @@ PreToolUse hooks with exit code 2 **cannot be bypassed**, even in
 `bypassPermissions` mode. This makes the git push and destructive command
 blocks authoritative safety controls.
 
-The Stop verification hook uses Haiku for fast, low-cost evaluation.
-It fires on every stop but only flags when code edits occurred without
-verification, keeping false positives low.
+The TeammateIdle hook uses `additionalContext` injection (advisory only),
+not exit code 2. This keeps it safe to experiment with — remove it if it
+causes teammate loops.
 
 ## Customization
 

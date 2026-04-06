@@ -10,22 +10,22 @@ argument-hint: "[feature description]"
 
 ## Purpose
 
-Drive a feature from idea to implementation-ready plan. Covers the full arc:
-explore the codebase, understand the problem, capture workflow preferences,
-research and design (at a depth the user chooses), produce a phased
-implementation plan with complete code, self-review, verify against the
-codebase, iterate with the user, and hand off to execution.
+Drive a feature from idea to implementation-ready plan through guided
+conversation. This is an interactive skill: the user drives decisions while
+you provide analysis, options, and recommendations. Every stage involves
+the user directly.
 
-**Preferred invocation:** Delegate to the `feature-architect` agent, which
-has this skill plus `plan-verify` and `technical-writing` preloaded with
-persistent memory. The agent runs the full methodology and retains design
-preferences across sessions.
+Covers the full arc: explore the codebase, understand the problem, capture
+workflow preferences, research and design (at a depth the user chooses),
+produce a phased implementation plan with complete code, verify against the
+codebase, iterate with the user, and hand off to execution.
 
 ## Instructions
 
 Work through these stages in order. Each stage builds on the previous one.
 Do not skip stages, but scale the depth of each stage to the feature's
-complexity.
+complexity. Present one topic at a time and wait for the user before
+proceeding.
 
 ### Stage 1: Explore and understand
 

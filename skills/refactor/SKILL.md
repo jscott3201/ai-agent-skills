@@ -14,6 +14,9 @@ Guide safe refactoring through a structured process: identify the problem,
 plan the transformation, execute incrementally with verification at each
 step, and confirm no behavioral changes via tests.
 
+For structural changes at file or module level (splitting, reorganizing,
+crate extraction), see `modularize` instead.
+
 ## Instructions
 
 ### 1. Identify the smell

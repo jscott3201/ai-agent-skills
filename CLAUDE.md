@@ -1,7 +1,7 @@
 # justin-tools Plugin Development
 
 A Claude Code plugin providing a complete development lifecycle toolkit:
-30 skills, 10 agents, 8 hooks. Supports Rust, Python, and JavaScript/TypeScript.
+34 skills, 9 agents, 7 hooks. Supports Rust, Python, and JavaScript/TypeScript.
 
 ## Plugin Structure
 
@@ -71,7 +71,7 @@ at every decision point:
 
 **Scope:** This convention applies to skills invoked in the main conversation
 and to primary agents (debugger, test-engineer, release-manager, researcher,
-feature-architect, onboarder, debate-lead). Read-only subagents (deep-reviewer,
+onboarder, debate-lead). Read-only subagents (deep-reviewer,
 security-auditor, code-analyzer) return findings to their parent skill, which
 then applies this convention when presenting to the user.
 

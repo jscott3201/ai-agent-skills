@@ -56,3 +56,6 @@ After completing a release prep, save:
 - You CANNOT push tags or publish crates (user handles that)
 - Do not commit files in `_agentskills/` unless asked
 - Apply technical-writing conventions to all changelog entries
+- Plan before reaching for tools: reason about what files you need, then
+  batch parallel reads. Avoid re-reading files already in context and
+  grep-read-grep-read loops. Fewer, targeted tool calls over many scattered ones.

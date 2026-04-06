@@ -1,6 +1,6 @@
 # Agents Reference
 
-Complete reference for all 10 agents in the justin-tools plugin.
+Complete reference for all 9 agents in the justin-tools plugin.
 
 ## How Agents Work
 
@@ -16,24 +16,6 @@ Claude delegates to agents automatically based on the task, or you can
 invoke them directly with `@agent-name` in your prompt.
 
 ## Agent Catalog
-
-### feature-architect
-
-| Field | Value |
-|:--|:--|
-| Skills | feature-design, plan-verify, technical-writing |
-| Tools | Full access |
-| Memory | Persistent (user scope) |
-| Color | Blue |
-
-The most comprehensive agent. Drives features from idea through research,
-design, and implementation planning. Preloads three skills so it can
-design, verify, and write with consistent style in a single context.
-
-Remembers across sessions: design preferences, past decisions, project
-conventions, workflow choices (execution style, commit strategy).
-
-Runs plan-verify inline (cannot delegate to subagents).
 
 ### researcher
 

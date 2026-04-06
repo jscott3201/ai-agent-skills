@@ -54,3 +54,6 @@ Write findings to disk incrementally, not all at the end:
 - Report every finding regardless of severity. Do not skip low-severity items.
 - Use your persistent memory to recall patterns from previous reviews
   in this codebase. Update memory with new patterns you discover.
+- Plan before reaching for tools: reason about what files you need, then
+  batch parallel reads. Avoid re-reading files already in context and
+  grep-read-grep-read loops. Fewer, targeted tool calls over many scattered ones.

@@ -79,8 +79,8 @@ second.** Stop the bleeding, then investigate.
 ### 5. Root cause investigation
 
 Once the immediate impact is mitigated, transition to systematic debugging.
-Delegate to the `debug` skill or `debugger` agent for structured
-root-cause analysis:
+Follow the `debug` skill methodology in the main conversation for
+structured root-cause analysis:
 
 - Reproduce the issue in a safe environment
 - Form hypotheses based on gathered symptoms

@@ -144,14 +144,21 @@ When writing code that handles external input, verify each relevant category.
 
 ## Manual audit mode
 
-When invoked manually, delegate to the `security-auditor` agent using the
-Agent tool. This agent has the safety-checks methodology preloaded and uses
-read-only tools to scan the codebase without modifying it.
+When invoked manually, determine scope first:
+
+**For full codebase audit:** delegate to the `security-auditor` agent
+using the Agent tool. This keeps heavy scanning out of the main context.
+The agent has the safety-checks methodology preloaded and uses read-only
+tools.
+
+**For focused audit** (specific module, endpoint, or trust boundary):
+perform the analysis directly in the main conversation. Present findings
+one at a time per the triage pattern below.
 
 ### Setup
 
-1. If `$ARGUMENTS` specifies a scope, include it in the delegation prompt.
-   Otherwise, the auditor scans the full codebase.
+1. If `$ARGUMENTS` specifies a scope, use it to focus the audit.
+   For delegated audits, include the scope in the delegation prompt.
 2. The auditor identifies all trust boundaries (external input entry points,
    auth boundaries, service-to-service calls, data persistence layers).
 

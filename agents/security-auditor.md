@@ -56,6 +56,10 @@ Write findings to disk at each phase boundary:
 4. For the final report, read the findings file back and produce the
    grouped, severity-ranked summary.
 
+Plan before reaching for tools: reason about what files you need, then
+batch parallel reads. Avoid re-reading files already in context and
+grep-read-grep-read loops. Fewer, targeted tool calls over many scattered ones.
+
 ## Report format
 
 Group findings by STRIDE category with severity:

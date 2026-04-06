@@ -15,6 +15,9 @@ the performance question, establish a baseline, identify hot spots, form
 hypotheses, implement targeted optimizations, and verify no regressions.
 Also supports adding observability instrumentation to code.
 
+Use `sequential-bench` to run benchmarks reliably. For broader
+investigation including profiling and optimization, use this skill.
+
 ## Instructions
 
 ### 1. Define the question

@@ -15,8 +15,8 @@ state and guide the user through setting up conventions, configuration, and
 practices that make the plugin's skills and agents most effective. One step
 at a time, never overwhelming.
 
-**Preferred invocation:** Delegate to the `onboarder` agent, which has
-this skill and `technical-writing` preloaded with persistent memory.
+This is an interactive skill. Present each setup step individually, explain
+why it matters, and wait for the user's approval before making changes.
 
 ## Instructions
 

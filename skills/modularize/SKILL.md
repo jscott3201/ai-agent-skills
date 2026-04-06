@@ -72,12 +72,29 @@ When the code-analyzer report returns:
    - **P2**: Files 500-1000 lines, god classes, visibility over-exposure
    - **P3**: Files 300-500 lines, coupling issues, naming problems
 
-3. Present findings to the user as a ranked list with estimated effort
-   per item (small/medium/large).
+3. Present findings to the user **one at a time**, starting with P1.
+   For each finding:
+
+   > "[Finding]: [brief description]
+   > **Priority:** P1/P2/P3 | **Effort:** small/medium/large
+   > **What it improves:** [specific benefit]
+   > **What it costs:** [risk, disruption, effort]
+   >
+   > Options:
+   > 1. **Include** - add to the refactoring plan
+   > 2. **Skip** - not worth addressing now
+   > 3. **Defer** - track for later (add to DEFERRED.md)
+   >
+   > I recommend [option] because [reason]."
+
+   Wait for the user's decision before presenting the next finding.
+   After all findings are triaged, summarize the approved set and
+   confirm before proceeding to planning.
 
 ### 4. Create refactoring plan
 
-For approved items, produce a step-by-step refactoring plan. Detect the
+For the approved set of findings, produce a step-by-step refactoring
+plan. Detect the
 project's primary language from file extensions. Load ONLY the single
 patterns file for that language:
 

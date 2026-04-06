@@ -109,13 +109,55 @@ files.
 - Review each teammate's output before starting the next wave
 - Each teammate should run CI verification before committing
 
-## Team sizing
+## Teammate configuration
+
+When assigning tasks to teammates, match the effort and model to the
+task's complexity:
+
+| Task type | Effort | Model | Rationale |
+|:--|:--|:--|:--|
+| Read-only review, linting, formatting | low | haiku | No judgment calls, mechanical checks |
+| Standard implementation, test writing, docs | default | inherit | Follow existing patterns |
+| Security audit, architectural review, complex debugging | high | opus | Ambiguity, multi-component reasoning, security implications |
+
+Apply this per teammate, not per team. A review team might have a
+deep-reviewer on default effort and a security-auditor on high effort
+if the security surface is significant.
+
+## Team sizing and structure
 
 - **3-5 teammates** for most workflows. Coordination overhead increases
   rapidly beyond 5.
 - **5-6 tasks per teammate** keeps everyone productive without excessive
   context switching.
-- Three focused teammates outperform five scattered ones.
+- Three focused teammates outperform five scattered ones. The real
+  bottleneck is review capacity, not generation speed.
+
+### Hierarchical leads for larger work
+
+When a team needs 6+ agents, use hierarchical leads instead of flat
+dispatch from a single orchestrator:
+
+- **2 feature leads**, each managing 2-3 specialists
+- Each lead owns a subsystem or concern area
+- Leads report to the main orchestrator, which synthesizes
+
+One orchestrator managing 6+ agents directly causes context overflow and
+coordination drift. Hierarchical teams mirror engineering org structure
+for the same reason.
+
+### Budget management per teammate
+
+Set `maxTurns` on every teammate to prevent unbounded token usage:
+
+- **Read-only reviewers:** 30-50 turns
+- **Implementation teammates:** 50-80 turns
+- **Research teammates:** 40-60 turns
+
+When a teammate hits its limit without completing, spawn a fresh
+replacement with context about what was accomplished. Do not ask the
+stalled teammate to recover — a clean context window outperforms
+accumulated error state.
 
 ## Available agent types
 
@@ -126,7 +168,6 @@ These plugin agents are available as teammate types:
 | `deep-reviewer` | Post-phase code review | Read-only | Persistent |
 | `security-auditor` | STRIDE security audit | Read-only | Persistent |
 | `researcher` | Technical research | Full access | Persistent |
-| `feature-architect` | Feature design and planning | Full access | Persistent |
 
 Reference by name when spawning teammates:
 > "Spawn a teammate using the deep-reviewer agent type."
@@ -190,3 +231,13 @@ different files. If any overlap exists, keep those tasks sequential.
 **Teams are expensive.** Each teammate is a separate Claude session with
 its own token costs. Use teams when the parallel value justifies the cost,
 not as a default execution mode.
+
+**Prefer the main conversation.** Before creating a team, ask whether the
+primary agent could do the work directly. Teams are best for genuinely
+parallel, independent work. If the task involves sequential decisions or
+user input at each step, keep it in the main conversation.
+
+**Error amplification is 17x, not linear.** Unstructured multi-agent
+topologies amplify errors exponentially (NeurIPS 2025). Wave boundaries
+are your defense — review all teammate output before starting the next
+wave. Never skip inter-wave review.

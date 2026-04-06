@@ -7,6 +7,9 @@ description: >
 
 ## Purpose
 
+This is Stage 5a of the `feature-design` workflow, but can also be invoked
+standalone on any implementation plan.
+
 Catch factual errors in implementation plans before they become implementation
 bugs. Plans make claims about what exists, how APIs work, and where code lives.
 These claims go stale or were wrong to begin with. The most common plan errors
@@ -101,6 +104,8 @@ the highest blast-radius items:
 1. For each inaccuracy, present:
    - The plan claim vs the actual codebase state
    - Your proposed correction
+   - Your recommendation and why: "I recommend [accept/investigate]
+     because [reason — e.g., straightforward rename vs uncertain behavior change]"
    - Ask: **accept correction**, **adjust correction**, or **investigate
      further**
 2. Wait for the user's decision before presenting the next finding

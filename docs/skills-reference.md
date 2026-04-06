@@ -1,6 +1,6 @@
 # Skills Reference
 
-Complete reference for all 30 skills in the justin-tools plugin.
+Complete reference for all 34 skills in the justin-tools plugin.
 
 ## Skill Categories
 
@@ -35,9 +35,8 @@ Supporting files: `claude-md-template.md`
 #### feature-design
 
 **Invocation:** Manual (`/justin-tools:feature-design [description]`)
-**Agent:** `feature-architect`
 
-Guides feature development through 5 stages:
+Guided interactive skill that runs in the main conversation through 5 stages:
 
 1. **Explore and understand** - structured codebase exploration using
    `exploration-checklist.md`, then one-at-a-time clarifying questions

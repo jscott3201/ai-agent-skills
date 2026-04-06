@@ -15,8 +15,8 @@ generate a changelog, detect breaking API changes, suggest the correct
 version bump, verify documentation is current, and handle multi-crate
 workspace release ordering.
 
-**Preferred invocation:** Delegate to the `release-manager` agent, which
-has this skill plus `docs-sync` and `technical-writing` preloaded.
+This is an interactive skill. Present each release decision (version bump,
+changelog entries, documentation gaps) for user approval before acting.
 
 ## Instructions
 

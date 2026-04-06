@@ -13,9 +13,11 @@ Apply the scientific method to debugging rather than thrashing with blind
 fixes. Reproduce the bug, form hypotheses, isolate the cause through
 systematic elimination, verify the fix, and confirm no regressions.
 
-**Preferred invocation:** Delegate to the `debugger` agent, which has this
-skill and `safety-checks` preloaded with persistent memory for tracking
-recurring failure patterns.
+This is an interactive skill. Present hypotheses one at a time, let the
+user guide investigation priority, and confirm fixes before moving on.
+
+For production incidents, start with `incident-response` for triage and
+mitigation before diving into root-cause debugging here.
 
 ## Instructions
 
@@ -70,6 +72,7 @@ likely:
 1. For each hypothesis, present:
    - The hypothesis and what you would observe if it is correct
    - The test you would run to check it
+   - Why you rank it here: "I think this is most likely because [evidence]"
    - Ask: **test this**, **skip to next**, or **reorder**
 2. Wait for the user's approval before running each test
 3. After each test, report the result and ask whether to continue:

@@ -32,6 +32,17 @@
         ]
       }
     ],
+    "TeammateIdle": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"additionalContext\": \"Before going idle, check the task list for pending unblocked tasks. If any exist, claim and start the next one.\"}'"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",

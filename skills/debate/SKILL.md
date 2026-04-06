@@ -16,10 +16,9 @@ Research shows multi-perspective analysis mitigates anchoring bias,
 confirmation bias, and groupthink while surfacing risks that
 single-perspective analysis misses.
 
-**Preferred invocation:** Delegate to the `debate-lead` agent, which has
-this skill and `technical-writing` preloaded with persistent memory.
-When agent teams are available, the agent spawns real teammates per
-perspective for genuine inter-agent debate.
+This is an interactive skill. Confirm framing and perspectives with the
+user before starting, then present debate findings and rulings one at a
+time for the user to accept, challenge, or override.
 
 ## Instructions
 

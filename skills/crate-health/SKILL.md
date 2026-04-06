@@ -14,6 +14,8 @@ Evaluate the health of a Rust workspace and produce a prioritized list of
 maintenance tasks. Covers compile time analysis, dependency graph health,
 feature flag audit, dead code detection, and test coverage assessment.
 
+For evaluating specific dependency candidates, see `dep-audit`.
+
 ## Instructions
 
 ### 1. Dependency graph analysis

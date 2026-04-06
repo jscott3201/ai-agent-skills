@@ -46,11 +46,33 @@ Present the scan results and confirm scope before generating:
 
 Wait for the user to confirm scope before generating any documentation.
 
-### 2. Generate documentation
+### 2. Generate documentation incrementally
 
-For each undocumented or incomplete public item, generate documentation
-following the language's convention (see the `technical-writing` skill's
-`docstring-conventions.md` for format details).
+Generate docs in batches of 5-10 items, grouped by module or logical area.
+For each batch:
+
+1. Write the doc comments for that batch
+2. Run verification (doc-tests, compilation) for the batch
+3. Present the batch to the user:
+
+> "Batch N: documented [items] in [module/area].
+> [Show a representative sample — 2-3 items, not all]
+>
+> Options:
+> 1. **Accept** — keep these, move to next batch
+> 2. **Adjust** — change the style or depth (explain what to change)
+> 3. **Review all** — show every item in this batch before accepting
+>
+> I recommend accepting. [N items remain.]"
+
+4. Wait for the user's decision before the next batch
+
+This catches style mismatches early. If the first batch's tone or depth
+is wrong, correct before generating 40 more items the same way.
+
+For each item, generate documentation following the language's convention
+(see the `technical-writing` skill's `docstring-conventions.md` for
+format details).
 
 **Rust documentation:**
 - `///` for items, `//!` for module-level
@@ -120,6 +142,6 @@ copy-pasteable and runnable.
 **Doc-tests are free tests.** In Rust, every code example in `///` blocks
 runs as a test. Use this to keep documentation accurate as code evolves.
 
-**Generate in batches.** For a crate with 50 undocumented items, generate
-docs in batches of 5-10, verify each batch compiles, then continue. This
-prevents a cascade of compilation errors from incorrect examples.
+**Batching prevents cascading errors.** Verifying after each batch of
+5-10 items catches compilation errors and style mismatches before they
+multiply across the remaining items.

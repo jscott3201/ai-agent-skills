@@ -127,7 +127,39 @@ or usage patterns for a specific library or framework.
 This mode does not need a formal template. Output directly in the
 conversation or save to a file if the user requests.
 
-### 3. Save and report
+### 3. Checkpoint before synthesis (modes 1-3)
+
+After gathering sources and before producing the full document, present
+an outline to the user:
+
+> "Research gathered. Here's what I found and what I plan to write:
+>
+> **Sources:** N sources consulted ([list key ones])
+> **Key findings so far:**
+> 1. [Most important finding]
+> 2. [Second finding]
+> 3. [Third finding]
+>
+> **Proposed document structure:**
+> - [Section 1 — what it covers]
+> - [Section 2 — what it covers]
+> - [...]
+>
+> **My recommendation:** [brief summary of where the research points]
+>
+> Options:
+> 1. **Proceed** — produce the full document with this structure
+> 2. **Adjust** — change focus, add/remove sections, investigate more
+> 3. **Enough** — the findings above answer my question, skip the document
+>
+> Which direction?"
+
+Wait for the user's decision. This prevents spending effort synthesizing
+a document that misses what the user actually needed.
+
+Skip this checkpoint for mode 4 (doc lookup), which is quick-turnaround.
+
+### 4. Save and report
 
 For modes 1-3, save the findings document to `_agentskills/research/`.
 Name the file with the date and topic: `YYYY-MM-DD-<topic>-research.md`.

@@ -25,14 +25,37 @@ Before dispatching an implementation subagent, check the project's CLAUDE.md
 for any restrictions on agent usage. Some projects forbid implementation
 subagents entirely (research/review only). Respect those rules.
 
+### Classify task complexity before dispatch
+
+Before writing the subagent prompt, classify the task to set appropriate
+effort and model parameters on the Agent tool:
+
+| Complexity | Effort | Model | Examples |
+|:--|:--|:--|:--|
+| **Simple** | low | haiku | Formatting, linting, single-file mechanical changes, file moves/renames, import updates, scaffolding from templates |
+| **Standard** | default | inherit | Feature implementation within existing patterns, test generation, documentation, bug fixes with known root cause |
+| **Complex** | high | opus | Cross-module changes, race conditions, security-sensitive code (auth, crypto, validation), performance optimization, unexpected behavior spanning multiple components |
+
+Default to standard. Only escalate to complex when the task involves
+ambiguity, multi-component interaction, or security implications. Only
+drop to simple for purely mechanical work with no judgment calls.
+
+**Factor in error cost, not just complexity.** A simple classification task
+that gates a critical decision should use a stronger model than a complex
+but low-stakes generation task.
+
 ### Sequential dispatch only
 
 Dispatch one implementation subagent at a time. Never run multiple
 implementation agents in parallel.
 
-**Why:** Parallel implementation agents modify overlapping files, creating
-merge conflicts and inconsistent state. Sequential dispatch with review
-between tasks avoids this entirely.
+**Why:** Multi-agent error amplification is 17x in unstructured topologies,
+not linear (NeurIPS 2025). Parallel implementation agents modify overlapping
+files, creating merge conflicts and inconsistent state. Sequential dispatch
+with review between tasks catches errors before they cascade.
+
+**Constraint:** Subagents cannot spawn other subagents. Chain tasks from
+the main conversation or use agent teams for parallel work.
 
 ### Review between tasks
 
@@ -81,6 +104,31 @@ Each subagent task must include all context needed for independent execution:
 A subagent starts with zero context about prior tasks. Everything it needs
 must be in its prompt.
 
+### Budget controls
+
+Set `maxTurns` on every implementation subagent to prevent unbounded
+token burn. Guidelines:
+
+- **Simple tasks:** 15-25 turns
+- **Standard tasks:** 30-50 turns
+- **Complex tasks:** 50-80 turns
+
+If a subagent hits its turn limit without completing, do not retry it
+with the same prompt. Instead, spawn a fresh replacement with additional
+context about what the previous attempt accomplished and where it stalled.
+A new agent gets a clean context window without error accumulation.
+
+### Use worktree isolation for risky changes
+
+Set `isolation: worktree` on the Agent tool when:
+- The task modifies core infrastructure files
+- You want free rollback (delete the worktree to discard changes)
+- Multiple subagents need to work on the same repo without conflicts
+
+Worktrees create a temporary git branch with a full checkout. If the
+subagent makes no changes, the worktree is auto-cleaned. Be mindful of
+disk usage on large repos.
+
 ## Consider agent teams for parallel work
 
 If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is available (check settings or
@@ -103,10 +151,22 @@ See the `team-coordination` skill for team patterns and guidance.
 
 ## Guidance
 
-The sequential-with-review pattern is slower than parallel dispatch but
-produces consistently correct results. The time saved by parallel execution
-is lost to conflict resolution and debugging inconsistencies.
+**Review between tasks is not optional ceremony.** Automated failure
+attribution is only 53.5% accurate (NeurIPS 2025). You cannot rely on
+detecting which agent failed after the fact. Catching errors between tasks
+is cheaper than debugging cascading failures.
 
-Formatting is the most commonly skipped step in subagent work. If the project
-has a non-default formatter config (like a `rustfmt.toml` with stricter rules),
+**Prefer the main conversation.** Before dispatching a subagent, ask
+whether the primary agent could do the work directly. Subagents are best
+for: isolating verbose output (test runs, log processing), preserving
+main context (large codebase exploration), and parallel read-only review.
+If the task involves decisions the user should weigh in on, keep it in
+the main conversation.
+
+**Formatting is the most commonly skipped step.** If the project has a
+non-default formatter config (like a `rustfmt.toml` with stricter rules),
 mention it explicitly in the subagent prompt.
+
+**Spawn replacements, don't retry.** When a subagent fails or stalls,
+a fresh agent with additional context outperforms asking the stuck agent
+to recover. Context reset prevents hallucination accumulation.

@@ -33,7 +33,9 @@ Follow the test-strategy skill's methodology exactly.
 6. Present the test plan to the user. Summarize: N tests across M
    functions, covering which categories. Ask: proceed with all, adjust
    the plan, or focus on a subset. Wait for approval before writing code.
-7. Write complete, runnable test code for approved tests
+7. Generate tests incrementally per the skill's step 5: one function
+   group at a time, present each group for accept/adjust/skip, run tests
+   after each accepted group
 8. Suggest property-based tests where applicable
 
 ## Context management
@@ -70,3 +72,6 @@ After completing test generation, save:
 - Write tests that test behavior, not implementation details
 - Each test should have a clear, descriptive name
 - Do not commit files in `_agentskills/` unless asked
+- Plan before reaching for tools: reason about what files you need, then
+  batch parallel reads. Avoid re-reading files already in context and
+  grep-read-grep-read loops. Fewer, targeted tool calls over many scattered ones.

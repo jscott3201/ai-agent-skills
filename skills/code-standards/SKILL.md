@@ -61,13 +61,27 @@ When invoked with `$ARGUMENTS`:
 2. Detect the primary language
 3. Load the relevant language standards file
 4. Check every item in the standards against the target code
-5. Report findings grouped by category:
-   - **Naming**: convention violations, stuttering, misleading names
-   - **Complexity**: functions/classes exceeding thresholds
-   - **Structure**: anti-patterns, coupling, missing abstractions
-   - **Idioms**: non-idiomatic patterns with idiomatic alternatives
-   - **Linting**: missing or misconfigured lint rules
-6. For each finding: file, line, category, what to change, why
+5. Triage findings with the user **one at a time**, starting with the
+   highest-severity issues. For each finding:
+
+   > **[Category]:** [brief description]
+   > `file:line` — [what the code does now]
+   >
+   > **Suggested fix:** [what to change and why]
+   >
+   > Options:
+   > 1. **Fix** — apply the change now
+   > 2. **Skip** — not worth changing
+   > 3. **Defer** — track for later
+   >
+   > I recommend [option] because [reason].
+
+   Wait for the user's decision before presenting the next finding.
+   Apply accepted fixes immediately so subsequent findings reflect the
+   current state of the code.
+
+6. After all findings are triaged, summarize: N fixed, N skipped,
+   N deferred
 
 ## Complexity thresholds
 

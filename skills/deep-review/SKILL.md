@@ -22,13 +22,17 @@ system-level impact.
 
 ### Phase 1: Research
 
-Delegate to the `deep-reviewer` agent using the Agent tool. This agent has
-the deep-review methodology preloaded in its system prompt and uses read-only
-tools to keep the main conversation context clean.
+If `$ARGUMENTS` was provided, use it to focus the review scope. Otherwise,
+identify scope from recent commits or ask the user.
 
-If `$ARGUMENTS` was provided, include it in the delegation prompt to focus
-the review scope. Otherwise, identify scope from recent commits or ask the
-user.
+**For large scope** (10+ files, full feature, or multi-module changes):
+delegate to the `deep-reviewer` agent using the Agent tool. This keeps
+heavy scanning out of the main context. Include the scope and review
+navigation order below in the delegation prompt.
+
+**For focused scope** (a few files, single module, or targeted review):
+perform the analysis directly in the main conversation. Delegation adds
+overhead without context benefit for small scopes.
 
 #### Review navigation order
 
@@ -129,7 +133,8 @@ For every changed or added component, check each category. See
 
 ### Phase 2: Report
 
-When the Explore subagent returns, structure the report:
+When the analysis is complete (whether delegated or direct), structure
+the report:
 
 #### Finding format
 

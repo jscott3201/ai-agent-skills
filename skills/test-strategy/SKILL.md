@@ -13,8 +13,9 @@ Analyze code and produce a comprehensive test plan: what to test, which
 test types to use, and concrete test code. Includes coverage gap analysis
 for existing tests and property-based testing strategies.
 
-**Preferred invocation:** Delegate to the `test-engineer` agent, which has
-this skill and `technical-writing` preloaded with persistent memory.
+This is an interactive skill. Present the test plan for approval, then
+generate tests incrementally per function group with user review at each
+step.
 
 ## Instructions
 
@@ -41,6 +42,9 @@ For each function/behavior, determine which test categories apply:
 | **Concurrency** | Thread safety, race conditions | For shared mutable state |
 | **Property-based** | Invariants hold for random inputs | For pure functions, codecs, parsers |
 | **Integration** | Components work together correctly | For cross-module interactions |
+| **Visual regression** | UI renders correctly after changes | For components with visual output |
+| **Component** | UI components in isolation | For React/Vue/Svelte components |
+| **Accessibility** | WCAG compliance, screen reader support | For user-facing UI |
 
 ### 3. Apply boundary value analysis
 
@@ -88,10 +92,35 @@ Present the test plan to the user before writing any test code:
 
 Wait for the user's decision before generating test code.
 
-### 5. Generate test code
+### 5. Generate test code incrementally
 
-Write complete, runnable test code. Follow the project's existing test
-patterns (check how existing tests are structured before writing new ones).
+Generate tests one function or behavior group at a time. Do not batch
+generate all tests at once.
+
+For each group in the approved plan:
+
+1. Write the tests for that function/behavior
+2. Present the generated tests to the user:
+
+> "[Function name]: N tests covering [categories].
+> [Show the test code]
+>
+> Options:
+> 1. **Accept** - keep these tests, move to next group
+> 2. **Adjust** - modify approach for this group (explain what to change)
+> 3. **Skip** - drop this group, move to next
+>
+> I recommend accepting. [Brief rationale if relevant.]"
+
+3. Wait for user decision before generating the next group
+4. Run each accepted group immediately to verify it passes
+
+This incremental approach catches mismatches early. If the first group's
+style or approach is wrong, the user corrects before N more groups are
+generated the same way.
+
+Follow the project's existing test patterns (check how existing tests are
+structured before writing new ones).
 
 **Rust test structure:**
 ```rust
@@ -222,6 +251,97 @@ without failing any test. No setup or nightly compiler needed.
 
 Run on changed files incrementally in CI, not on the full codebase.
 Focus on functions with complex logic, not getters or simple wrappers.
+
+### 9. Visual and UI testing (frontend)
+
+Apply these categories when the target includes user-facing UI. Skip
+this section for backend-only code.
+
+#### Visual regression testing
+
+Capture screenshots and compare against baselines to catch unintended
+visual changes.
+
+**Playwright screenshot comparison:**
+```typescript
+test('dashboard renders correctly', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expect(page).toHaveScreenshot('dashboard.png', {
+    maxDiffPixelRatio: 0.01,
+  });
+});
+```
+
+**When to use:** after CSS changes, component library upgrades, layout
+refactors, or responsive design work. Not useful for logic-only changes.
+
+**Update baselines deliberately:** failing visual tests mean either a bug
+or an intentional change. Review the diff, then update the baseline with
+`--update-snapshots` if the change is correct.
+
+#### Component testing
+
+Test UI components in isolation with realistic props and user interaction.
+
+**React Testing Library:**
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+
+test('search filters results on input', async () => {
+  render(<SearchPanel items={mockItems} />);
+  await fireEvent.change(screen.getByRole('searchbox'), {
+    target: { value: 'query' },
+  });
+  expect(screen.getAllByRole('listitem')).toHaveLength(2);
+});
+```
+
+**Storybook + interaction tests:**
+```typescript
+export const WithError: Story = {
+  args: { error: 'Invalid input' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('alert')).toBeVisible();
+  },
+};
+```
+
+**When to use:** for components with conditional rendering, user
+interaction, or complex state. Not needed for pure display components
+with no logic.
+
+#### Accessibility testing
+
+Automated WCAG compliance checks catch common issues (missing labels,
+insufficient contrast, keyboard traps). They do not replace manual
+testing but catch the low-hanging fruit.
+
+**Playwright + axe-core:**
+```typescript
+import AxeBuilder from '@axe-core/playwright';
+
+test('login page has no a11y violations', async ({ page }) => {
+  await page.goto('/login');
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+```
+
+**Jest + jest-axe:**
+```typescript
+import { axe, toHaveNoViolations } from 'jest-axe';
+expect.extend(toHaveNoViolations);
+
+test('form is accessible', async () => {
+  const { container } = render(<LoginForm />);
+  expect(await axe(container)).toHaveNoViolations();
+});
+```
+
+**When to use:** for all user-facing pages and interactive components.
+Run in CI on every PR that touches frontend code. Focus on: forms,
+navigation, modals/dialogs, and dynamic content.
 
 ## Guidance
 

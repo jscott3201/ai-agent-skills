@@ -1,7 +1,7 @@
 # justin-tools
 
 A Claude Code plugin providing a complete development lifecycle toolkit:
-30 skills, 10 agents, and 6 hooks covering research, design, implementation,
+34 skills, 9 agents, and 7 hooks covering research, design, implementation,
 testing, review, debugging, release, and team coordination.
 
 **Languages:** Rust, Python, JavaScript/TypeScript
@@ -35,6 +35,7 @@ Then run `/reload-plugins` in your session.
 | `research` | `/justin-tools:research [topic]` | Technical deep-dives, competitive analysis, doc lookup (4 modes) |
 | `debate` | `/justin-tools:debate [question]` | Multi-perspective analysis with scoring and rulings |
 | `plan-verify` | Auto or manual | Verify plan claims against the actual codebase |
+| `requirements-trace` | `/justin-tools:requirements-trace [plan]` | Post-implementation trace: requirements to code to tests |
 
 ### Implementation
 
@@ -56,6 +57,8 @@ Then run `/reload-plugins` in your session.
 | `dep-audit` | Auto or manual | Dependency health, license compatibility, supply chain signals |
 | `rust-ci-check` | `/justin-tools:rust-ci-check` | Full Rust CI: fmt, clippy, test, deny |
 | `sequential-bench` | Auto or manual | Sequential benchmarks with regression detection |
+| `env-audit` | `/justin-tools:env-audit [scope]` | Audit env var usage against config files, find mismatches |
+| `migration-safety` | `/justin-tools:migration-safety [file]` | Database migration risk analysis and rollback planning |
 
 ### Operations
 
@@ -65,6 +68,7 @@ Then run `/reload-plugins` in your session.
 | `perf-profile` | `/justin-tools:perf-profile [target]` | Performance investigation with instrumentation guidance |
 | `incident-response` | `/justin-tools:incident-response [issue]` | Production triage, mitigation, postmortem |
 | `crate-health` | `/justin-tools:crate-health` | Rust workspace health dashboard |
+| `ci-pipeline` | `/justin-tools:ci-pipeline [mode]` | Generate, audit, and diagnose CI/CD pipelines |
 | `project-onboard` | `/justin-tools:project-onboard` | Guided project setup for justin-tools |
 
 ### Release and Documentation
@@ -96,7 +100,6 @@ memory. They accumulate knowledge across sessions.
 
 | Agent | Skills Preloaded | Tools | Purpose |
 |:--|:--|:--|:--|
-| `feature-architect` | feature-design, plan-verify, technical-writing | Full | Feature design and planning |
 | `researcher` | research, technical-writing | Full | Technical deep-dives and doc lookup |
 | `debate-lead` | debate, technical-writing | Full | Multi-perspective decision evaluation |
 | `code-analyzer` | modularize, code-standards | Reports-only | Codebase structure and complexity analysis |
@@ -119,6 +122,7 @@ based on the task.
 | PreToolUse | Block `git checkout --` | Discards uncommitted changes |
 | PreToolUse | Block `git clean -f` | Removes untracked files permanently |
 | PreToolUse | Block `rm -rf` | Requires targeted rm or user consent |
+| TeammateIdle | Task check | Reminds idle teammates to check for pending tasks |
 | Notification | Desktop alert | macOS notification when Claude needs input |
 
 ## Output Directory
@@ -146,13 +150,7 @@ When using justin-tools on an existing project for the first time:
 /justin-tools:project-onboard
 ```
 
-Or delegate to the onboarding agent:
-
-```
-@onboarder set up this project for justin-tools
-```
-
-The onboarder will:
+The skill will guide you through setup interactively:
 1. Explore the project (languages, build system, conventions, CI)
 2. Assess what is already in place
 3. Walk through gaps one step at a time (gitignore, CLAUDE.md, etc.)

@@ -131,7 +131,6 @@ These skills auto-trigger without invocation:
 
 Agents are invoked with `@agent-name` or Claude delegates automatically:
 
-- `@feature-architect` - feature design sessions
 - `@researcher` - technical research
 - `@debate-lead` - structured debates
 - `@deep-reviewer` - post-phase code review
@@ -159,7 +158,7 @@ committed unless you explicitly ask.
 
 ## Next Steps
 
-- [Skills Reference](skills-reference.md) - detailed documentation for all 30 skills
-- [Agents Reference](agents-reference.md) - detailed documentation for all 10 agents
-- [Hooks Reference](hooks-reference.md) - detailed documentation for all 8 hooks
+- [Skills Reference](skills-reference.md) - detailed documentation for all 34 skills
+- [Agents Reference](agents-reference.md) - detailed documentation for all 9 agents
+- [Hooks Reference](hooks-reference.md) - detailed documentation for all 7 hooks
 - [CLAUDE.md](../CLAUDE.md) - development conventions for this plugin
