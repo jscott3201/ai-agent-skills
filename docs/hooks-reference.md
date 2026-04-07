@@ -1,6 +1,6 @@
 # Hooks Reference
 
-Complete reference for all 7 hooks in the justin-tools plugin.
+Complete reference for all 8 hooks in the justin-tools plugin.
 
 ## How Hooks Work
 
@@ -62,6 +62,26 @@ work.
 
 Prevents recursive forced deletion. Claude should use specific file
 removal or ask for confirmation.
+
+### SessionStart Hook (1)
+
+#### Skill routing table
+
+**Matcher:** none (fires on every session start)
+**Type:** command (additionalContext injection)
+**Behavior:** injects compact skill routing table
+
+Runs `session-start.sh` at the beginning of every session to inject a
+compact task-to-skill routing table. This helps the agent recommend manual
+skills proactively when it sees the user working on a matching task.
+
+The output is a one-line-per-category summary of all 35 skills grouped by
+workflow phase (planning, building, testing, debugging, reviewing, releasing,
+maintenance). Skills marked (auto) are noted so the agent knows not to
+invoke them explicitly.
+
+Points to `/justin-tools:skill-guide` for detailed routing when the compact
+table isn't sufficient.
 
 ### TeammateIdle Hook (1)
 

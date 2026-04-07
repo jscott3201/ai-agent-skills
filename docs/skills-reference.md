@@ -1,8 +1,24 @@
 # Skills Reference
 
-Complete reference for all 34 skills in the justin-tools plugin.
+Complete reference for all 35 skills in the justin-tools plugin.
 
 ## Skill Categories
+
+### Discovery (1 skill)
+
+#### skill-guide
+
+**Invocation:** Auto (model-invocable)
+
+Find the right skill for a task. Routes by workflow phase: planning,
+building, testing, debugging, reviewing, releasing, and maintenance.
+Includes disambiguation for similar skills and agent recommendations.
+
+Injected as a compact routing table at session start via the SessionStart
+hook. The full skill provides detailed routing tables and a "choosing
+between similar skills" guide.
+
+---
 
 ### Onboarding (1 skill)
 
