@@ -94,6 +94,7 @@ codebase to understand conventions and generate a CLAUDE.md that captures:
 - Important patterns and decisions
 - Any restrictions or preferences
 
+Use [claude-md-template.md](claude-md-template.md) as a starting structure.
 Present the draft for review. Do not write without approval.
 
 If CLAUDE.md already exists, scan for gaps:

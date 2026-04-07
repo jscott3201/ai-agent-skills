@@ -181,6 +181,11 @@ cost of introducing a subtle behavioral change during refactoring.
 compilable, test-passing state. If a step cannot be made small enough,
 the refactoring plan needs to be decomposed further.
 
+**Chesterton's Fence.** Before removing or rewriting code, understand why
+it was written that way. Code that looks unnecessary may be handling an
+edge case, working around a dependency bug, or satisfying a requirement
+that isn't obvious. Characterization tests help reveal these hidden reasons.
+
 **One smell at a time.** Resist the urge to fix everything at once.
 Fix the identified smell, commit, and then decide if another pass is
 needed.

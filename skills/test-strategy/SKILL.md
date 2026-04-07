@@ -388,6 +388,11 @@ cases. Property tests discover unknown ones. Use both.
 can have 60% branch coverage. Mutation testing reveals whether tests
 actually detect changes to behavior.
 
+**The Beyonce Rule.** If you liked it, you should have put a test on it.
+Any behavior worth relying on is worth testing. If a behavior isn't
+tested, it will eventually be broken by someone who doesn't know it
+matters.
+
 **Follow existing test patterns.** Read how the project structures its
 tests (inline `#[cfg(test)]` vs separate files, fixtures, helpers) and
 match the convention.

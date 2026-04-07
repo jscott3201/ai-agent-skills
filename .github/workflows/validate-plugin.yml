@@ -1,0 +1,96 @@
+name: Validate Plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check SKILL.md line limits
+        run: |
+          failed=0
+          for f in skills/*/SKILL.md; do
+            lines=$(wc -l < "$f")
+            if [ "$lines" -gt 500 ]; then
+              echo "FAIL: $f has $lines lines (max 500)"
+              failed=1
+            fi
+          done
+          if [ "$failed" -eq 1 ]; then exit 1; fi
+          echo "All SKILL.md files under 500 lines"
+
+      - name: Check required frontmatter fields
+        run: |
+          failed=0
+          for f in skills/*/SKILL.md; do
+            skill=$(basename "$(dirname "$f")")
+            if [ "$skill" = "_template" ]; then continue; fi
+            if ! head -20 "$f" | grep -q "^name:"; then
+              echo "FAIL: $f missing 'name' in frontmatter"
+              failed=1
+            fi
+            if ! head -20 "$f" | grep -q "description:"; then
+              echo "FAIL: $f missing 'description' in frontmatter"
+              failed=1
+            fi
+          done
+          if [ "$failed" -eq 1 ]; then exit 1; fi
+          echo "All skills have required frontmatter"
+
+      - name: Check no context fork usage
+        run: |
+          if grep -rn "context:.*fork" skills/*/SKILL.md; then
+            echo "FAIL: context: fork found (use custom agents instead)"
+            exit 1
+          fi
+          echo "No context: fork usage found"
+
+      - name: Check supporting file references
+        run: |
+          failed=0
+          for dir in skills/*/; do
+            skill=$(basename "$dir")
+            if [ "$skill" = "_template" ]; then continue; fi
+            for f in "$dir"*.md; do
+              base=$(basename "$f")
+              if [ "$base" = "SKILL.md" ]; then continue; fi
+              if ! grep -q "$base" "$dir/SKILL.md"; then
+                echo "FAIL: $dir$base not referenced from SKILL.md"
+                failed=1
+              fi
+            done
+          done
+          if [ "$failed" -eq 1 ]; then exit 1; fi
+          echo "All supporting files referenced from SKILL.md"
+
+      - name: Validate hooks.json
+        run: |
+          python3 -c "import json; json.load(open('hooks/hooks.json')); print('hooks.json is valid JSON')"
+
+      - name: Validate plugin.json
+        run: |
+          python3 -c "
+          import json
+          p = json.load(open('.claude-plugin/plugin.json'))
+          for field in ['name', 'description', 'version']:
+              assert field in p, f'Missing required field: {field}'
+          print(f'Plugin: {p[\"name\"]} v{p[\"version\"]}')
+          "
+
+      - name: Summary
+        run: |
+          echo "Skills: $(ls -d skills/*/ | grep -v _template | wc -l)"
+          echo "Agents: $(ls agents/*.md 2>/dev/null | wc -l)"
+          echo "Hooks: $(python3 -c "
+          import json
+          h = json.load(open('hooks/hooks.json'))
+          count = sum(len(m['hooks']) for ms in h['hooks'].values() for m in ms)
+          print(count)
+          ")"
+          echo "Version: $(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")"

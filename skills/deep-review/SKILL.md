@@ -237,6 +237,11 @@ a complete feature. Check that all pieces are actually wired together, that
 cross-module patterns are consistent, and that documentation reflects what
 was built (not what was planned).
 
+**Chesterton's Fence applies to reviews.** Before flagging code for
+removal or simplification, verify you understand why it exists. What
+looks like dead code may be handling a rare edge case, a rollback path,
+or a dependency workaround. Check git blame if the purpose is unclear.
+
 **Navigate before scanning.** Understanding intent and reviewing main files
 first catches design-level issues before you spend tokens on detail checks.
 If the architecture is wrong, flag it immediately.

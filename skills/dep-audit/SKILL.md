@@ -196,6 +196,11 @@ report and ask: "Adopt, reject, or investigate alternatives?"
 **Transitive dependencies are invisible risk.** 70% of critical security debt
 originates from third-party code. Run the dependency tree before adopting.
 
+**The Lindy Effect.** A dependency that has existed for 10 years is more
+likely to exist for another 10 than one released last year. Weight age
+and stability heavily when choosing between alternatives. New is not
+better — proven is better.
+
 **Corporate backing matters for longevity.** Corporate-backed libraries have
 3x the survival rate over 5 years. Weight maintainer stability heavily for
 dependencies you will use long-term.

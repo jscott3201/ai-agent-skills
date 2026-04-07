@@ -146,6 +146,12 @@ For simple renames and signature changes, offer:
 migrate on their schedule rather than being forced by a major version bump.
 Only skip deprecation when the change is a fundamental restructure.
 
+**Hyrum's Law.** With a sufficient number of users, every observable
+behavior of your API will be depended upon by someone — including
+behaviors you consider bugs or implementation details. This means even
+"safe" changes (reordering fields, changing error messages, adjusting
+timing) can break downstream consumers.
+
 **Semantic changes are the hardest to migrate.** A renamed function is
 easy to find-and-replace. A function that returns the same type but with
 different behavior requires careful review of every call site. Flag
