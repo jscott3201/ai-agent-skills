@@ -187,8 +187,8 @@ Suggest concrete next steps based on the project's state:
 
 ## Guidance
 
-**One step at a time.** Never present the full list of 27 skills and
-8 agents. Introduce only what is relevant to this project. More can be
+**One step at a time.** Never present the full list of 35 skills and
+9 agents. Introduce only what is relevant to this project. More can be
 introduced as the user explores.
 
 **Ask before changing.** Every modification (gitignore, CLAUDE.md, settings)

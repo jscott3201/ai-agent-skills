@@ -9,7 +9,7 @@ description: >
 ## Purpose
 
 Help discover and select the right skill for the current task. This plugin
-has 34 skills — this guide routes by what you're trying to accomplish.
+has 35 skills — this guide routes by what you're trying to accomplish.
 
 Skills marked **(auto)** trigger automatically from their descriptions.
 Skills marked **(manual)** require `/justin-tools:<name>` to invoke.

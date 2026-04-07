@@ -1,7 +1,7 @@
 # justin-tools
 
 A Claude Code plugin providing a complete development lifecycle toolkit:
-34 skills, 9 agents, and 7 hooks covering research, design, implementation,
+35 skills, 9 agents, and 8 hooks covering research, design, implementation,
 testing, review, debugging, release, and team coordination.
 
 **Languages:** Rust, Python, JavaScript/TypeScript

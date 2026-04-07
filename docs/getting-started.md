@@ -158,7 +158,7 @@ committed unless you explicitly ask.
 
 ## Next Steps
 
-- [Skills Reference](skills-reference.md) - detailed documentation for all 34 skills
+- [Skills Reference](skills-reference.md) - detailed documentation for all 35 skills
 - [Agents Reference](agents-reference.md) - detailed documentation for all 9 agents
-- [Hooks Reference](hooks-reference.md) - detailed documentation for all 7 hooks
+- [Hooks Reference](hooks-reference.md) - detailed documentation for all 8 hooks
 - [CLAUDE.md](../CLAUDE.md) - development conventions for this plugin
