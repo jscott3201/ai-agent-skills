@@ -131,6 +131,15 @@ Present a summary: the decision, key arguments, and the ruling.
 
 - [debate-output-template.md](debate-output-template.md) - output format for debate findings
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Single perspective is enough" | One perspective finds one answer. You need three to find the right one. |
+| "Skip exchange rounds, arguments are clear" | Arguments that seem clear haven't been challenged. Exchange reveals weaknesses. |
+| "Force consensus, disagreements confuse" | Residual disagreements are signals, not noise. Report them honestly. |
+| "Raw findings sufficient, skip synthesis" | Synthesis distills actionable recommendations. Findings without synthesis are just data. |
+
 ## Guidance
 
 **3-5 perspectives, 3 rounds.** Research consistently shows this is the

@@ -189,6 +189,16 @@ Work through approved fixes in the main context:
 3. After all approved fixes are applied, do a final scan to confirm no
    remaining issues from the approved set
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Good test coverage means structural issues are unlikely" | Tests verify behavior, not architecture. Cross-module consistency, concurrency, and resource lifecycle hide behind passing tests. |
+| "API changes are caught by tests, skip consumer tracing" | Tests cover known consumers. Forgotten or external callers break silently. |
+| "Small change, boundary/concurrency checks not relevant" | Small changes cause big outages. Size ≠ risk. |
+| "I'll batch findings for efficiency" | Batching overwhelms. One finding at a time lets the user make informed decisions. |
+| "Documentation is outdated anyway, skip alignment check" | That's exactly why it needs checking. Stale docs mislead the next person. |
+
 ## Supporting files
 
 - [review-patterns.md](review-patterns.md) - detailed patterns and examples for each review category

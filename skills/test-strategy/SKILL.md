@@ -343,6 +343,15 @@ test('form is accessible', async () => {
 Run in CI on every PR that touches frontend code. Focus on: forms,
 navigation, modals/dialogs, and dynamic content.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "First group passed, I can batch the rest" | Pattern match ≠ correctness. Each group tests different logic; incremental review catches mismatches early. |
+| "Boundary value analysis is exhaustive — just test critical cases" | Boundaries are where bugs cluster. Skipping min/max/off-by-one misses the defects unit tests exist to catch. |
+| "Property-based testing is for math, not domain logic" | Property tests find the edge cases you didn't think to write. Domain logic has invariants too. |
+| "Existing tests cover happy path, focus on errors only" | Happy-path tests may assert the wrong thing. Verify what exists before extending. |
+
 ## Guidance
 
 **Test behavior, not implementation.** Tests that verify public behavior

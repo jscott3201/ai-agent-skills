@@ -84,6 +84,16 @@ needs explicit approval.
 Work directly on main unless the user specifies a branch. If the user says
 to create a branch, do so and work there.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Small change, CI verification unnecessary" | Small changes cause big outages. A 1-line typo can break the build. |
+| "Batch related features into one commit" | Atomic commits are revertible. Batched commits force all-or-nothing rollbacks. |
+| "Reviewed carefully, skip tests" | You catch logic errors. Tests catch integration, regression, and edge-case errors you didn't consider. |
+| "User asked to commit, probably wants a push too" | Commit is local and reversible. Push is shared and permanent. Never conflate the two. |
+| "Just docs, skip the full suite" | Doc changes can break doc-tests, links, and build steps. Run the suite. |
+
 ## Guidance
 
 The commit-at-milestones rule serves two purposes: it creates clean rollback

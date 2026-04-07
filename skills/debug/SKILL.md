@@ -186,6 +186,16 @@ Concurrency bugs require special techniques:
 - Check lock ordering across all code paths
 - Inject random delays at synchronization points to explore interleavings
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Error is clear, I can fix without reproducing" | You're fixing your mental model, not the bug. Reproduction confirms you understand the actual failure. |
+| "Obvious bug, no need for hypotheses" | Obvious bugs have obvious fixes that mask the real cause. Form hypotheses to avoid confirmation bias. |
+| "Found one cause, implement and move on" | First hypothesis, not confirmed hypothesis. Test it before committing to a fix. |
+| "Git history shows when it changed, skip bisect" | History shows what changed, not which change caused the bug. Bisect isolates the exact commit. |
+| "Fix works, don't need 5 Whys depth" | Symptoms recur. Stopping at the proximate cause means fixing the same class of bug next month. |
+
 ## Guidance
 
 **Reproduce first.** If you cannot trigger the bug, you cannot verify a fix.

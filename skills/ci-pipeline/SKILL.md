@@ -265,6 +265,15 @@ If the user pastes log output, work from that directly.
 
 Wait for decision.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Caching is optional complexity" | Uncached CI wastes developer time on every push. One `uses:` line saves minutes per run. |
+| "Default features sufficient for CI" | Feature-gated code that isn't tested in CI breaks silently in production. Test all features. |
+| "@v4 is good enough for action versions" | Unpinned actions are a supply chain attack vector. Pin to SHA for production pipelines. |
+| "Small project doesn't need concurrency control" | Concurrent CI on the same branch produces race conditions regardless of project size. |
+
 ## Guidance
 
 **Cache aggressively.** Dependency caching alone cuts most Rust builds

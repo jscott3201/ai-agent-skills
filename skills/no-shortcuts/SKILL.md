@@ -87,6 +87,16 @@ If the change cascades further than expected or breaks something:
 - If not, use `git stash` or `git diff > patch.diff` to save progress
 - Report what happened and get guidance before continuing
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Handle the important sites now, fix the rest later" | Later never comes. Partial implementations leave traps for the next developer. |
+| "Wildcard arm quiets the compiler" | Wildcards hide new variants. The compiler warning is telling you something; silencing it creates silent bugs. |
+| "These sites are internal/private, skip them" | Internal code still executes. A missed call site is a bug regardless of visibility. |
+| "Grep will find all occurrences" | Grep finds strings, not semantics. The compiler/type checker finds actual usage — use it. |
+| "Add a TODO and defer remaining sites" | A TODO is a promise with no enforcement. Fix it now or accept the tech debt consciously with the user. |
+
 ## Guidance
 
 The most common shortcuts are: handling 3 of 5 enum variants and using a

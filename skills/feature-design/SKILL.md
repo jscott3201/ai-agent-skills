@@ -224,6 +224,16 @@ After the user approves:
 - [research-template.md](research-template.md) - formal research/design document format for Stage 3
 - [plan-template.md](plan-template.md) - implementation plan structure for Stage 4
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Combine exploration and design to move faster" | Exploration informs design. Skipping it means designing against assumptions, not facts. |
+| "Simple feature, skip formal design" | Complexity hides in integration. The design phase catches what "simple" missed. |
+| "User knows what they want, skip to planning" | Users know the goal, not the constraints. Exploration reveals what the codebase actually supports. |
+| "Pseudocode first, fill in exact code later" | Pseudocode hides the hard parts. Complete code forces confrontation with reality. |
+| "First review passes, skip iteration" | First reviews catch obvious issues. Second reviews catch subtle ones. |
+
 ## Guidance
 
 **Context first, questions second.** Read the codebase before asking the user

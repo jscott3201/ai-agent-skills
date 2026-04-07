@@ -133,6 +133,16 @@ Save to `_agentskills/reviews/YYYY-MM-DD-incident-<name>.md`:
 | [Preventive action] | [Who] | [When] |
 ```
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Issue fixed, skip postmortem" | Postmortems prevent recurrence. Fixes address symptoms. |
+| "Recent changes aren't suspicious" | Recent changes are statistically the most common cause. Start there. |
+| "Timeline takes too long to write" | Timelines written while fresh take minutes. Timelines reconstructed later take hours and miss details. |
+| "Root cause is obvious" | Obvious root causes are proximate causes. Keep asking why. |
+| "Mitigation is fast enough, skip formal analysis" | Speed now, recurrence later. Formal analysis breaks the cycle. |
+
 ## Guidance
 
 **Speed over thoroughness in triage.** The first 5 minutes of an incident

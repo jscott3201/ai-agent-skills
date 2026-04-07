@@ -144,6 +144,16 @@ After all steps are complete:
 than expected and introduce new bugs. Refactoring preserves working code
 and existing tests.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "I understand the code, skip characterization tests" | Understanding is not verification. Characterization tests catch the behaviors you didn't notice. |
+| "Multiple smells, fix them all in one pass" | Interleaved changes mask which refactoring broke what. One smell at a time keeps each step verifiable. |
+| "Straightforward change, skip the plan" | "Straightforward" is where overconfidence hides. A 2-minute plan catches cascading impacts. |
+| "Refactor while adding the feature to save time" | Mixed commits are unrevertable. If the feature is reverted, the refactoring goes with it. |
+| "Cleaner code, skip full test suite rerun" | Cleaner ≠ correct. Refactoring changes structure; tests verify behavior survived. |
+
 ## Guidance
 
 **Never refactor without tests.** If tests do not exist, write

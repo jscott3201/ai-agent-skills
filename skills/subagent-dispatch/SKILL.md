@@ -149,6 +149,16 @@ genuinely parallel work.
 
 See the `team-coordination` skill for team patterns and guidance.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Run tasks in parallel for speed" | Error amplification is 17x (NeurIPS 2025). Parallel agents multiply mistakes. Sequential with review catches them. |
+| "Skip review between tasks, they're independent" | Independence is assumed, not proven. Reviews catch unexpected interactions and scope drift. |
+| "Subagent can infer CI requirements" | Inference fails silently. Explicit CI verification in the prompt is one line that prevents broken commits. |
+| "Retry stalled agent instead of spawning fresh" | Stalled agents carry corrupted context. Fresh spawns start clean. |
+| "Formatting is optional, focus on logic" | Formatting is the most commonly skipped step and creates the most cleanup work. Include it. |
+
 ## Guidance
 
 **Review between tasks is not optional ceremony.** Automated failure

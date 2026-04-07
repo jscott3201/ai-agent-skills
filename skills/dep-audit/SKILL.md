@@ -165,6 +165,16 @@ report and ask: "Adopt, reject, or investigate alternatives?"
 - [ecosystem-audit.md](ecosystem-audit.md) - tools, thresholds, and commands per ecosystem
 - [license-compatibility.md](license-compatibility.md) - license contamination matrix and rules
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Skip build-vs-depend, it's already a candidate" | The best dependency is one you don't take. Answer the question before evaluating packages. |
+| "High downloads means it's safe" | Downloads measure popularity, not security. event-stream had millions of downloads when compromised. |
+| "Well-known package, skip maintenance check" | Maintainers burn out. A well-known package can go unmaintained overnight. Check current status. |
+| "MIT license, obviously compatible" | MIT is compatible with most, but dual licensing, patent clauses, and transitive copyleft can surprise you. |
+| "Just prototyping, full audit is overkill" | Prototype dependencies ship to production. Audit now or audit under pressure later. |
+
 ## Guidance
 
 **Total downloads are misleading.** A package with 10M all-time downloads but

@@ -96,6 +96,15 @@ When invoked with `$ARGUMENTS`:
 | Return statements | - | 6 | - |
 | Branches | - | 12 | - |
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Code works, style issues can wait" | Style debt compounds faster than feature debt. Inconsistent code slows every future change. |
+| "Almost at threshold, no need to refactor" | Thresholds exist because code just over them degrades fast. Respect the line. |
+| "Linter passed, standards are satisfied" | Linters check syntax. Standards check design, naming, and patterns that linters can't see. |
+| "Load all language files for completeness" | Irrelevant standards create noise and waste context. Load only what applies. |
+
 ## Guidance
 
 **Idiomatic code reads naturally to practitioners of that language.**

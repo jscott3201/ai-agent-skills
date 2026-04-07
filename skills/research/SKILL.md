@@ -175,6 +175,15 @@ Present a summary of key findings to the user after saving.
 - [multi-perspective-template.md](multi-perspective-template.md) - multi-perspective analysis output format
 - [landscape-template.md](landscape-template.md) - competitive/landscape analysis output format
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Skip checkpoint, proceed to synthesis" | Checkpoints catch wrong directions before you invest in synthesis. Minutes saved, hours wasted. |
+| "High-level findings are good enough" | Vague findings produce vague decisions. Every finding must be specific and cite sources. |
+| "Skip 'not recommended' section" | Knowing what to avoid is as valuable as knowing what to adopt. It prevents re-investigation. |
+| "Share findings in conversation, don't save" | Conversations disappear. Saved research persists for the team and future sessions. |
+
 ## Guidance
 
 **Every finding must be specific.** "X might be an issue" is not a finding.

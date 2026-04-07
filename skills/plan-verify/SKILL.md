@@ -132,6 +132,16 @@ Get alignment on the decision before any implementation begins.
 
 - [verification-checklist.md](verification-checklist.md) - complete mechanical verification checklist
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Plan was reviewed already, assume correct" | Plans decay the moment code changes. Verification catches drift that review cannot. |
+| "A few API references checked, that's enough" | Partial checking gives false confidence. One wrong signature wastes hours of implementation. |
+| "No obvious path errors, skip file checks" | Obvious errors are caught during planning. Verification catches the non-obvious ones — renamed files, moved modules. |
+| "Plan is 2 days old, skip staleness check" | Two days of active development can change dozens of files. Age alone doesn't predict staleness. |
+| "Inaccuracies can be fixed during implementation" | Fixing during implementation costs 10x more than fixing during verification. |
+
 ## Guidance
 
 **API signatures are the highest-value check.** Research shows naming and

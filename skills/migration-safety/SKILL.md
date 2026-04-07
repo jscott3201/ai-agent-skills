@@ -175,6 +175,16 @@ Save to `_agentskills/reviews/YYYY-MM-DD-migration-safety.md`:
 - [ ] Monitoring in place for lock duration and query errors
 ```
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Straightforward migration, skip classification" | "Straightforward" migrations that lock tables for 20 minutes aren't straightforward. Classify every operation. |
+| "Lock hazards only matter on large tables" | You're testing on dev data. Production tables are 1000x larger. Always analyze lock behavior. |
+| "Check up.sql, down.sql can come later" | Rollback plans written during an outage are written badly. Write them now. |
+| "Zero-downtime deployment handles compatibility" | Deployment handles mechanics. Schema compatibility is your responsibility. |
+| "DBA will test on production data" | Shifting responsibility is not risk mitigation. Test what you can test. |
+
 ## Guidance
 
 **Deploy schema changes separately from code changes.** A migration and

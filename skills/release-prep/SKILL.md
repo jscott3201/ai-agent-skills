@@ -174,6 +174,16 @@ tag, then push when ready."
 
 Do not push tags or publish. The user handles that.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Bump minor, changes are mostly features" | Skipping semver-checks misses breaking changes hidden in refactors. Run the tool. |
+| "Auto-generate changelog from commits" | Commit messages are for developers. Changelogs are for users. Translate. |
+| "Docs don't change for minor releases" | API docs, examples, and migration notes all drift. Verify every release. |
+| "Skip dry-run, package is fine" | Dry-runs catch packaging errors that tests don't cover. Minutes to run, hours to fix. |
+| "Breaking changes documented in git log" | Users don't read git logs. Write a migration guide they can find. |
+
 ## Guidance
 
 **Changelogs are for users, not developers.** "Refactored internal

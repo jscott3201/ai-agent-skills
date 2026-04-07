@@ -163,6 +163,16 @@ Save performance investigation results to
 `_agentskills/reviews/YYYY-MM-DD-perf-<topic>.md`.
 Do not commit files in `_agentskills/` unless the user explicitly asks.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "I can see the slow code by inspection" | Intuition about performance is frequently wrong. Profile first, then optimize the measured hot spot. |
+| "Multiple optimizations at once saves time" | Can't attribute improvement or regression. One change at a time is the only way to know what worked. |
+| "No formal baseline, but it's obviously slow" | Without a number, you can't prove you improved anything. Measure before and after. |
+| "Found hot spot, optimize without hypothesis" | Wrong hypothesis = wrong optimization = wasted effort. Predict before you change. |
+| "Optimization works, skip regression check" | Performance gains that break correctness are not gains. Run the full suite. |
+
 ## Guidance
 
 **Measure before optimizing.** Intuition about what is slow is frequently

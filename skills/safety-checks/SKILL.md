@@ -201,6 +201,16 @@ findings to the user **one at a time** before applying any fixes:
 4. Repeat for High severity. Medium and Low findings can be summarized
    as a group with the user choosing to review individually or batch-fix.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Internal-only code doesn't need input validation" | Internal today, exposed tomorrow. Trust boundaries shift. Validate at every boundary. |
+| "Middleware handles auth, endpoints don't need checks" | Middleware can be bypassed, misconfigured, or skipped in new routes. Defense in depth means checking at every layer. |
+| "It's a prototype, security hardening comes later" | Prototypes ship. Security bolted on later is security never done right. |
+| "Standard library handles crypto, skip crypto review" | The standard library provides primitives. Using them wrong (ECB mode, weak KDF, hardcoded IV) is the actual risk. |
+| "Well-known packages can't be compromised" | event-stream, ua-parser-js, colors.js were all well-known. Popularity is not security. |
+
 ## Supporting files
 
 Language-specific (load ONLY the one matching the project language):

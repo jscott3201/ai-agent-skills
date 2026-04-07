@@ -214,6 +214,15 @@ teammates to check for pending tasks before going idle.
 - **Split large tasks** if one teammate is falling behind while others
   are idle
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Wave reviews optional for independent tasks" | Independence is assumed until a file conflict proves otherwise. Review at every wave boundary. |
+| "More teammates means faster completion" | Teams larger than 5 spend more time coordinating than producing. Diminishing returns are steep. |
+| "Let teammates work unsupervised" | Unsupervised agents drift. The lead's job is continuous monitoring and course correction. |
+| "Mixed parallel/sequential is fine" | Pick a pattern and commit. Mixed approaches lose the benefits of both and complicate coordination. |
+
 ## Guidance
 
 **Start with review and research.** These are the safest team patterns -

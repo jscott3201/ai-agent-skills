@@ -154,6 +154,15 @@ what to *detect*).
 | Max nesting depth | 4 levels | 4 levels | 3 levels |
 | Max struct/class fields | 7 | 7 attributes | 8 props |
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Skip code-analyzer, read code directly" | You miss what you don't look for. The analyzer checks systematically across the full codebase. |
+| "Only address P1 findings" | P2/P3 compound. Small structural issues become large ones when deferred together. |
+| "Skip verification between steps" | Each modularization step can break imports and references. Verify incrementally. |
+| "Conservative mode is fine, skip execution" | Analysis without action is a report, not a refactoring. Execute the approved changes. |
+
 ## Guidance
 
 **Aggressiveness is a ceiling, not a floor.** Conservative mode does not

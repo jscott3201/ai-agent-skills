@@ -94,6 +94,15 @@ For approved fixes:
 2. Apply technical writing conventions to all updated content
 3. After all fixes, do a final grep for any remaining stale terms
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "README is most visible, rest can wait" | API docs and examples mislead more directly than READMEs. Fix what users copy-paste first. |
+| "Stale examples aren't critical" | Stale examples waste hours for every user who tries them. They're the highest-cost stale content. |
+| ".pyi stubs regenerate automatically" | They don't. They're the most commonly forgotten documentation surface after refactors. |
+| "Spot-check a few version numbers" | The one you miss is the one someone copies into their config. Check them all. |
+
 ## Guidance
 
 The highest-value checks are removed feature references and stale API examples.
