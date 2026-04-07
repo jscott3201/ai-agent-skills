@@ -234,6 +234,23 @@ After the user approves:
 | "Pseudocode first, fill in exact code later" | Pseudocode hides the hard parts. Complete code forces confrontation with reality. |
 | "First review passes, skip iteration" | First reviews catch obvious issues. Second reviews catch subtle ones. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Jumping to implementation planning without exploring the codebase
+- Pseudocode or "TODO" placeholders in the implementation plan
+- Skipping the plan verification stage
+- No non-goals defined (scope will creep)
+- Presenting all design decisions at once instead of one at a time
+
+## Verification
+
+- [ ] Codebase explored before asking clarifying questions
+- [ ] Approach selected with user from presented options
+- [ ] Implementation plan written with complete code (no pseudocode)
+- [ ] Plan self-reviewed for placeholders and internal consistency
+- [ ] Plan verified via plan-verify and approved by user
+
 ## Guidance
 
 **Context first, questions second.** Read the codebase before asking the user

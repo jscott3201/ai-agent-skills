@@ -17,6 +17,11 @@ are naming hallucinations (referencing renamed functions), mapping hallucination
 (wrong data flow assumptions), and resource hallucinations (files or APIs that
 do not exist).
 
+**When NOT to use:** The user is brainstorming or exploring (plans aren't
+written yet). The plan was just generated in this conversation from current
+code (verification adds little for same-session plans). The user asks to
+"just start building."
+
 ## Instructions
 
 For each task in the plan, verify the following against the actual codebase.
@@ -141,6 +146,22 @@ Get alignment on the decision before any implementation begins.
 | "No obvious path errors, skip file checks" | Obvious errors are caught during planning. Verification catches the non-obvious ones — renamed files, moved modules. |
 | "Plan is 2 days old, skip staleness check" | Two days of active development can change dozens of files. Age alone doesn't predict staleness. |
 | "Inaccuracies can be fixed during implementation" | Fixing during implementation costs 10x more than fixing during verification. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Trusting plan claims without grepping for actual definitions
+- Skipping API signature checks ("the names look right")
+- Accepting inaccuracies with "we'll fix during implementation"
+- Presenting all findings at once instead of by blast radius
+
+## Verification
+
+- [ ] All file paths in the plan verified against the codebase
+- [ ] All API signatures grep-confirmed (not trusted from the plan)
+- [ ] Dependency ordering checked for cycles and missing edges
+- [ ] Placeholder scan found zero TBD/TODO/vague instructions
+- [ ] Quality gate decision reached with user (Go / Fix / Rewrite / Kill)
 
 ## Guidance
 

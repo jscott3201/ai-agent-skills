@@ -18,6 +18,11 @@ This is a post-implementation review, not a PR review. It examines the entire
 body of work: cross-module consistency, integration completeness, and
 system-level impact.
 
+**When NOT to use:** The user is still actively building (review after the
+feature is complete). A quick style check is needed (use `code-standards`).
+The user wants a PR-style review of someone else's code (this reviews your
+own completed work).
+
 ## Instructions
 
 ### Phase 1: Research
@@ -198,6 +203,22 @@ Work through approved fixes in the main context:
 | "Small change, boundary/concurrency checks not relevant" | Small changes cause big outages. Size ≠ risk. |
 | "I'll batch findings for efficiency" | Batching overwhelms. One finding at a time lets the user make informed decisions. |
 | "Documentation is outdated anyway, skip alignment check" | That's exactly why it needs checking. Stale docs mislead the next person. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Reviewing only the largest files and skipping small ones
+- No findings from concurrency or resource lifecycle categories
+- Presenting all findings at once instead of one at a time
+- Fixing issues without verifying each fix individually
+
+## Verification
+
+- [ ] All 13 review categories checked against every changed component
+- [ ] Every finding has location, category, severity, and suggested fix
+- [ ] Findings triaged one at a time with user starting at S1
+- [ ] All approved fixes applied and verified individually
+- [ ] Final scan confirms no remaining issues from approved set
 
 ## Supporting files
 

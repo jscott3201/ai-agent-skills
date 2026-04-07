@@ -12,6 +12,10 @@ Enforce language-specific coding standards, catch anti-patterns early, and
 guide idiomatic code. Operates as background knowledge during development.
 When invoked manually, audits a file or scope against the full checklist.
 
+**When NOT to use:** Reviewing completed features for correctness (use
+`deep-review`). Security concerns (use `safety-checks`). The user is
+writing throwaway prototyping code they explicitly said is temporary.
+
 ## Quick reference
 
 ### Universal anti-patterns
@@ -104,6 +108,13 @@ When invoked with `$ARGUMENTS`:
 | "Almost at threshold, no need to refactor" | Thresholds exist because code just over them degrades fast. Respect the line. |
 | "Linter passed, standards are satisfied" | Linters check syntax. Standards check design, naming, and patterns that linters can't see. |
 | "Load all language files for completeness" | Irrelevant standards create noise and waste context. Load only what applies. |
+
+## Verification
+
+- [ ] Correct language-specific standards file loaded (only one)
+- [ ] Every item in the checklist checked (not sampled)
+- [ ] Findings triaged one at a time with user
+- [ ] Accepted fixes applied immediately before continuing
 
 ## Guidance
 

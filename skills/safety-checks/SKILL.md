@@ -15,6 +15,11 @@ on user data. Auto-triggers as background knowledge during development. When
 invoked manually, performs a full codebase safety audit using STRIDE-based
 threat analysis.
 
+**When NOT to use:** The code does not handle external input, auth, or
+user data (pure internal logic, algorithms, data structures). Style or
+readability concerns (use `code-standards`). Performance investigation
+(use `perf-profile`).
+
 ## Principles
 
 Non-negotiable. Apply before consulting the checklist.
@@ -210,6 +215,22 @@ findings to the user **one at a time** before applying any fixes:
 | "It's a prototype, security hardening comes later" | Prototypes ship. Security bolted on later is security never done right. |
 | "Standard library handles crypto, skip crypto review" | The standard library provides primitives. Using them wrong (ECB mode, weak KDF, hardcoded IV) is the actual risk. |
 | "Well-known packages can't be compromised" | event-stream, ua-parser-js, colors.js were all well-known. Popularity is not security. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Skipping checklist categories because "the code looks safe"
+- No STRIDE analysis performed for endpoints handling external input
+- Treating popularity as proof of security for dependencies
+- Reporting zero findings (even well-written code has hardening opportunities)
+
+## Verification
+
+- [ ] Every checklist item checked against the codebase (not sampled)
+- [ ] STRIDE analysis completed for each trust boundary
+- [ ] Findings grouped by STRIDE category with severity assigned
+- [ ] Critical and High findings triaged one at a time with user
+- [ ] Approved fixes applied and verified
 
 ## Supporting files
 

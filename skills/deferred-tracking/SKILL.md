@@ -15,6 +15,10 @@ so it can be revisited when circumstances change. When invoked manually,
 triage the list: identify items ready to tackle, items that are stale, and
 items that should be re-prioritized.
 
+**When NOT to use:** The decision is to not do something permanently
+(that's a design decision, not deferred work). The item has a tracking
+ticket elsewhere (don't duplicate). The user explicitly says to drop it.
+
 ## Instructions
 
 ### Auto-detection: when to capture

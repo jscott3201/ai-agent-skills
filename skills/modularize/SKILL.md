@@ -163,6 +163,14 @@ what to *detect*).
 | "Skip verification between steps" | Each modularization step can break imports and references. Verify incrementally. |
 | "Conservative mode is fine, skip execution" | Analysis without action is a report, not a refactoring. Execute the approved changes. |
 
+## Verification
+
+- [ ] Code-analyzer report produced with prioritized findings
+- [ ] Aggressiveness level confirmed with user
+- [ ] Each transformation verified (compiles, tests pass) before the next
+- [ ] No circular dependencies introduced
+- [ ] Existing tests still pass without rewrites
+
 ## Guidance
 
 **Aggressiveness is a ceiling, not a floor.** Conservative mode does not

@@ -140,6 +140,14 @@ Present a summary: the decision, key arguments, and the ruling.
 | "Force consensus, disagreements confuse" | Residual disagreements are signals, not noise. Report them honestly. |
 | "Raw findings sufficient, skip synthesis" | Synthesis distills actionable recommendations. Findings without synthesis are just data. |
 
+## Verification
+
+- [ ] 3-5 perspectives generated with genuinely different frames
+- [ ] 2-3 adversarial exchange rounds completed
+- [ ] Synthesis produced with clear recommendation
+- [ ] Residual disagreements documented (not forced to consensus)
+- [ ] Debate findings saved to `_agentskills/debates/`
+
 ## Guidance
 
 **3-5 perspectives, 3 rounds.** Research consistently shows this is the

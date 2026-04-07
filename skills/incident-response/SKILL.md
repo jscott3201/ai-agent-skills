@@ -143,6 +143,22 @@ Save to `_agentskills/reviews/YYYY-MM-DD-incident-<name>.md`:
 | "Root cause is obvious" | Obvious root causes are proximate causes. Keep asking why. |
 | "Mitigation is fast enough, skip formal analysis" | Speed now, recurrence later. Formal analysis breaks the cycle. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Investigating root cause before mitigating impact
+- Chasing exotic theories before checking recent changes
+- Skipping the postmortem because the fix is deployed
+- Assigning blame to individuals instead of analyzing systems
+
+## Verification
+
+- [ ] Timeline captured with timestamps
+- [ ] Recent changes checked (last 3 days of commits and deploys)
+- [ ] Severity assessed and mitigation applied
+- [ ] Root cause identified (not just proximate cause)
+- [ ] Postmortem written with action items while fresh
+
 ## Guidance
 
 **Speed over thoroughness in triage.** The first 5 minutes of an incident

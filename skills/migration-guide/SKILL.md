@@ -132,6 +132,14 @@ For simple renames and signature changes, offer:
 - The guide is tested: following the steps on example code produces
   a working result
 
+## Verification
+
+- [ ] All breaking changes cataloged
+- [ ] Migration strategy confirmed with user
+- [ ] Migration guide with before/after examples generated
+- [ ] Transformation aids (codemods, scripts) provided where feasible
+- [ ] Guide tested against a representative consumer
+
 ## Guidance
 
 **Deprecation-first is always preferred.** It gives consumers time to

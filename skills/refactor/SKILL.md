@@ -154,6 +154,23 @@ and existing tests.
 | "Refactor while adding the feature to save time" | Mixed commits are unrevertable. If the feature is reverted, the refactoring goes with it. |
 | "Cleaner code, skip full test suite rerun" | Cleaner ≠ correct. Refactoring changes structure; tests verify behavior survived. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Making changes without characterization tests in place
+- A refactoring step that doesn't compile or breaks tests
+- Fixing multiple smells in a single pass
+- Adding new features while refactoring
+- Skipping user approval on the transformation plan
+
+## Verification
+
+- [ ] Characterization tests written before any changes
+- [ ] Each step compiles and passes tests before the next step
+- [ ] Public API unchanged (or changes are intentional and documented)
+- [ ] Original smell resolved
+- [ ] Full CI verification passes
+
 ## Guidance
 
 **Never refactor without tests.** If tests do not exist, write

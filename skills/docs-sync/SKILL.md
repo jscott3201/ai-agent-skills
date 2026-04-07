@@ -12,6 +12,11 @@ Documentation drifts from code. After major changes, scan every documentation
 surface against the current codebase to find stale references, removed features,
 renamed types, and outdated examples. Report what needs fixing, then fix it.
 
+**When NOT to use:** The user is in the middle of building a feature (docs
+sync after the code stabilizes). Only a single doc file needs updating
+(just edit it directly). The project has no documentation yet (write docs
+first, don't sync nothing).
+
 ## Instructions
 
 ### Phase 1: Discovery
@@ -102,6 +107,13 @@ For approved fixes:
 | "Stale examples aren't critical" | Stale examples waste hours for every user who tries them. They're the highest-cost stale content. |
 | ".pyi stubs regenerate automatically" | They don't. They're the most commonly forgotten documentation surface after refactors. |
 | "Spot-check a few version numbers" | The one you miss is the one someone copies into their config. Check them all. |
+
+## Verification
+
+- [ ] All documentation surfaces scanned (README, docs/, comments, .pyi, Dockerfile)
+- [ ] Stale references verified against current codebase
+- [ ] Findings triaged one at a time with user
+- [ ] Final grep for remaining stale terms after fixes
 
 ## Guidance
 

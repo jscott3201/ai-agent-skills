@@ -14,6 +14,10 @@ benchmark runs cause CPU/cache contention that inflates times by 15-40% and
 produces high outlier rates. After running, compare against existing baselines
 and flag regressions.
 
+**When NOT to use:** The user wants quick timing of a single operation
+(just use `time` or `std::time::Instant`). The project has no benchmark
+suite. The user is profiling for hot spots (use `perf-profile`).
+
 ## Instructions
 
 ### 1. Discover benchmark targets

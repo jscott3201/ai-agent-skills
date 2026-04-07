@@ -171,6 +171,14 @@ Save to `_agentskills/reviews/YYYY-MM-DD-env-audit.md`:
 | `API_KEY` | Real value in .env.example | Replaced with placeholder |
 ```
 
+## Verification
+
+- [ ] Code scanned for all env var references
+- [ ] Configuration sources scanned (.env, docker-compose, CI, etc.)
+- [ ] Cross-reference complete (missing vars and unused vars identified)
+- [ ] Secrets exposure checked
+- [ ] Audit report produced
+
 ## Guidance
 
 **Run before deployment, not after incidents.** The cheapest time to

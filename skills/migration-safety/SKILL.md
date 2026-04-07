@@ -185,6 +185,22 @@ Save to `_agentskills/reviews/YYYY-MM-DD-migration-safety.md`:
 | "Zero-downtime deployment handles compatibility" | Deployment handles mechanics. Schema compatibility is your responsibility. |
 | "DBA will test on production data" | Shifting responsibility is not risk mitigation. Test what you can test. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Classifying operations without checking lock behavior
+- No rollback plan for Dangerous or Critical operations
+- Assuming dev-data timing represents production behavior
+- Skipping backward compatibility analysis
+
+## Verification
+
+- [ ] Every migration operation classified (Safe / Caution / Dangerous / Critical)
+- [ ] Lock behavior analyzed for each DDL statement
+- [ ] Rollback plan generated for each operation
+- [ ] Findings presented to user starting with Critical/Dangerous
+- [ ] Safety report saved to `_agentskills/reviews/`
+
 ## Guidance
 
 **Deploy schema changes separately from code changes.** A migration and

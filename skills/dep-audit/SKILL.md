@@ -14,6 +14,10 @@ potential vulnerabilities, license obligations, and supply chain risk.
 Evaluate whether to depend at all, then verify the specific package is
 healthy and safe before recommending it.
 
+**When NOT to use:** Updating an already-adopted dependency to a patch
+version. The user is removing a dependency. The dependency is part of
+the language standard library.
+
 ## Instructions
 
 ### 1. Build vs depend
@@ -174,6 +178,15 @@ report and ask: "Adopt, reject, or investigate alternatives?"
 | "Well-known package, skip maintenance check" | Maintainers burn out. A well-known package can go unmaintained overnight. Check current status. |
 | "MIT license, obviously compatible" | MIT is compatible with most, but dual licensing, patent clauses, and transitive copyleft can surprise you. |
 | "Just prototyping, full audit is overkill" | Prototype dependencies ship to production. Audit now or audit under pressure later. |
+
+## Verification
+
+- [ ] Build-vs-depend question answered before any package evaluation
+- [ ] Health metrics checked (downloads, last release, maintainers, OpenSSF)
+- [ ] Vulnerability audit run (`cargo-audit` / `npm audit` / `pip-audit`)
+- [ ] License compatibility verified against project
+- [ ] Supply chain signals checked for red flags
+- [ ] Clear recommendation presented: ADOPT / CAUTION / REJECT
 
 ## Guidance
 

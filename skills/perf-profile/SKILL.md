@@ -173,6 +173,14 @@ Do not commit files in `_agentskills/` unless the user explicitly asks.
 | "Found hot spot, optimize without hypothesis" | Wrong hypothesis = wrong optimization = wasted effort. Predict before you change. |
 | "Optimization works, skip regression check" | Performance gains that break correctness are not gains. Run the full suite. |
 
+## Verification
+
+- [ ] Baseline measurement recorded with date and conditions
+- [ ] Hot spots identified via profiler (not intuition)
+- [ ] Each optimization measured independently against baseline
+- [ ] No regressions in correctness (full test suite passes)
+- [ ] Results saved to `_agentskills/reviews/`
+
 ## Guidance
 
 **Measure before optimizing.** Intuition about what is slow is frequently

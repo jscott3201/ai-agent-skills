@@ -184,6 +184,13 @@ cargo clippy -p <crate-name> -- -D warnings
 
 Report the crate is ready for development.
 
+## Verification
+
+- [ ] Requirements gathered (layer position, dependencies, features)
+- [ ] Crate created with Cargo.toml, lib.rs, error.rs, tests
+- [ ] Workspace Cargo.toml updated if applicable
+- [ ] `cargo check --workspace` and `cargo test --workspace` pass
+
 ## Guidance
 
 The layer position drives dependency decisions. Foundation crates should have

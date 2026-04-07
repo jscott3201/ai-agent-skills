@@ -274,6 +274,14 @@ Wait for decision.
 | "@v4 is good enough for action versions" | Unpinned actions are a supply chain attack vector. Pin to SHA for production pipelines. |
 | "Small project doesn't need concurrency control" | Concurrent CI on the same branch produces race conditions regardless of project size. |
 
+## Verification
+
+- [ ] Project characteristics detected (language, build tool, test framework)
+- [ ] Pipeline includes: lint, test, security audit, and build stages
+- [ ] Dependency caching configured
+- [ ] Action versions pinned (SHA for production, tag for development)
+- [ ] Pipeline verified against local development commands
+
 ## Guidance
 
 **Cache aggressively.** Dependency caching alone cuts most Rust builds

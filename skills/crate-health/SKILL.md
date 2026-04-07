@@ -152,6 +152,13 @@ maintenance tasks **one at a time**:
 3. After all tasks are triaged, summarize the approved work:
    > "Approved N tasks. Start with [first task], or adjust the order?"
 
+## Verification
+
+- [ ] Dependency graph analyzed (duplicates, depth, single-maintainer)
+- [ ] Compile time profiled
+- [ ] Feature flags audited
+- [ ] Health report produced with prioritized maintenance tasks
+
 ## Guidance
 
 **Run periodically, not once.** Workspace health drifts. A quarterly health

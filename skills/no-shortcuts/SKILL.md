@@ -12,6 +12,10 @@ When a change affects N call sites, modify all N. Do not prioritize a subset
 and defer the rest. Partial changes create inconsistency that is harder to
 find later than doing it all now.
 
+**When NOT to use:** The change affects a single call site (just fix it).
+The user is exploring or prototyping (cross-cutting discipline applies
+to committed code). The change is additive with no existing consumers.
+
 ## Instructions
 
 ### 1. Recommend a checkpoint
@@ -86,6 +90,14 @@ If the change cascades further than expected or breaks something:
 - If a checkpoint commit exists, revert to it
 - If not, use `git stash` or `git diff > patch.diff` to save progress
 - Report what happened and get guidance before continuing
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Using `_ => ...` wildcard arms to handle new variants
+- Adding `#[allow(...)]` or equivalent to silence warnings
+- Fixing some call sites and deferring others with TODO comments
+- Using grep instead of the compiler to find affected sites
 
 ## Common Rationalizations
 

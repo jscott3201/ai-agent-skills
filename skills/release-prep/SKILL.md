@@ -184,6 +184,14 @@ Do not push tags or publish. The user handles that.
 | "Skip dry-run, package is fine" | Dry-runs catch packaging errors that tests don't cover. Minutes to run, hours to fix. |
 | "Breaking changes documented in git log" | Users don't read git logs. Write a migration guide they can find. |
 
+## Verification
+
+- [ ] Breaking changes detected via semver-checks or manual review
+- [ ] Version bump confirmed with user
+- [ ] Changelog written in user-facing language and approved
+- [ ] Documentation verified current (README, API docs, migration guides)
+- [ ] Tag created (not pushed — user handles that)
+
 ## Guidance
 
 **Changelogs are for users, not developers.** "Refactored internal

@@ -17,6 +17,11 @@ This is an interactive skill. Present the test plan for approval, then
 generate tests incrementally per function group with user review at each
 step.
 
+**When NOT to use:** The user is asking you to run existing tests (just
+run them). The user wants a quick one-off test for something they're
+exploring (just write it). The code under test is being actively
+refactored (wait until the refactoring stabilizes).
+
 ## Instructions
 
 ### 1. Analyze the target
@@ -351,6 +356,21 @@ navigation, modals/dialogs, and dynamic content.
 | "Boundary value analysis is exhaustive — just test critical cases" | Boundaries are where bugs cluster. Skipping min/max/off-by-one misses the defects unit tests exist to catch. |
 | "Property-based testing is for math, not domain logic" | Property tests find the edge cases you didn't think to write. Domain logic has invariants too. |
 | "Existing tests cover happy path, focus on errors only" | Happy-path tests may assert the wrong thing. Verify what exists before extending. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Generating all tests at once instead of incrementally
+- No boundary value analysis for numeric inputs
+- Tests that assert on implementation details (private methods, internal state)
+- Skipping property-based tests for functions with clear invariants
+
+## Verification
+
+- [ ] Test plan approved by user before code generation
+- [ ] Each test group reviewed and accepted incrementally
+- [ ] All accepted tests pass when run
+- [ ] Coverage gaps identified and documented
 
 ## Guidance
 

@@ -121,6 +121,13 @@ Report:
 - Any gaps or issues found in existing error handling
 - Migration plan if redesigning existing error types
 
+## Verification
+
+- [ ] Failure modes analyzed for the target crate/module
+- [ ] Error hierarchy design confirmed with user
+- [ ] From conversion chains verified (no gaps in the chain)
+- [ ] Consumer handling verified at every catch site
+
 ## Guidance
 
 **One error type per crate is the default.** Split only if the crate has

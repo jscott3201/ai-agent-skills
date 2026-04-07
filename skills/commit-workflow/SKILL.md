@@ -84,6 +84,14 @@ needs explicit approval.
 Work directly on main unless the user specifies a branch. If the user says
 to create a branch, do so and work there.
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Committing without running the CI verification sequence
+- Multiple features or fixes in a single commit
+- Pushing to remote without explicit user approval in this conversation
+- Staging `_agentskills/` files
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |

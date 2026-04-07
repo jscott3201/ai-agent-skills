@@ -177,6 +177,13 @@ Suggest concrete next steps based on the project's state:
 > All skills work in this project now. Run `/reload-plugins` if you
 > add or change skills during this session."
 
+## Verification
+
+- [ ] Project explored (languages, build system, CI, tests, conventions)
+- [ ] Assessment presented showing ready/gap status
+- [ ] Each setup step approved by user before applying
+- [ ] Project profile saved to persistent memory
+
 ## Guidance
 
 **One step at a time.** Never present the full list of 27 skills and

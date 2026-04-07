@@ -128,6 +128,13 @@ Summary of what was generated:
 - Doc-tests: N passing, M fixed
 - Any items where documentation was unclear (flag for human review)
 
+## Verification
+
+- [ ] Scope confirmed with user before generation
+- [ ] Docs generated incrementally in batches
+- [ ] Module overviews written for each documented module
+- [ ] Doc-tests pass (`cargo test --doc` or equivalent)
+
 ## Guidance
 
 **Don't document the obvious.** A getter named `get_name` returning a

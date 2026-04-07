@@ -184,6 +184,14 @@ Present a summary of key findings to the user after saving.
 | "Skip 'not recommended' section" | Knowing what to avoid is as valuable as knowing what to adopt. It prevents re-investigation. |
 | "Share findings in conversation, don't save" | Conversations disappear. Saved research persists for the team and future sessions. |
 
+## Verification
+
+- [ ] Research mode selected and appropriate for the question
+- [ ] Checkpoint presented to user before synthesis
+- [ ] Every finding is specific with cited sources
+- [ ] "Not recommended" section included where applicable
+- [ ] Research document saved to `_agentskills/research/`
+
 ## Guidance
 
 **Every finding must be specific.** "X might be an issue" is not a finding.

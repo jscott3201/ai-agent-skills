@@ -15,6 +15,10 @@ Skills marked **(auto)** trigger automatically from their descriptions.
 Skills marked **(manual)** require `/justin-tools:<name>` to invoke.
 Skills marked **(background)** apply silently during all work.
 
+**When NOT to use:** You already know which skill to use (just use it).
+The user invoked a specific skill by name. The task doesn't match any
+skill (not everything needs a skill — sometimes just write the code).
+
 ## Routing by Task
 
 ### Planning and design

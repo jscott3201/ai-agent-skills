@@ -159,6 +159,22 @@ See the `team-coordination` skill for team patterns and guidance.
 | "Retry stalled agent instead of spawning fresh" | Stalled agents carry corrupted context. Fresh spawns start clean. |
 | "Formatting is optional, focus on logic" | Formatting is the most commonly skipped step and creates the most cleanup work. Include it. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Multiple implementation agents running in parallel
+- Dispatching the next agent without reviewing the previous output
+- Subagent prompts missing CI verification commands
+- Retrying a stalled agent instead of spawning a fresh replacement
+
+## Verification
+
+- [ ] Project CLAUDE.md checked for agent restrictions
+- [ ] Task complexity classified (simple/standard/complex)
+- [ ] CI verification commands included in every subagent prompt
+- [ ] Output reviewed and verified between each dispatch
+- [ ] No parallel implementation agents dispatched
+
 ## Guidance
 
 **Review between tasks is not optional ceremony.** Automated failure

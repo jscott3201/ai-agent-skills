@@ -156,6 +156,14 @@ After all gaps are triaged, save the full trace matrix to
 Summarize: "N requirements fully traced, N gaps addressed, N deferred,
 N untraced code items flagged."
 
+## Verification
+
+- [ ] Requirements source located and confirmed with user
+- [ ] Each requirement traced to implementation code
+- [ ] Each requirement traced to test coverage
+- [ ] Gaps presented to user one at a time
+- [ ] Trace matrix produced
+
 ## Guidance
 
 **Run this after implementation, before release.** The trace matrix is
