@@ -44,7 +44,7 @@ create a session and recall prior debate context:
 Prior rulings and residual disagreements are especially valuable —
 they prevent re-debating settled questions and surface unresolved tensions
 that may still apply.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### Setup
 

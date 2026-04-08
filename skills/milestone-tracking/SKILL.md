@@ -40,7 +40,6 @@ ORDER BY m.started_on DESC
 
 3. Present active milestones as context before proceeding.
 
-If SeleneDB is not available, fall back to `_agentskills/milestones.md`.
 
 ### Auto-detection: commit linking
 
@@ -127,22 +126,6 @@ MATCH (m:Milestone) WHERE id(m) = $milestone_id
 SET m.status = 'in_progress', m.started_on = date()
 ```
 
-#### Flat-file fallback
-
-When SeleneDB is not available, write to `_agentskills/milestones.md`:
-
-```markdown
-# Milestones
-
-## [In Progress] Milestone Name
-**Started:** YYYY-MM-DD | **Target:** YYYY-MM-DD
-**Description:** ...
-**Commits:** (list of short SHAs with messages)
-**Documents:** (list of linked documents)
-
----
-```
-
 ### Reviewing milestones
 
 When invoked with `review` or without arguments:
@@ -225,7 +208,7 @@ SET m.status = 'completed', m.completed_on = date()
 
 ## Supporting files
 
-- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB detection, sessions, auto-recall, fallback
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB detection, sessions, auto-recall
 
 ## Common Rationalizations
 

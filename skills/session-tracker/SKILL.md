@@ -144,25 +144,6 @@ RETURN s.date, s.skill, s.summary, s.next_steps,
 ORDER BY s.date DESC
 ```
 
-## Flat-file fallback
-
-When SeleneDB is not available, maintain `_agentskills/SESSION_LOG.md`:
-
-```markdown
-# Session Log
-
-## YYYY-MM-DD HH:MM — [skill]
-**Scope:** [what was worked on]
-**Summary:** [what was accomplished]
-**Next steps:** [what to do next]
-**Outcome:** [completed | partial | aborted | deferred]
-
----
-```
-
-Append new entries at the top. Keep last 20 entries. The SessionStart
-hook reads the top entry when SeleneDB is not available.
-
 ## Supporting files
 
 - [selene-integration.md](../_selene/selene-integration.md) - SeleneDB detection, sessions, rolling checkpoints

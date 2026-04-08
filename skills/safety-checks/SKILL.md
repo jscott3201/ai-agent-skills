@@ -1,22 +1,21 @@
 ---
 name: safety-checks
 description: >
-  Security, auth, and memory safety for code handling external input.
-  Use when writing parsers, handlers, auth, or APIs. Invoke manually
-  for a full codebase safety audit.
+  Security auditing with graph-persisted concerns. STRIDE-based threat
+  analysis writing SecurityConcern nodes linked to dependencies, crates,
+  and modules. Enables supply chain and security posture queries.
 argument-hint: "[audit scope]"
 ---
 
 ## Purpose
 
-Enforce security, authentication, and memory safety when writing code that
-handles external input, manages authentication, or allocates resources based
-on user data. Auto-triggers as background knowledge during development. When
-invoked manually, performs a full codebase safety audit using STRIDE-based
-threat analysis.
+Security auditing with graph persistence. Every finding becomes a
+`:SecurityConcern` node linked to affected dependencies, crates, and modules.
+Auto-triggers as background knowledge during development. When invoked
+manually, performs a full codebase audit using STRIDE-based threat analysis
+with all findings persisted to the graph for cross-session tracking.
 
-**When NOT to use:** The code does not handle external input, auth, or
-user data (pure internal logic, algorithms, data structures). Style or
+**When NOT to use:** Pure internal logic with no external input. Style or
 readability concerns (use `code-standards`). Performance investigation
 (use `perf-profile`).
 
@@ -147,6 +146,71 @@ When writing code that handles external input, verify each relevant category.
 - [ ] Security-relevant actions logged (auth failures, access denials,
       input validation failures)
 
+## Graph Integration
+
+### 0. Context recall
+
+Query prior security concerns for this project before starting:
+
+```gql
+MATCH (sc:SecurityConcern)
+WHERE sc.project = $project AND sc.status = 'open'
+OPTIONAL MATCH (sc)-[:affects]->(target)
+RETURN sc.summary, sc.severity, sc.category, sc.cve,
+  labels(target) AS affected_type, target.name AS affected_name
+ORDER BY sc.severity
+```
+
+Present open concerns to the user: "N open security concerns from prior
+audits. [Summarize top items]." This establishes baseline before new analysis.
+
+Also query dependencies flagged as security-relevant:
+
+```gql
+MATCH (d:dependency {security_relevant: true})
+RETURN d.name, d.version
+```
+
+### Session creation
+
+Create a session at audit start per [selene-integration.md](../_selene/selene-integration.md).
+
+### Graph write: security concern
+
+After each finding is triaged (fix now, defer, accept, false positive),
+write a SecurityConcern node:
+
+```gql
+INSERT (sc:SecurityConcern {
+  project: $project,
+  summary: $summary,
+  severity: $severity,
+  status: $triage_status,
+  category: $stride_category,
+  found_date: date(),
+  cve: $cve,
+  audit_session: $session_id
+})
+RETURN id(sc) AS concern_id
+```
+
+Link to session, affected code, and affected dependencies per patterns
+in [selene-patterns.md](../_selene/selene-patterns.md).
+
+### Graph write: mitigation
+
+When a fix is applied and committed:
+
+```gql
+MATCH (sc:SecurityConcern) WHERE id(sc) = $concern_id
+MERGE (c:GitCommit {sha: $full_sha})
+ON CREATE SET c.project = $project, c.short_sha = $short_sha,
+  c.message = $commit_message, c.author = $author, c.date = date(),
+  c.branch = $branch
+INSERT (sc)-[:mitigated_by]->(c)
+SET sc.status = 'mitigated'
+```
+
 ## Manual audit mode
 
 When invoked manually, determine scope first:
@@ -233,6 +297,9 @@ Stop and reassess if you observe:
 - [ ] Approved fixes applied and verified
 
 ## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) — SeleneDB detection, sessions, auto-recall
+- [selene-patterns.md](../_selene/selene-patterns.md) — SecurityConcern write/read patterns
 
 Language-specific (load ONLY the one matching the project language):
 - [python-safety.md](python-safety.md) - Python-specific vulnerability patterns

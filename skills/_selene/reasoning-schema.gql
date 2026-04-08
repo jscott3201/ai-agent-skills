@@ -11,6 +11,13 @@
 //
 // After running all statements, restart SeleneDB to build search indexes
 // for properties marked SEARCHABLE.
+//
+// Multi-project convention: all project-specific node types carry a
+// `project` property for multi-tenancy. Cross-cutting nodes (skill,
+// agent, dependency, workflow_category) are managed outside this schema
+// and have no project property. Filter by project in queries:
+//   WHERE n.project = $project
+// Omit the filter for cross-project aggregation.
 
 // ── Session ────────────────────────────────────────────────────────────
 
@@ -28,6 +35,7 @@ CREATE NODE TYPE :Session (
 // ── Document ───────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Document (
+  project    :: STRING NOT NULL INDEXED,
   title      :: STRING SEARCHABLE,
   doc_type   :: STRING NOT NULL INDEXED,
   content    :: STRING SEARCHABLE,
@@ -37,6 +45,7 @@ CREATE NODE TYPE :Document (
 // ── Decision ───────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Decision (
+  project      :: STRING NOT NULL INDEXED,
   summary      :: STRING NOT NULL SEARCHABLE,
   rationale    :: STRING SEARCHABLE,
   alternatives :: STRING,
@@ -46,6 +55,7 @@ CREATE NODE TYPE :Decision (
 // ── Finding ────────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Finding (
+  project        :: STRING NOT NULL INDEXED,
   summary        :: STRING NOT NULL SEARCHABLE,
   severity       :: STRING NOT NULL INDEXED,
   category       :: STRING INDEXED,
@@ -57,6 +67,7 @@ CREATE NODE TYPE :Finding (
 // ── Insight ────────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Insight (
+  project    :: STRING NOT NULL INDEXED,
   summary    :: STRING NOT NULL SEARCHABLE,
   sources    :: STRING,
   confidence :: STRING DEFAULT 'medium',
@@ -66,6 +77,7 @@ CREATE NODE TYPE :Insight (
 // ── Hypothesis ─────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Hypothesis (
+  project    :: STRING NOT NULL INDEXED,
   statement  :: STRING NOT NULL SEARCHABLE,
   prediction :: STRING,
   test       :: STRING,
@@ -77,6 +89,7 @@ CREATE NODE TYPE :Hypothesis (
 // ── RootCause ──────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :RootCause (
+  project  :: STRING NOT NULL INDEXED,
   why      :: STRING NOT NULL SEARCHABLE,
   level    :: INT NOT NULL,
   systemic :: BOOL DEFAULT false
@@ -85,6 +98,7 @@ CREATE NODE TYPE :RootCause (
 // ── DeferredItem ───────────────────────────────────────────────────────
 
 CREATE NODE TYPE :DeferredItem (
+  project     :: STRING NOT NULL INDEXED,
   item        :: STRING NOT NULL SEARCHABLE,
   description :: STRING SEARCHABLE,
   priority    :: STRING NOT NULL INDEXED,
@@ -98,6 +112,7 @@ CREATE NODE TYPE :DeferredItem (
 // ── Gate ───────────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Gate (
+  project   :: STRING NOT NULL INDEXED,
   condition :: STRING NOT NULL SEARCHABLE,
   met       :: BOOL DEFAULT false,
   met_on    :: DATE,
@@ -107,6 +122,7 @@ CREATE NODE TYPE :Gate (
 // ── CoverageGap ────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :CoverageGap (
+  project     :: STRING NOT NULL INDEXED,
   function    :: STRING NOT NULL,
   gap_type    :: STRING NOT NULL INDEXED,
   description :: STRING SEARCHABLE,
@@ -116,16 +132,18 @@ CREATE NODE TYPE :CoverageGap (
 // ── Release ────────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Release (
-  version             :: STRING NOT NULL INDEXED,
-  bump_type           :: STRING,
-  date                :: DATE,
-  changelog           :: STRING SEARCHABLE,
+  project              :: STRING NOT NULL INDEXED,
+  version              :: STRING NOT NULL INDEXED,
+  bump_type            :: STRING,
+  date                 :: DATE,
+  changelog            :: STRING SEARCHABLE,
   has_breaking_changes :: BOOL DEFAULT false
 )
 
 // ── CodeLocation ───────────────────────────────────────────────────────
 
 CREATE NODE TYPE :CodeLocation (
+  project    :: STRING NOT NULL INDEXED,
   file       :: STRING NOT NULL INDEXED,
   line_start :: INT,
   line_end   :: INT,
@@ -136,6 +154,7 @@ CREATE NODE TYPE :CodeLocation (
 // ── Rationalization ────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Rationalization (
+  project           :: STRING NOT NULL INDEXED,
   pattern           :: STRING NOT NULL SEARCHABLE,
   skill             :: STRING NOT NULL INDEXED,
   corrective_action :: STRING
@@ -144,6 +163,7 @@ CREATE NODE TYPE :Rationalization (
 // ── PlanClaim ──────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :PlanClaim (
+  project         :: STRING NOT NULL INDEXED,
   claim           :: STRING NOT NULL SEARCHABLE,
   actual          :: STRING,
   inaccuracy_type :: STRING NOT NULL INDEXED,
@@ -153,6 +173,7 @@ CREATE NODE TYPE :PlanClaim (
 // ── Incident ───────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Incident (
+  project         :: STRING NOT NULL INDEXED,
   title           :: STRING NOT NULL SEARCHABLE,
   severity        :: STRING NOT NULL INDEXED,
   blast_radius    :: STRING,
@@ -167,6 +188,7 @@ CREATE NODE TYPE :Incident (
 // ── Perspective ────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Perspective (
+  project        :: STRING NOT NULL INDEXED,
   role           :: STRING NOT NULL,
   priority_focus :: STRING,
   claim          :: STRING SEARCHABLE,
@@ -180,6 +202,7 @@ CREATE NODE TYPE :Perspective (
 // ── Note ──────────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Note (
+  project :: STRING NOT NULL INDEXED,
   content :: STRING NOT NULL SEARCHABLE,
   kind    :: STRING NOT NULL INDEXED,
   author  :: STRING NOT NULL INDEXED
@@ -188,6 +211,7 @@ CREATE NODE TYPE :Note (
 // ── Convention ────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Convention (
+  project   :: STRING NOT NULL INDEXED,
   rule      :: STRING NOT NULL SEARCHABLE,
   scope     :: STRING NOT NULL INDEXED,
   severity  :: STRING NOT NULL INDEXED,
@@ -199,6 +223,7 @@ CREATE NODE TYPE :Convention (
 // ── Milestone ─────────────────────────────────────────────────────────
 
 CREATE NODE TYPE :Milestone (
+  project       :: STRING NOT NULL INDEXED,
   name          :: STRING NOT NULL SEARCHABLE,
   description   :: STRING SEARCHABLE,
   status        :: STRING DEFAULT 'planned' INDEXED,
@@ -208,17 +233,36 @@ CREATE NODE TYPE :Milestone (
 )
 
 // ── Topic ─────────────────────────────────────────────────────────────
+// Topics can bridge projects. Set project to scope to one project,
+// or omit for cross-project topics (e.g., 'performance', 'auth').
 
 CREATE NODE TYPE :Topic (
+  project     :: STRING INDEXED,
   name        :: STRING NOT NULL SEARCHABLE,
   domain      :: STRING INDEXED,
   description :: STRING SEARCHABLE
+)
+
+// ── SecurityConcern ────────────────────────────────────────────────────
+// Security issues from audits, dependency reviews, or code analysis.
+// Links to dependencies and code for supply chain tracking.
+
+CREATE NODE TYPE :SecurityConcern (
+  project       :: STRING NOT NULL INDEXED,
+  summary       :: STRING NOT NULL SEARCHABLE,
+  severity      :: STRING NOT NULL INDEXED,
+  status        :: STRING DEFAULT 'open' INDEXED,
+  category      :: STRING NOT NULL INDEXED,
+  found_date    :: DATE,
+  cve           :: STRING INDEXED,
+  audit_session :: STRING
 )
 
 // ── GitCommit ──────────────────────────────────────────────────────────
 // Note: "Commit" is a reserved keyword in ISO GQL.
 
 CREATE NODE TYPE :GitCommit (
+  project       :: STRING NOT NULL INDEXED,
   sha           :: STRING NOT NULL UNIQUE INDEXED,
   short_sha     :: STRING,
   message       :: STRING SEARCHABLE,
@@ -234,7 +278,7 @@ CREATE EDGE TYPE :produced (
   FROM :Session TO :Decision, :Finding, :Insight, :Hypothesis,
     :RootCause, :DeferredItem, :CoverageGap, :Release, :Incident,
     :Perspective, :PlanClaim, :Document, :Rationalization, :GitCommit,
-    :Convention, :Milestone, :Note
+    :Convention, :Milestone, :Note, :SecurityConcern
 )
 
 CREATE EDGE TYPE :contains (
@@ -246,7 +290,7 @@ CREATE EDGE TYPE :based_on (
 )
 
 CREATE EDGE TYPE :affects (
-  FROM :Decision, :Finding, :Hypothesis, :Insight, :CoverageGap
+  FROM :Decision, :Finding, :Hypothesis, :Insight, :CoverageGap, :SecurityConcern
   TO :CodeLocation
 )
 
@@ -293,7 +337,7 @@ CREATE EDGE TYPE :breaking_change (
 )
 
 CREATE EDGE TYPE :mitigated_by (
-  FROM :Incident TO :Decision
+  FROM :Incident, :SecurityConcern TO :Decision, :GitCommit
 )
 
 CREATE EDGE TYPE :caused_by (

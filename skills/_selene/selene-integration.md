@@ -1,9 +1,9 @@
 # SeleneDB Integration Guide
 
-Supporting file for skills that persist reasoning to SeleneDB.
-Skills reference this file for detection, session management,
-auto-recall, and fallback behavior. Schema and query patterns
-are in separate supporting files.
+Supporting file for all skills. SeleneDB is the foundation of this
+plugin — every skill reads from and writes to the property graph.
+Skills reference this file for detection, session management, and
+auto-recall. Schema and query patterns are in separate supporting files.
 
 **Supporting files:**
 - [selene-schema.md](selene-schema.md) — node types, edge types, property definitions
@@ -11,30 +11,43 @@ are in separate supporting files.
 - [reasoning-schema.gql](reasoning-schema.gql) — GQL DDL statements for schema registration
 - [setup-schema.sh](setup-schema.sh) — one-command schema setup script
 
+## Multi-Project Convention
+
+Multiple projects share a single SeleneDB graph. All project-specific
+node types carry a `project` property for isolation. Cross-cutting
+nodes (`skill`, `agent`, `dependency`, `workflow_category`) are shared
+and have no `project` property.
+
+**Rules:**
+- Every INSERT of a project-specific node must include `project: $project`
+- MERGE on CodeLocation must include `project` (same file path in
+  different repos refers to different files)
+- Topics can omit `project` to bridge projects, or include it for
+  project-scoped topics
+- Filter by `WHERE n.project = $project` for project-scoped queries
+- Omit the filter for cross-project aggregation
+
+**Project naming:** Use the well-known project or plugin name
+(e.g., `'justin-tools'`, `'SeleneDB'`), not directory paths that
+vary per user's machine. Set this once at session start.
+
+See [selene-schema.md](selene-schema.md) for which node types are
+project-specific vs shared.
+
 ## Detection
 
-Check whether SeleneDB MCP tools are available before using them.
-The user configures SeleneDB as an MCP server in their project or
-user settings. Skills detect availability at runtime.
+SeleneDB is required. Check that the `gql_query` tool is available
+at skill start. If it is not available, inform the user:
 
-**Detection check:** Attempt to call the `gql_query` tool. If it
-exists and responds, SeleneDB is available. Cache this result for
-the session.
+> "This plugin requires SeleneDB. Configure the SeleneDB MCP server
+> in your project or user settings, then retry."
 
-```
-IF gql_query tool is available:
-  -> SeleneDB mode: use graph persistence
-ELSE:
-  -> Fallback mode: use existing behavior (flat files or conversation)
-```
-
-Do not prompt the user about SeleneDB availability. If it is not
-configured, proceed silently with fallback behavior.
+Do not proceed with the skill workflow without SeleneDB.
 
 ## Session Creation
 
-When a SeleneDB-integrated skill starts and SeleneDB is available,
-auto-create a session node before any other graph operations:
+When a skill starts, auto-create a session node before any other
+graph operations:
 
 ```gql
 INSERT (s:Session {
@@ -71,7 +84,9 @@ See [selene-schema.md](selene-schema.md) for which properties are searchable.
 Capture `session_id` for linking all reasoning produced in this session.
 
 **Property sources:**
-- `project`: git remote origin URL or working directory basename
+- `project`: well-known project/plugin name (e.g., `'justin-tools'`,
+  `'SeleneDB'`). Derive from plugin name or repo identity, not
+  directory path. Must be stable across machines.
 - `branch`: output of `git branch --show-current`
 - `scope`: `$ARGUMENTS` or user-provided description
 - `skill`: the skill name from SKILL.md frontmatter
@@ -177,36 +192,18 @@ MATCH (prior:Session) WHERE id(prior) = $prior_session_id
 INSERT (current)-[:continued_from]->(prior)
 ```
 
-## Fallback Behavior
+## Background Annotation
 
-When SeleneDB is not available, skills use their existing behavior:
+All skills auto-annotate the graph with `:Note` nodes as they work.
+This is a background discipline, not a separate invocation:
 
-| Skill | SeleneDB Mode | Fallback Mode |
+| Kind | When to create | Example |
 |---|---|---|
-| **research** | Graph + `_agentskills/research/` file | `_agentskills/research/` file only |
-| **deep-review** | Graph persistence of findings | Conversation only (current behavior) |
-| **debug** | Graph persistence of hypotheses + root causes | Conversation only (current behavior) |
-| **plan-verify** | Graph persistence of claims + quality gate | Conversation only (current behavior) |
-| **release-prep** | Graph persistence of releases + changelog | Conversation only (current behavior) |
-| **deferred-tracking** | Graph + `_agentskills/DEFERRED.md` | `_agentskills/DEFERRED.md` only |
-| **test-strategy** | Graph persistence of coverage gaps | Test files only (current behavior) |
-| **feature-design** | Graph persistence of design decisions + plan | `_agentskills/design/` and `_agentskills/plans/` only |
-| **debate** | Graph persistence of perspectives + rulings | `_agentskills/debates/` file only |
-| **incident-response** | Graph persistence of incidents + postmortem | `_agentskills/reviews/` file only |
-| **refactor** | Graph persistence of smell analysis + decisions | Conversation only (current behavior) |
-| **perf-profile** | Graph persistence of baselines + optimizations | `_agentskills/reviews/` file only |
-| **modularize** | Graph persistence of structural findings | Conversation only (current behavior) |
-| **project-onboard** | Graph persistence of project assessment | Agent persistent memory only |
-| **requirements-trace** | Graph persistence of trace gaps + decisions | `_agentskills/reviews/` file only |
-| **milestone-tracking** | Graph persistence of milestones + commit links | `_agentskills/milestones.md` only |
-| **notes** | Graph persistence of annotations on any node | `_agentskills/NOTES.md` only |
-| **session-tracker** | Session summaries + cross-session context queries | `_agentskills/SESSION_LOG.md` only |
+| `rationale` | Making a judgment call or close decision | "Chose BTreeMap over HashMap for ordered range scans" |
+| `observation` | Spotting a pattern or something interesting | "Module B mirrors module A — possible shared abstraction" |
+| `todo` | Identifying future work lighter than a DeferredItem | "TODO: add retry logic after transport layer stabilizes" |
+| `bookmark` | Noting something to revisit next session | "Revisit this optimization after real-workload benchmarks" |
 
-In fallback mode:
-- Skip session creation
-- Skip scoped auto-recall
-- Skip all graph write operations
-- Proceed with the skill's existing workflow unchanged
-
-The user's experience in fallback mode is identical to the current
-skill behavior. SeleneDB is purely additive.
+Attach notes to the most specific target node available (CodeLocation,
+Decision, Milestone, etc.) via `:annotates` edges. Link to the current
+session via `:produced`.

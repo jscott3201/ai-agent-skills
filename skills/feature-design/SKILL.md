@@ -59,7 +59,7 @@ create a session and recall prior design context:
 >
 > This may inform the design. Proceeding with exploration."
 
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 Work through these stages in order. Each stage builds on the previous one.
 Do not skip stages, but scale the depth of each stage to the feature's

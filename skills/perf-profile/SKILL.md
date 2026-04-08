@@ -43,7 +43,7 @@ create a session and recall prior performance context:
 Prior baselines that are worse than current indicate regression since the
 last optimization. Prior baselines that are better indicate a new regression
 to investigate.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Define the question
 

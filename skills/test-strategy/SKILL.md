@@ -45,7 +45,7 @@ create a session and recall prior test coverage context:
 >
 > I'll factor these into the test plan."
 
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Analyze the target
 

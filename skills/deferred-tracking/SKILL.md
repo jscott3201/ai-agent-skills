@@ -1,9 +1,9 @@
 ---
 name: deferred-tracking
 description: >
-  Track deferred work items in a structured DEFERRED.md. Auto-triggers when
-  work is deferred during planning or implementation. Invoke manually to
-  review and triage the deferred list.
+  Track deferred work items in the graph. Auto-triggers when work is
+  deferred during planning or implementation. Invoke manually to review
+  and triage the deferred list.
 argument-hint: "[review or add]"
 ---
 
@@ -41,12 +41,7 @@ ORDER BY d.priority, s.date
 3. **Check gate proximity** — for items with temporal or milestone gates,
    evaluate whether conditions are approaching or met.
 
-When SeleneDB is available, it becomes the primary store for deferred items.
-`_agentskills/DEFERRED.md` is still written as a human-readable snapshot
-but the graph is the source of truth.
-
-If SeleneDB is not available, fall back to `_agentskills/DEFERRED.md` as
-the sole store (current behavior).
+The graph is the source of truth for all deferred items.
 
 ### Auto-detection: when to capture
 
@@ -64,33 +59,7 @@ When detected, capture immediately. Do not wait for the user to ask.
 
 ### Adding deferred items
 
-1. Look for `_agentskills/DEFERRED.md`. If it does not exist, create the
-   directory and file with this structure:
-
-```markdown
-# Deferred Work
-
-**Last updated:** YYYY-MM-DD
-**Project:** [project name]
-
----
-
-## [Category Name]
-
-| # | Item | Priority | Gate | Description | Source | Added |
-|---|------|----------|------|-------------|--------|-------|
-
----
-
-## Summary
-
-| Category | Count | Ready | Stale |
-|----------|-------|-------|-------|
-| **Total** | **0** | **0** | **0** |
-```
-
-2. Add the item to the appropriate category table (create the category
-   if it does not exist):
+1. Capture the deferred item with these fields:
 
    - **Item:** short name for the deferred work
    - **Priority:** High / Medium / Low based on the classification below
@@ -99,17 +68,13 @@ When detected, capture immediately. Do not wait for the user to ask.
    - **Source:** where this came from (plan name, phase, conversation date)
    - **Added:** date the item was deferred (YYYY-MM-DD)
 
-3. Assign priority using this framework:
+2. Assign priority using this framework:
 
    | Priority | Criteria |
    |----------|----------|
    | **High** | Blocks future features, affects correctness, or users have asked for it |
    | **Medium** | Improves performance, DX, or maintainability but nothing blocks on it |
    | **Low** | Nice-to-have, speculative, or only relevant at much larger scale |
-
-4. Update the **Last updated** date and the **Summary** counts.
-
-5. Do not commit files in `_agentskills/` unless the user explicitly asks.
 
 #### Graph write: new item (SeleneDB)
 
@@ -178,7 +143,7 @@ MATCH (other:DeferredItem) WHERE id(other) = $related_id
 INSERT (d)-[:blocks]->(other)
 ```
 
-Still write to `_agentskills/DEFERRED.md` as a human-readable snapshot.
+Write all deferred items and relationships to the graph.
 
 ### Gate quality
 
@@ -208,7 +173,7 @@ or `/justin-tools:deferred-tracking`):
 
 #### 1. Load and assess
 
-Read `_agentskills/DEFERRED.md` and assess each item against current
+Query all active deferred items from the graph and assess each against current
 project state.
 
 #### 2. Check gates

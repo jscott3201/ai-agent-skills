@@ -61,7 +61,7 @@ them alongside the standard categories — a convention violation is at
 the severity recorded in the convention node.
 
 This focuses the review on historically problematic areas.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### Phase 1: Research
 

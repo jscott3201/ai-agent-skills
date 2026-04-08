@@ -1,25 +1,28 @@
 ---
 name: notes
 description: >
-  Attach free-form notes to code, decisions, or any graph node. Supports
-  TODOs, rationale, observations, and bookmarks. Use when context doesn't
-  fit structured types like findings or deferred items.
-argument-hint: "[add | list | triage]"
+  Background annotation discipline. All skills auto-annotate graph nodes
+  with rationale, observations, TODOs, and bookmarks as they work.
+  Captures context that feeds into graph-docs documentation generation.
+user-invocable: false
 ---
 
 ## Purpose
 
-Capture context that would otherwise evaporate with the conversation.
-Notes are the lightweight counterpart to structured reasoning nodes —
-they don't require severity, gates, or categories. A note is a sticky
-note on the project graph.
+Background annotation discipline for all skills. Every skill should
+auto-annotate graph nodes with context as it works. Notes are the
+lightweight counterpart to structured reasoning nodes — they don't
+require severity, gates, or categories.
 
-**When NOT to use:** The item has a verifiable gate condition (use
+**When to annotate:**
+- Making a judgment call or close decision → `rationale` note
+- Spotting a pattern or something interesting → `observation` note
+- Identifying future work lighter than a DeferredItem → `todo` note
+- Noting something to revisit next session → `bookmark` note
+
+**When NOT to use notes:** The item has a verifiable gate condition (use
 deferred-tracking). The item is a code review finding with severity
 (use deep-review). The item is a full research question (use research).
-
-**When to use:** "Why did we choose this?", "TODO: revisit after X",
-"Interesting but not actionable yet", "Come back to this next session."
 
 ## Instructions
 
@@ -75,19 +78,6 @@ MATCH (n:Note) WHERE id(n) = $note_id
 INSERT (n)-[:annotates]->(loc)
 ```
 
-#### Flat-file fallback
-
-When SeleneDB is not available, append to `_agentskills/NOTES.md`:
-
-```markdown
-## [Kind] Note — YYYY-MM-DD
-**Target:** [file:line or node description]
-**Author:** [user or agent]
-
-[note content]
-
----
-```
 
 ### Listing notes
 
@@ -139,7 +129,7 @@ Notes older than 90 days are flagged as potentially stale.
 
 ## Supporting files
 
-- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB detection, sessions, auto-recall, fallback
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB detection, sessions, auto-recall
 
 ## Guidance
 

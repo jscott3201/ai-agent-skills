@@ -48,7 +48,7 @@ create a session and recall prior debugging context:
 
 Eliminated hypotheses from past sessions are especially valuable —
 they prevent re-testing theories that were already disproven.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Understand the bug
 

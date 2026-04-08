@@ -1,15 +1,16 @@
 ---
 name: skill-guide
 description: >
-  Find the right skill for a task. Routes tasks to the appropriate skill
-  by workflow phase. Use when unsure which skill applies or to recommend
-  skills the user may not know about.
+  Find the right skill for a task. Routes via graph queries on skill and
+  workflow_category nodes. Use when unsure which skill applies or to
+  recommend skills the user may not know about.
 ---
 
 ## Purpose
 
 Help discover and select the right skill for the current task. This plugin
-has 38 skills — this guide routes by what you're trying to accomplish.
+has 24 graph-native skills — this guide routes by what you're trying to
+accomplish. Every skill reads from and writes to SeleneDB.
 
 Skills marked **(auto)** trigger automatically from their descriptions.
 Skills marked **(manual)** require `/justin-tools:<name>` to invoke.
@@ -19,6 +20,18 @@ Skills marked **(background)** apply silently during all work.
 The user invoked a specific skill by name. The task doesn't match any
 skill (not everything needs a skill — sometimes just write the code).
 
+## Graph-Based Routing
+
+When SeleneDB is available, query the skill catalog from the graph:
+
+```gql
+MATCH (s:skill)-[:belongs_to]->(wc:workflow_category)
+RETURN wc.name AS category, collect(s.name) AS skills
+ORDER BY wc.name
+```
+
+This ensures routing always reflects the current plugin state.
+
 ## Routing by Task
 
 ### Planning and design
@@ -26,104 +39,84 @@ skill (not everything needs a skill — sometimes just write the code).
 | Task | Skill | Invocation |
 |---|---|---|
 | Plan a feature from idea to implementation | **feature-design** | manual |
-| Research a technology, evaluate options, or investigate alternatives | **research** | manual |
-| Evaluate a decision with structured multi-perspective debate | **debate** | manual |
+| Research a technology, evaluate options | **research** | manual |
+| Evaluate a decision with structured debate | **debate** | manual |
+| Verify a plan against the actual codebase | **plan-verify** | auto |
 
 ### Building
 
 | Task | Skill | Invocation |
 |---|---|---|
-| Scaffold a new Rust crate with architecture and tests | **rust-scaffold** | manual |
-| Design error type hierarchies for Rust crates | **error-catalog** | manual |
 | Restructure a codebase into well-organized modules | **modularize** | manual |
 | Refactor code safely with verification at each step | **refactor** | manual |
-| Generate, audit, or diagnose CI/CD pipelines | **ci-pipeline** | manual |
-
-### Testing and verification
-
-| Task | Skill | Invocation |
-|---|---|---|
-| Generate test plan and test code with coverage analysis | **test-strategy** | auto |
-| Run the full Rust CI sequence (fmt, clippy, test, deny) | **rust-ci-check** | manual |
-| Verify an implementation plan against the actual codebase | **plan-verify** | auto |
-| Verify requirements have corresponding code and tests | **requirements-trace** | manual |
-| Run benchmarks sequentially and track results | **sequential-bench** | auto |
+| Apply language-specific coding standards + graph conventions | **code-standards** | auto |
 
 ### Debugging and performance
 
 | Task | Skill | Invocation |
 |---|---|---|
 | Systematically debug a bug with hypotheses and root cause | **debug** | auto |
-| Investigate performance: profile, hypothesize, optimize, verify | **perf-profile** | manual |
+| Investigate performance: profile, hypothesize, optimize | **perf-profile** | manual |
 | Triage a production incident with structured response | **incident-response** | manual |
 
-### Code review and security
+### Review and security
 
 | Task | Skill | Invocation |
 |---|---|---|
 | Deep review after completing a feature or phase | **deep-review** | auto |
-| Security audit using STRIDE threat analysis | **safety-checks** | auto |
-| Apply language-specific coding standards | **code-standards** | auto |
-| Audit a dependency before adoption | **dep-audit** | auto |
+| Security audit with graph-persisted concerns | **safety-checks** | auto |
+| Audit a dependency before adoption (supply chain) | **dep-audit** | auto |
 
-### Releasing and migration
-
-| Task | Skill | Invocation |
-|---|---|---|
-| Prepare a release: changelog, semver, version bump, docs | **release-prep** | manual |
-| Manage breaking API changes with migration guides | **migration-guide** | manual |
-| Analyze database migrations for unsafe operations | **migration-safety** | manual |
-
-### Documentation and maintenance
+### Releasing
 
 | Task | Skill | Invocation |
 |---|---|---|
-| Scan docs for stale references after code changes | **docs-sync** | auto |
-| Generate or update API documentation from code | **api-doc-gen** | manual |
-| Audit environment variables against config files | **env-audit** | manual |
-| Analyze Rust workspace health (deps, compile times, coverage) | **crate-health** | manual |
-| Onboard a new project for use with this plugin | **project-onboard** | manual |
-| Track deferred work items in DEFERRED.md | **deferred-tracking** | auto |
+| Prepare a release: changelog, semver, version bump | **release-prep** | manual |
+| Verify requirements have corresponding code and tests | **requirements-trace** | manual |
+
+### Tracking
+
+| Task | Skill | Invocation |
+|---|---|---|
 | Track development milestones across sessions | **milestone-tracking** | auto |
-| Attach notes (TODOs, rationale, observations) to anything | **notes** | auto |
+| Track deferred work items with gates | **deferred-tracking** | auto |
 | Review session history and search past work | **session-tracker** | auto |
+| Link commits to milestones and decisions | **commit-workflow** | background |
 
-### Process (background rules)
+### Documentation
 
-These apply automatically during all implementation work:
+| Task | Skill | Invocation |
+|---|---|---|
+| Generate docs from graph traversal | **graph-docs** | manual |
+| Onboard a new project for use with this plugin | **project-onboard** | manual |
+
+### Background
 
 | Rule | Skill |
 |---|---|
-| Commit at milestones, verify before commit, never push | **commit-workflow** |
-| Sequential subagent dispatch with review between tasks | **subagent-dispatch** |
-| Team coordination patterns and wave boundaries | **team-coordination** |
-| Technical writing style for all prose | **technical-writing** |
-| All affected sites must be updated, no partial changes | **no-shortcuts** |
+| Auto-annotate with rationale, observations, TODOs | **notes** |
+| Route tasks to the right skill | **skill-guide** |
 
 ## Choosing Between Similar Skills
 
 | Situation | Use this | Not this |
 |---|---|---|
 | Restructure files and modules | **modularize** | refactor |
-| Refactor within a file (extract function, reduce complexity) | **refactor** | modularize |
+| Refactor within a file (extract function) | **refactor** | modularize |
 | Review code after building a feature | **deep-review** | code-standards |
 | Check coding style during development | **code-standards** | deep-review |
 | Plan a new feature end-to-end | **feature-design** | research |
 | Investigate a technology or compare options | **research** | feature-design |
 | Debug a specific bug | **debug** | perf-profile |
 | Investigate why something is slow | **perf-profile** | debug |
-| Check a new dependency before adding it | **dep-audit** | crate-health |
-| Assess overall workspace health | **crate-health** | dep-audit |
 | Production is down, need triage now | **incident-response** | debug |
-| Bug found in development, need root cause | **debug** | incident-response |
 | Track a named initiative across sessions | **milestone-tracking** | deferred-tracking |
-| Track individual deferred work items with gates | **deferred-tracking** | milestone-tracking |
+| Track individual deferred items with gates | **deferred-tracking** | milestone-tracking |
+| Generate docs from graph data | **graph-docs** | project-onboard |
 
 ## Agents
 
 Agents are specialized subprocesses with preloaded skills and tool restrictions.
-Use agents when the task benefits from isolation, parallelism, or specialized
-focus.
 
 | Agent | Purpose | Key skills |
 |---|---|---|
@@ -133,7 +126,7 @@ focus.
 | **test-engineer** | Test planning and generation | test-strategy |
 | **debugger** | Systematic debugging | debug, safety-checks |
 | **researcher** | Technical research and evaluation | research |
-| **release-manager** | Release preparation | release-prep, docs-sync |
+| **release-manager** | Release preparation | release-prep, graph-docs |
 | **onboarder** | Project onboarding | project-onboard |
 | **debate-lead** | Multi-perspective debate | debate |
 
@@ -141,17 +134,8 @@ focus.
 
 | Rationalization | Why It's Wrong |
 |---|---|
-| "User didn't ask for a skill, don't suggest one" | Proactive recommendation is the point. Users don't know what 35 skills do — surface the right one. |
+| "User didn't ask for a skill, don't suggest one" | Proactive recommendation is the point. Users don't know what 24 skills do — surface the right one. |
 | "Close enough, recommend the similar skill" | Similar skills have different scopes. debug vs perf-profile, modularize vs refactor — wrong pick wastes setup time. |
-| "Skip disambiguation, the right skill is obvious" | Obvious to you with full context. Present the choice so the user confirms rather than discovers mid-workflow. |
-
-## Red Flags
-
-Stop and reassess if you observe:
-- Recommending a manual skill when the user's task matches an auto skill
-- Suggesting background rules as invocable skills
-- Listing all 35 skills instead of routing to the 1-2 relevant ones
-- Not checking the "Choosing Between Similar Skills" table for ambiguous cases
 
 ## Verification
 
@@ -166,10 +150,9 @@ Stop and reassess if you observe:
 a manual skill, suggest it. The user may not know the skill exists.
 
 **Auto skills handle themselves.** Don't invoke auto skills explicitly unless
-the user asks. Their descriptions tell the model when to activate.
+the user asks.
 
-**Background rules are always active.** Never invoke them as skills. They
-apply to all implementation work automatically.
+**Background rules are always active.** Never invoke them as skills.
 
 **When in doubt, start with feature-design.** For ambiguous feature work,
 feature-design orchestrates the full workflow and invokes other skills

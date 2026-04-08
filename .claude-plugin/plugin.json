@@ -1,9 +1,9 @@
 {
   "name": "justin-tools",
-  "description": "Personal workflow skills, agents, and automation",
-  "version": "3.1.0",
+  "description": "SeleneDB-first development lifecycle toolkit. 24 graph-native skills, 9 agents. Every skill reads from and writes to the property graph.",
+  "version": "4.0.0",
   "author": {
     "name": "Justin Scott"
   },
-  "keywords": ["personal", "workflows", "productivity"]
+  "keywords": ["selenedb", "property-graph", "graph-native", "development-lifecycle"]
 }

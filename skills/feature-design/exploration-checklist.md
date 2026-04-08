@@ -35,7 +35,7 @@ conversation context with exploration output.
 
 - [ ] Read the last 10-20 commit messages for ongoing work
 - [ ] Check for open branches that might interact with this feature
-- [ ] Look for recently deferred items (DEFERRED.md) related to this area
+- [ ] Look for recently deferred items (query graph) related to this area
 - [ ] Check if there are existing issues, TODOs, or FIXMEs in the area
 
 ## 5. Quality and CI

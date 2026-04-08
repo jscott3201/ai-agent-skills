@@ -39,7 +39,7 @@ create a session and recall prior incident context:
 
 Past root causes and mitigations are especially valuable during triage —
 they indicate whether this is a recurrence or a new class of issue.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Gather symptoms
 

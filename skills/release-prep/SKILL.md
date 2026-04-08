@@ -40,7 +40,7 @@ create a session and recall prior release context:
 >
 > Proceeding with release scope analysis."
 
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Determine scope
 

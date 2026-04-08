@@ -1,9 +1,9 @@
 ---
 name: code-standards
 description: >
-  Language-specific best practices, anti-patterns, and linting rules for
-  Rust, Python, and JS/TS. Auto-applies during development to catch
-  complexity, naming, and structural issues before they accumulate.
+  Language-specific standards plus graph-sourced conventions. Reads Convention
+  nodes from SeleneDB, enforces project rules alongside built-in standards.
+  Promotes recurring violations to new conventions.
 ---
 
 ## Purpose
@@ -64,15 +64,14 @@ When invoked with `$ARGUMENTS`:
 1. Identify the target scope (file, directory, or full codebase)
 2. Detect the primary language
 3. Load the relevant language standards file
-4. **Load project conventions (SeleneDB).** If SeleneDB is available,
-   query active conventions scoped to the detected language or project:
+4. **Load project conventions from graph.** Query active conventions
+   scoped to the detected language, prose, or all:
 
    ```gql
    MATCH (c:Convention {active: true})
-   MATCH (c)<-[:produced]-(s:Session)
-   WHERE s.project = $project
-     AND (c.scope = $language OR c.scope = 'all')
-   RETURN c.rule, c.severity, c.rationale
+   WHERE c.project = $project
+     AND (c.scope = $language OR c.scope = 'all' OR c.scope = 'prose')
+   RETURN c.rule, c.severity, c.rationale, c.scope
    ORDER BY c.severity
    ```
 
@@ -155,8 +154,33 @@ the function is likely doing too much. Extracting a helper and suppressing
 the lint misses the point. Understand *why* the function is complex and
 address the root cause.
 
+## Graph Integration
+
+### 0. Context recall
+
+Create a session per [selene-integration.md](../_selene/selene-integration.md).
+Query active conventions (Step 4 above) and check for recurring violations:
+
+```gql
+MATCH (f:Finding {category: 'code-standards'})
+WHERE f.project = $project AND f.triage = 'fix_now'
+WITH f.summary AS summary, count(*) AS occurrences
+WHERE occurrences >= 3
+RETURN summary, occurrences
+ORDER BY occurrences DESC
+```
+
+If recurring violations are found, suggest convention promotion.
+
+### Graph write: convention promotion
+
+When the same violation pattern appears 3+ times, prompt user to promote
+to a Convention node per the graduation pattern in
+[selene-patterns.md](../_selene/selene-patterns.md).
+
 ## Supporting files
 
+- [selene-integration.md](../_selene/selene-integration.md) — SeleneDB detection, sessions, auto-recall
 - [rust-standards.md](rust-standards.md) - Rust naming, visibility, error
   handling, clippy config, idioms
 - [python-standards.md](python-standards.md) - Python naming, typing, imports,

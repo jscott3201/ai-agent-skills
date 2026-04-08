@@ -44,7 +44,7 @@ create a session and recall prior verification context:
 >
 > I'll prioritize checking [high-drift areas] first."
 
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 For each task in the plan, verify the following against the actual codebase.
 Use grep and read. Do not trust the plan's claims. See

@@ -1,7 +1,11 @@
 # justin-tools Plugin Development
 
-A Claude Code plugin providing a complete development lifecycle toolkit:
-38 skills, 9 agents, 8 hooks. Supports Rust, Python, and JavaScript/TypeScript.
+A SeleneDB-first Claude Code plugin. Every skill reads from and writes to
+the property graph. 24 graph-native skills, 9 agents, 4 hook types.
+
+**SeleneDB is required.** Users must configure the SeleneDB MCP server
+in their project or user settings. Skills check for `gql_query` tool
+availability at startup and will not proceed without it.
 
 ## Plugin Structure
 
@@ -31,6 +35,43 @@ _agentskills/
 └── DEFERRED.md  — deferred work tracking
 ```
 
+## SeleneDB Integration
+
+SeleneDB is the foundation of this plugin. Every skill persists reasoning
+to the property graph for cross-session knowledge accumulation.
+
+**Architecture:**
+- Skills detect `gql_query` tool availability at startup (required)
+- Graph stores structured reasoning: decisions, findings, hypotheses,
+  root causes, deferred items, security concerns, coverage gaps, releases
+- Skills write at decision points (user triage = graph commit)
+- Skills auto-recall relevant prior reasoning at start via scoped search
+- Sessions auto-create and chain via `:continued_from` edges
+- All skills auto-annotate with `:Note` nodes (background discipline)
+
+**Integration files:**
+- `skills/_selene/selene-integration.md` — detection, sessions, auto-recall
+- `skills/_selene/selene-schema.md` — node types, edge types, properties
+- `skills/_selene/selene-patterns.md` — write patterns, read queries
+- `skills/_selene/reasoning-schema.gql` — GQL DDL for schema registration
+- `skills/_selene/setup-schema.sh` — one-command schema setup
+
+**Adding SeleneDB to a new skill:**
+1. Add `### 0. Context recall` section matching the skill's numbering
+2. Add `#### Graph write: [name]` sections at each decision point
+3. Reference `selene-integration.md` in the Supporting Files section
+
+**Cross-skill bridges:**
+- deep-review deferred findings auto-create `:DeferredItem` nodes
+- deep-review findings surface in test-strategy auto-recall
+- release-prep queries deferred items gated on "next release"
+- safety-checks writes `:SecurityConcern` nodes linked to dependencies
+- dep-audit writes `:SecurityConcern` nodes for supply chain issues
+- code-standards reads `:Convention` nodes from graph for enforcement
+- commit-workflow links `:GitCommit` nodes to milestones and decisions
+- graph-docs assembles documentation from graph traversal
+- notes auto-annotates all graph nodes as a background discipline
+
 ## Creating Skills
 
 1. Copy `skills/_template/` to `skills/<skill-name>/`
@@ -38,7 +79,8 @@ _agentskills/
 3. Description: front-load the key use case, under 250 characters
 4. Keep SKILL.md under 500 lines, move reference material to supporting files
 5. Reference supporting files with markdown links so Claude knows when to load them
-6. Test with `claude --plugin-dir .` then `/justin-tools:<skill-name>`
+6. Every skill must have graph read AND write patterns
+7. Test with `claude --plugin-dir .` then `/justin-tools:<skill-name>`
 
 ## Skill Conventions
 
@@ -51,6 +93,7 @@ _agentskills/
   `disable-model-invocation: true` that Claude cannot invoke)
 - Multi-language: include Rust, Python, and JS/TS examples where applicable
 - Output files go to `_agentskills/<subfolder>/`
+- SeleneDB integration is mandatory — follow `_selene/` patterns
 
 ## User Interaction Convention
 
@@ -94,47 +137,6 @@ then applies this convention when presenting to the user.
 - Prompt-based hooks (type: prompt) use Haiku for fast evaluation
 - TeammateIdle hooks keep team agents productive
 
-## SeleneDB Integration
-
-Skills can persist reasoning to SeleneDB (an AI-first property graph
-database) for cross-session knowledge accumulation. SeleneDB is optional
-and purely additive — skills fall back to existing behavior when it is
-not available.
-
-**Architecture:**
-- User configures SeleneDB MCP server in project/user settings
-- Skills detect `gql_query` tool availability at runtime
-- Graph stores structured reasoning: decisions, findings, hypotheses,
-  root causes, deferred items, coverage gaps, releases
-- Skills write at decision points (user triage = graph commit)
-- Skills auto-recall relevant prior reasoning at start via scoped
-  vector search
-- Sessions auto-create and chain via `:continued_from` edges
-
-**Migrated skills (18):** research, deep-review, debug, plan-verify,
-release-prep, deferred-tracking, test-strategy, feature-design, debate,
-incident-response, refactor, perf-profile, modularize, project-onboard,
-requirements-trace, milestone-tracking, notes, session-tracker.
-
-**Integration files:**
-- `skills/_selene/selene-integration.md` — detection, sessions, auto-recall, fallback
-- `skills/_selene/selene-schema.md` — node types, edge types, properties
-- `skills/_selene/selene-patterns.md` — write patterns, read queries, rationalization tracking
-- `skills/_selene/reasoning-schema.gql` — GQL DDL for schema registration
-- `skills/_selene/setup-schema.sh` — one-command schema setup (run once, then restart SeleneDB)
-
-**Adding SeleneDB to a new skill:**
-1. Add `### 0. Context recall (SeleneDB)` section matching the skill's
-   numbering convention
-2. Add `#### Graph write: [name] (SeleneDB)` sections at each decision point
-3. Reference `selene-integration.md` in the Supporting Files section
-4. Add the skill to the fallback table in `selene-integration.md`
-
-**Cross-skill bridges:**
-- deep-review deferred findings auto-create `:DeferredItem` nodes
-- deep-review findings surface in test-strategy auto-recall
-- release-prep queries deferred items gated on "next release"
-
 ## Quality Checklist
 
 Before considering a skill or agent complete:
@@ -145,7 +147,8 @@ Before considering a skill or agent complete:
 - [ ] Supporting files referenced from SKILL.md
 - [ ] Multi-language examples where applicable (Rust, Python, JS/TS)
 - [ ] Output paths use `_agentskills/<subfolder>/`
-- [ ] SeleneDB integration follows `_selene/` patterns (if applicable)
+- [ ] SeleneDB integration with context recall and graph write patterns
+- [ ] References `selene-integration.md` in supporting files
 - [ ] Tested via `--plugin-dir .`
 
 ## Version Management

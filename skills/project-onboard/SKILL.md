@@ -41,7 +41,7 @@ create a session and check for prior onboarding:
 
 A previously onboarded project gets a lighter touch — focus on what
 changed since last onboarding rather than a full assessment.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### Stage 1: Explore the project
 

@@ -43,7 +43,7 @@ create a session and recall prior traceability context:
 
 Design non-goals are especially valuable — code implementing a non-goal
 is scope creep that the trace should catch.
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Locate the requirements source
 
@@ -138,7 +138,7 @@ Present each gap **one at a time**, starting with high severity:
 > Options:
 > 1. **Address now** — implement/test the missing piece
 > 2. **Accept** �� this gap is intentional (document why)
-> 3. **Defer** — add to DEFERRED.md for later
+> 3. **Defer** — track as a deferred item in the graph
 >
 > I recommend [option] because [reason].
 

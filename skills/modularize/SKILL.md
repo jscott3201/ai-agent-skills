@@ -38,7 +38,7 @@ create a session and recall prior structural analysis:
 >
 > Prior deferred items may be ready to address."
 
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Assess aggressiveness
 
@@ -105,7 +105,7 @@ When the code-analyzer report returns:
    > Options:
    > 1. **Include** - add to the refactoring plan
    > 2. **Skip** - not worth addressing now
-   > 3. **Defer** - track for later (add to DEFERRED.md)
+   > 3. **Defer** - track for later (add to graph as deferred item)
    >
    > I recommend [option] because [reason]."
 

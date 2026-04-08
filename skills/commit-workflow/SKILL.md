@@ -1,8 +1,9 @@
 ---
 name: commit-workflow
 description: >
-  Commit discipline: milestone commits, verify before committing, never push
-  unless asked. Background rules for all implementation work.
+  Commit discipline with graph linking. MERGE GitCommit nodes and link to
+  active milestones, findings, and decisions. Verify before committing,
+  never push unless asked.
 user-invocable: false
 ---
 
@@ -116,6 +117,42 @@ Stop and reassess if you observe:
 - Committing without running the test suite first
 - Batching unrelated changes into a single commit
 - Using `--no-verify` to skip pre-commit hooks
+
+## Graph Integration
+
+### Graph write: commit linking
+
+After every commit, MERGE a GitCommit node and link it to active reasoning.
+This runs within the calling skill's session (no separate session needed).
+
+```gql
+MERGE (c:GitCommit {sha: $full_sha})
+ON CREATE SET
+  c.project = $project,
+  c.short_sha = $short_sha,
+  c.message = $commit_message,
+  c.author = $author,
+  c.date = date(),
+  c.branch = $branch
+```
+
+Query for active milestone and link if found:
+
+```gql
+MATCH (m:Milestone {status: 'in_progress'})
+WHERE m.project = $project
+RETURN m.name, id(m) AS milestone_id
+```
+
+If a milestone is active, create `:part_of` edge from commit to milestone.
+
+If the commit implements a Decision or fixes a Finding from the current
+session, create `:implemented_by` or `:fixed_by` edges per the patterns
+in [selene-patterns.md](../_selene/selene-patterns.md).
+
+## Supporting files
+
+- [selene-patterns.md](../_selene/selene-patterns.md) — commit linking patterns
 
 ## Guidance
 

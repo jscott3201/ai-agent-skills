@@ -1,9 +1,9 @@
 ---
 name: dep-audit
 description: >
-  Audit dependencies before adoption. Checks health metrics, license
-  compatibility, supply chain signals, and evaluates build vs depend.
-  Use when recommending or adding a new library or package.
+  Audit dependencies with graph-persisted findings. Checks health metrics,
+  license compatibility, supply chain signals. Writes dependency and
+  SecurityConcern nodes for cross-session supply chain tracking.
 ---
 
 ## Purpose
@@ -164,8 +164,62 @@ Step 5, then walk through each recommendation:
 If only one candidate is being audited (not a comparison), present the
 report and ask: "Adopt, reject, or investigate alternatives?"
 
+## Graph Integration
+
+### 0. Context recall
+
+Query existing dependency data and security concerns before auditing:
+
+```gql
+MATCH (d:dependency)
+OPTIONAL MATCH (sc:SecurityConcern)-[:affects]->(d)
+WHERE sc.status = 'open'
+RETURN d.name, d.version, d.security_relevant,
+  collect(sc.summary) AS open_concerns
+ORDER BY d.name
+```
+
+Present existing dependency landscape to user before new audit begins.
+
+### Session creation
+
+Create a session at audit start per [selene-integration.md](../_selene/selene-integration.md).
+
+### Graph write: dependency audit result
+
+After user confirms adopt/reject/caution decision:
+
+```gql
+MERGE (d:dependency {name: $dep_name})
+ON CREATE SET d.version = $version,
+  d.security_relevant = $is_security_relevant
+```
+
+### Graph write: security concern on vulnerability
+
+When a vulnerability or license concern is discovered:
+
+```gql
+INSERT (sc:SecurityConcern {
+  project: $project,
+  summary: $vulnerability_summary,
+  severity: $severity,
+  status: 'open',
+  category: 'supply_chain',
+  found_date: date(),
+  cve: $cve
+})
+RETURN id(sc) AS concern_id
+
+// Link to dependency
+MATCH (sc:SecurityConcern) WHERE id(sc) = $concern_id
+MATCH (d:dependency {name: $dep_name})
+INSERT (sc)-[:affects]->(d)
+```
+
 ## Supporting files
 
+- [selene-integration.md](../_selene/selene-integration.md) — SeleneDB detection, sessions, auto-recall
 - [ecosystem-audit.md](ecosystem-audit.md) - tools, thresholds, and commands per ecosystem
 - [license-compatibility.md](license-compatibility.md) - license contamination matrix and rules
 

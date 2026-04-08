@@ -5,6 +5,18 @@ auto-generated properties: `id`, `created_at`, `updated_at`, `version`.
 Text properties with `searchable = true` are indexed for BM25 full-text
 search and auto-embedded for vector search.
 
+## Multi-Project Convention
+
+All project-specific node types carry a `project` property for
+multi-tenancy. Multiple projects (e.g., `'justin-tools'`, `'SeleneDB'`)
+share a single graph. Cross-cutting nodes (`skill`, `agent`,
+`dependency`, `workflow_category`) are managed outside this schema
+and have no `project` property.
+
+- **Filter by project:** `WHERE n.project = $project`
+- **Cross-project aggregation:** omit the project filter
+- **Topic bridging:** Topics may omit `project` to span projects
+
 ## Schema Registration
 
 Node type schemas must be registered in SeleneDB for search and indexing
@@ -36,8 +48,8 @@ Conversation context anchor. Every reasoning node links back to a session.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `date` | Date | When the session occurred |
-| `project` | String | Git remote or directory name |
 | `branch` | String | Git branch |
 | `scope` | String (searchable) | What was being worked on |
 | `skill` | String | Which skill ran |
@@ -50,6 +62,7 @@ Full artifact container (plan, research doc, review report).
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `title` | String (searchable) | Document title |
 | `doc_type` | String | plan, research, review, landscape, deep_dive |
 | `content` | String (searchable) | Full markdown content |
@@ -60,6 +73,7 @@ Atomic choice with rationale. The fundamental reasoning unit.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `summary` | String (searchable) | What was decided |
 | `rationale` | String (searchable) | Why this choice was made |
 | `alternatives` | String | What was considered and rejected |
@@ -70,6 +84,7 @@ Review or audit discovery with severity classification.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `summary` | String (searchable) | What was found |
 | `severity` | String | S1_critical, S2_high, S3_medium, S4_low |
 | `category` | String | Review category (1-13 from deep-review) |
@@ -82,6 +97,7 @@ Research learning with cited sources.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `summary` | String (searchable) | What was learned |
 | `sources` | String | Cited references |
 | `confidence` | String | high, medium, low |
@@ -92,6 +108,7 @@ Debug theory following the scientific method.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `statement` | String (searchable) | The hypothesis |
 | `prediction` | String | What would be observed if true |
 | `test` | String | How to check |
@@ -104,6 +121,7 @@ Link in a 5 Whys chain. Each level points deeper.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `why` | String (searchable) | The causal explanation at this level |
 | `level` | Integer | Depth in the chain (1 = surface, 5 = systemic) |
 | `systemic` | Boolean | Whether this is the root systemic cause |
@@ -113,6 +131,7 @@ Tracked deferred work with a verifiable gate.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `item` | String (searchable) | Short name |
 | `description` | String (searchable) | What the work involves |
 | `priority` | String | high, medium, low |
@@ -127,6 +146,7 @@ Verifiable trigger condition for deferred work.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `condition` | String (searchable) | What must be true |
 | `met` | Boolean | Whether the condition has been satisfied |
 | `met_on` | Date | When the gate was met |
@@ -137,6 +157,7 @@ Untested code path identified by test-strategy.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `function` | String | Function or method name |
 | `gap_type` | String | edge_case, error_path, boundary, concurrency, property |
 | `description` | String (searchable) | What is not tested |
@@ -147,6 +168,7 @@ Version release with changelog and breaking changes.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `version` | String | Semantic version (e.g., 1.3.0) |
 | `bump_type` | String | patch, minor, major |
 | `date` | Date | Release date |
@@ -158,6 +180,7 @@ File and optional line range in the codebase.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `file` | String | Relative file path |
 | `line_start` | Integer | Start line (optional) |
 | `line_end` | Integer | End line (optional) |
@@ -169,6 +192,7 @@ When an anti-rationalization pattern was observed during a session.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `pattern` | String (searchable) | The rationalization that was caught |
 | `skill` | String | Which skill's anti-rationalization table matched |
 | `corrective_action` | String | What was done instead |
@@ -178,6 +202,7 @@ A claim made in a plan about the codebase (used by plan-verify).
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `claim` | String (searchable) | What the plan asserted |
 | `actual` | String | What the codebase actually shows |
 | `inaccuracy_type` | String | naming, mapping, resource, staleness, none |
@@ -188,6 +213,7 @@ Production issue tracked through triage, mitigation, and postmortem.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `title` | String (searchable) | Brief incident description |
 | `severity` | String | S1_critical, S2_high, S3_medium, S4_low |
 | `blast_radius` | String | Who/what was affected |
@@ -203,6 +229,7 @@ A viewpoint in a structured debate with Toulmin argument structure.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `role` | String | Perspective name (e.g., Security Advocate) |
 | `priority_focus` | String | What this perspective optimizes for |
 | `claim` | String (searchable) | The position taken |
@@ -218,6 +245,7 @@ fit structured types: rationale, TODOs, observations, bookmarks.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `content` | String (searchable) | The note text |
 | `kind` | String | todo, rationale, observation, bookmark |
 | `author` | String | user, agent |
@@ -228,6 +256,7 @@ findings. Supplements (does not replace) built-in skill rules.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `rule` | String (searchable) | The convention statement (e.g., "All public API functions must validate input") |
 | `scope` | String | Where it applies (e.g., "rust", "api-design", "selene-gql", "testing") |
 | `severity` | String | critical, recommended, advisory |
@@ -241,6 +270,7 @@ Fills the gap between individual commits and the full project roadmap.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `name` | String (searchable) | Initiative name (e.g., "Auth middleware rewrite") |
 | `description` | String (searchable) | What this milestone covers |
 | `status` | String | planned, in_progress, completed, abandoned |
@@ -251,12 +281,29 @@ Fills the gap between individual commits and the full project roadmap.
 ### :Topic
 Domain area or subject that documents, insights, and deferred items can be
 tagged with. Enables cross-skill discovery: "What research covers embeddings?"
+Topics can bridge projects when `project` is omitted.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, optional) | Project scope, or omit for cross-project topics |
 | `name` | String (searchable) | Topic name (e.g., "embeddings", "auth", "query-engine") |
 | `domain` | String | Broad domain grouping (e.g., "infrastructure", "security", "ml") |
 | `description` | String (searchable) | What this topic area covers |
+
+### :SecurityConcern
+Security issue identified during audits, dependency reviews, or code analysis.
+Links to affected dependencies, crates, and modules for supply chain tracking.
+
+| Property | Type | Description |
+|---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
+| `summary` | String (searchable) | What the concern is |
+| `severity` | String (indexed) | critical, high, medium, low |
+| `status` | String (indexed) | open, mitigated, accepted, false_positive |
+| `category` | String (indexed) | STRIDE: spoofing, tampering, repudiation, information_disclosure, denial_of_service, elevation_of_privilege. Also: supply_chain, memory_safety, input_validation |
+| `found_date` | Date | When the concern was identified |
+| `cve` | String (indexed) | CVE identifier if applicable |
+| `audit_session` | String | Session ID where this was discovered |
 
 ### :GitCommit
 A git commit that implements, fixes, or introduces a change linked to reasoning.
@@ -264,6 +311,7 @@ Note: `Commit` is a reserved keyword in ISO GQL — use `GitCommit` instead.
 
 | Property | Type | Description |
 |---|---|---|
+| `project` | String (indexed, required) | Project identifier for multi-tenancy |
 | `sha` | String | Full commit SHA (unique identifier) |
 | `short_sha` | String | Short SHA for display (e.g., a30c465) |
 | `message` | String (searchable) | Commit message |
@@ -276,17 +324,16 @@ Note: `Commit` is a reserved keyword in ISO GQL — use `GitCommit` instead.
 
 | Edge | From | To | Meaning |
 |---|---|---|---|
-| `:produced` | Session | any reasoning node | Session generated this |
+| `:produced` | Session | any reasoning node, SecurityConcern | Session generated this |
 | `:contains` | Document | Decision, Finding, Insight | Parent-child hierarchy |
 | `:based_on` | Decision | Insight, Finding, Hypothesis | Evidence for the decision |
-| `:affects` | Decision, Finding | CodeLocation | What code is impacted |
+| `:affects` | Decision, Finding, SecurityConcern | CodeLocation, Dependency | What code or dependency is impacted |
 | `:led_to` | Decision | Decision, Finding | Downstream consequence |
 | `:resolved_by` | Finding, DeferredItem | Decision | How it was addressed |
 | `:gated_by` | DeferredItem | Gate | Trigger condition |
 | `:blocks` | DeferredItem | DeferredItem | Dependency |
 | `:supersedes` | any | any (same type) | Invalidation/replacement |
 | `:why` | RootCause | RootCause | 5 Whys depth chain |
-| `:tested_by` | Hypothesis | (inline) | Test applied to hypothesis |
 | `:covers` | CoverageGap | CodeLocation | What code is untested |
 | `:continued_from` | Session | Session | Multi-session chains |
 | `:in_project` | Session | (project scope) | Project grouping |
@@ -294,7 +341,7 @@ Note: `Commit` is a reserved keyword in ISO GQL — use `GitCommit` instead.
 | `:verified_as` | Document (plan) | (quality gate) | Plan verification result |
 | `:breaking_change` | Release | CodeLocation | What API changed |
 | `:changelog_entry` | Release | (inline) | Release note |
-| `:mitigated_by` | Incident | Decision | Mitigation strategy chosen |
+| `:mitigated_by` | Incident, SecurityConcern | Decision, GitCommit | Mitigation strategy or fixing commit |
 | `:caused_by` | Incident | RootCause | Root cause link |
 | `:postmortem` | Incident | Document | Postmortem document |
 | `:argued_by` | Document (debate) | Perspective | Debate viewpoint |

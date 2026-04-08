@@ -37,9 +37,7 @@ create a session and recall prior research before starting:
 > This may inform the current investigation. Proceeding with research."
 
 This prevents re-investigating dead ends and builds on prior findings.
-If no prior context is found, skip silently.
-
-If SeleneDB is not available or no prior context exists, skip silently.
+If no prior context exists, skip silently.
 
 ### 1. Select research mode
 
