@@ -1,7 +1,7 @@
 # justin-tools
 
 A Claude Code plugin providing a complete development lifecycle toolkit:
-35 skills, 9 agents, and 8 hooks covering research, design, implementation,
+38 skills, 9 agents, and 8 hooks covering research, design, implementation,
 testing, review, debugging, release, and team coordination.
 
 **Languages:** Rust, Python, JavaScript/TypeScript
@@ -31,6 +31,7 @@ Then run `/reload-plugins` in your session.
 
 | Skill | Invoke | Description |
 |:--|:--|:--|
+| `skill-guide` | Auto or manual | Find the right skill for a task — routes by workflow phase |
 | `feature-design` | `/justin-tools:feature-design [desc]` | Idea through research, design, and phased implementation planning |
 | `research` | `/justin-tools:research [topic]` | Technical deep-dives, competitive analysis, doc lookup (4 modes) |
 | `debate` | `/justin-tools:debate [question]` | Multi-perspective analysis with scoring and rulings |
@@ -52,7 +53,7 @@ Then run `/reload-plugins` in your session.
 
 | Skill | Invoke | Description |
 |:--|:--|:--|
-| `deep-review` | Auto or manual | Post-phase code review (13 categories, 4 groups) |
+| `deep-review` | Auto or manual | Post-phase code review (13 categories) with convention graduation |
 | `safety-checks` | Auto or `/justin-tools:safety-checks` | Security, auth, memory safety (STRIDE audit in manual mode) |
 | `dep-audit` | Auto or manual | Dependency health, license compatibility, supply chain signals |
 | `rust-ci-check` | `/justin-tools:rust-ci-check` | Full Rust CI: fmt, clippy, test, deny |
@@ -68,6 +69,9 @@ Then run `/reload-plugins` in your session.
 | `perf-profile` | `/justin-tools:perf-profile [target]` | Performance investigation with instrumentation guidance |
 | `incident-response` | `/justin-tools:incident-response [issue]` | Production triage, mitigation, postmortem |
 | `crate-health` | `/justin-tools:crate-health` | Rust workspace health dashboard |
+| `milestone-tracking` | Auto or manual | Track development milestones — groups of commits into named initiatives |
+| `notes` | Auto or manual | Attach TODOs, rationale, observations, and bookmarks to any graph node |
+| `session-tracker` | Auto or manual | Track and recall context across sessions for continuity |
 | `ci-pipeline` | `/justin-tools:ci-pipeline [mode]` | Generate, audit, and diagnose CI/CD pipelines |
 | `project-onboard` | `/justin-tools:project-onboard` | Guided project setup for justin-tools |
 
@@ -117,6 +121,7 @@ based on the task.
 
 | Event | Hook | Description |
 |:--|:--|:--|
+| SessionStart | Skill routing + session context | Injects skill routing table and loads prior session context from SeleneDB |
 | PreToolUse | Block `git push` | Only the user pushes to remote |
 | PreToolUse | Block `git reset --hard` | Destructive, requires user consent |
 | PreToolUse | Block `git checkout --` | Discards uncommitted changes |
@@ -136,11 +141,45 @@ _agentskills/
 ├── research/       # technical deep-dives, landscape analyses
 ├── debates/        # multi-perspective debate findings
 ├── reviews/        # code review and security audit reports
-└── DEFERRED.md     # deferred work tracking
+├── DEFERRED.md     # deferred work tracking
+├── NOTES.md        # free-form annotations (fallback)
+├── SESSION_LOG.md  # session continuity log (fallback)
+└── milestones.md   # milestone tracking (fallback)
 ```
 
 This directory should be gitignored. Files are not committed unless
 explicitly requested.
+
+## SeleneDB Integration
+
+18 skills can optionally persist structured reasoning to
+[SeleneDB](https://selenedb.com), an AI-first property graph database.
+This enables cross-session knowledge accumulation — prior debugging
+sessions inform future ones, review findings surface in test planning,
+deferred items carry forward to release prep, and recurring patterns
+graduate to project conventions.
+
+**Setup:** Configure the SeleneDB MCP server in your project or user settings.
+Skills auto-detect `gql_query` tool availability at runtime and fall back to
+normal behavior when SeleneDB is not available.
+
+**Key capabilities:**
+
+| Feature | What it does |
+|:--|:--|
+| **Session continuity** | Rolling summaries captured at skill completion, loaded at session start |
+| **Topic discovery** | `:Topic` nodes connect research, deferred items, and milestones by domain |
+| **Provenance chains** | `:informs` edges trace research → plan → implementation |
+| **Convention graduation** | Recurring deep-review findings auto-promote to project conventions |
+| **Milestone tracking** | Named initiatives group commits, documents, and decisions |
+| **Universal notes** | Free-form annotations attached to any graph node |
+
+**Migrated skills:** research, deep-review, debug, plan-verify, release-prep,
+deferred-tracking, test-strategy, feature-design, debate, incident-response,
+refactor, perf-profile, modularize, project-onboard, requirements-trace,
+milestone-tracking, notes, session-tracker.
+
+See `skills/_selene/` for schema, integration patterns, and setup scripts.
 
 ## Onboarding a New Project
 
@@ -166,6 +205,9 @@ cp -r skills/_template skills/my-new-skill
 # Edit skills/my-new-skill/SKILL.md
 claude --plugin-dir .  # test locally
 ```
+
+**CI:** A GitHub Actions workflow validates the plugin on push to `main` and
+on pull requests.
 
 **Rename the plugin:**
 

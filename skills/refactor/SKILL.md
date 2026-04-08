@@ -19,6 +19,28 @@ crate extraction), see `modularize` instead.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior refactoring context:
+
+1. **Create session** with `skill: 'refactor'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior refactoring work on this code:
+   - Prior `:Decision` nodes from refactor sessions on same `:CodeLocation`
+   - Prior smell identifications and transformation outcomes
+   - Any `:DeferredItem` nodes related to tech debt in this area
+
+3. If prior refactoring context exists:
+
+> "Prior refactor context:
+> - [This module was refactored N times — last on date for smell]
+> - [Any deferred refactoring items in this area]
+>
+> Recurring refactoring in the same module may indicate a deeper structural
+> issue (consider `modularize` instead)."
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Identify the smell
 
 From `$ARGUMENTS` or by analyzing the code, identify what needs refactoring:
@@ -71,6 +93,26 @@ Example plan:
 ```
 
 Get the user's approval on the plan before executing.
+
+#### Graph write: refactoring decision (SeleneDB)
+
+After the user approves the transformation plan:
+
+```gql
+INSERT (d:Decision {
+  summary: $smell_type + ': ' + $transformation_summary,
+  rationale: $why_this_approach,
+  alternatives: $other_approaches_considered,
+  confidence: 'high'
+})
+RETURN id(d) AS decision_id
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(d)
+
+MERGE (loc:CodeLocation {file: $file, function: $function})
+INSERT (d)-[:affects]->(loc)
+```
 
 ### 4. Execute incrementally
 
@@ -144,6 +186,10 @@ After all steps are complete:
 than expected and introduce new bugs. Refactoring preserves working code
 and existing tests.
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |
@@ -194,3 +240,8 @@ needed.
 surfaces during refactoring, defer it (use `deferred-tracking`).
 Mixing refactoring and feature work makes it impossible to verify
 "no behavioral change."
+
+**SeleneDB reveals refactoring patterns.** If the same module is
+refactored repeatedly, the graph shows it. Recurring refactoring points
+to a structural issue that `modularize` should address, not another
+incremental fix.

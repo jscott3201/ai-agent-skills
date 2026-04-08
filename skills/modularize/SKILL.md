@@ -18,6 +18,28 @@ individual code transformations.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior structural analysis:
+
+1. **Create session** with `skill: 'modularize'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior modularization work:
+   - Prior `:Decision` nodes from modularize or refactor sessions on same scope
+   - Prior findings triaged as "defer" or "skip" that may now be relevant
+   - Recurring refactoring patterns from the refactor skill on these modules
+
+3. If prior structural context exists:
+
+> "Prior structural context:
+> - [This area was analyzed N times — last aggressiveness level used]
+> - [N deferred findings from prior analysis]
+> - [Refactor skill has touched this module N times — may indicate deeper issue]
+>
+> Prior deferred items may be ready to address."
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Assess aggressiveness
 
 Before analyzing code, determine the refactoring scope. Ask the user:
@@ -91,6 +113,29 @@ When the code-analyzer report returns:
    After all findings are triaged, summarize the approved set and
    confirm before proceeding to planning.
 
+#### Graph write: finding triage (SeleneDB)
+
+After each finding triage decision:
+
+```gql
+INSERT (d:Decision {
+  summary: $finding_description,
+  rationale: $user_choice + ': ' + $reason,
+  alternatives: $other_options,
+  confidence: 'high'
+})
+RETURN id(d) AS decision_id
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(d)
+
+MERGE (loc:CodeLocation {file: $file, module: $module})
+INSERT (d)-[:affects]->(loc)
+```
+
+If the user chooses **defer**, also create a `:DeferredItem` to bridge
+to deferred-tracking.
+
 ### 4. Create refactoring plan
 
 For the approved set of findings, produce a step-by-step refactoring
@@ -163,6 +208,14 @@ what to *detect*).
 | "Skip verification between steps" | Each modularization step can break imports and references. Verify incrementally. |
 | "Conservative mode is fine, skip execution" | Analysis without action is a report, not a refactoring. Execute the approved changes. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Splitting files by line count instead of responsibility
+- Skipping the code-analyzer step and reading code directly
+- Not verifying compilation and tests after each structural move
+- Creating circular dependencies through the restructuring
+
 ## Verification
 
 - [ ] Code-analyzer report produced with prioritized findings
@@ -193,6 +246,7 @@ methodology with characterization tests.
 
 ## Supporting files
 
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
 - [rust-patterns.md](rust-patterns.md) - Rust module splitting, crate
   extraction, compose structs, visibility
 - [python-patterns.md](python-patterns.md) - Python package restructuring,

@@ -17,6 +17,30 @@ transition to root-cause analysis.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior incident context:
+
+1. **Create session** with `skill: 'incident-response'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior incidents and debug sessions:
+   - Prior `:Incident` nodes for this project, especially recent ones
+   - Prior `:RootCause` chains from debug sessions on related modules
+   - Any `:Hypothesis` nodes that were confirmed in the affected area
+
+3. If relevant incident history exists, present it:
+
+> "Prior incident context:
+> - [N] previous incidents in this project
+> - [Any recurring root causes or patterns]
+> - [Last incident in this area: date, root cause, mitigation]
+>
+> This history may narrow the investigation."
+
+Past root causes and mitigations are especially valuable during triage —
+they indicate whether this is a recurrence or a new class of issue.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Gather symptoms
 
 From `$ARGUMENTS` and the user, collect:
@@ -76,6 +100,40 @@ Common strategies:
 Wait for the user's decision before acting. **Mitigation first, root cause
 second.** Stop the bleeding, then investigate.
 
+#### Graph write: incident and mitigation (SeleneDB)
+
+After severity is assessed and mitigation is chosen:
+
+```gql
+INSERT (i:Incident {
+  title: $incident_title,
+  severity: $severity,
+  blast_radius: $who_affected,
+  started_at: $symptom_onset,
+  mitigation: $chosen_mitigation
+})
+RETURN id(i) AS incident_id
+
+INSERT (d:Decision {
+  summary: $mitigation_strategy,
+  rationale: $why_this_mitigation,
+  alternatives: $other_options_considered,
+  confidence: 'high'
+})
+RETURN id(d) AS mitigation_id
+```
+
+Link mitigation decision to incident:
+
+```gql
+MATCH (i:Incident) WHERE id(i) = $incident_id
+MATCH (d:Decision) WHERE id(d) = $mitigation_id
+INSERT (i)-[:mitigated_by]->(d)
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(i)
+```
+
 ### 5. Root cause investigation
 
 Once the immediate impact is mitigated, transition to systematic debugging.
@@ -88,6 +146,22 @@ structured root-cause analysis:
 - Verify the fix does not introduce new issues
 
 ### 6. Produce postmortem
+
+#### Graph write: root cause link (SeleneDB)
+
+If root cause analysis was performed (via debug methodology), link the
+`:RootCause` chain from the debug session to this incident:
+
+```gql
+MATCH (i:Incident) WHERE id(i) = $incident_id
+MATCH (r:RootCause {level: 1})<-[:produced]-(s:Session)
+WHERE id(s) = $session_id
+INSERT (i)-[:caused_by]->(r)
+```
+
+This creates a cross-skill link: the debug session's root cause chain
+is connected to the incident, enabling queries like "what systemic root
+causes produce S1 incidents?"
 
 Save to `_agentskills/reviews/YYYY-MM-DD-incident-<name>.md`:
 
@@ -133,6 +207,36 @@ Save to `_agentskills/reviews/YYYY-MM-DD-incident-<name>.md`:
 | [Preventive action] | [Who] | [When] |
 ```
 
+#### Graph write: postmortem (SeleneDB)
+
+After the postmortem is written:
+
+```gql
+INSERT (doc:Document {
+  title: $incident_title,
+  doc_type: 'postmortem',
+  content: $postmortem_content
+})
+RETURN id(doc) AS doc_id
+
+MATCH (i:Incident) WHERE id(i) = $incident_id
+MATCH (doc:Document) WHERE id(doc) = $doc_id
+INSERT (i)-[:postmortem]->(doc)
+
+// Update incident with resolution details
+MATCH (i:Incident) WHERE id(i) = $incident_id
+SET i.resolved_at = $resolution_time,
+    i.duration = $duration,
+    i.root_cause = $root_cause_summary,
+    i.lessons_learned = $lessons
+```
+
+Update session outcome to `completed`.
+
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |
@@ -175,3 +279,9 @@ incident, not days later.
 **Blame-free postmortems.** Focus on systems and processes, not individuals.
 "The deploy pipeline lacked a rollback mechanism" not "Engineer X deployed
 without testing."
+
+**SeleneDB turns incidents into institutional memory.** Root causes, mitigations,
+and postmortem lessons persist across sessions. When a new incident hits the
+same module, the auto-recall surfaces "last time this module had an S1, root
+cause was X, mitigation was Y." This is the difference between firefighting
+from scratch and firefighting with context.

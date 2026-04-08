@@ -193,6 +193,15 @@ Stop and reassess if you observe:
 - Assuming dev-data timing represents production behavior
 - Skipping backward compatibility analysis
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "It's just an ALTER TABLE, no data loss risk" | ALTER TABLE can lock the table for the duration on large tables. Even non-destructive DDL has operational risk. |
+| "We can always restore from backup" | Restore time is downtime. Preventing the bad migration is faster than recovering from it. |
+| "This migration worked in staging" | Staging data size and access patterns differ from production. Lock contention scales with table size and concurrent queries. |
+| "Rollback plan is obvious, skip documenting it" | Obvious to the author today. Not obvious to the oncall engineer at 2am next month. Write it down. |
+
 ## Verification
 
 - [ ] Every migration operation classified (Safe / Caution / Dangerous / Critical)

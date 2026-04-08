@@ -91,6 +91,13 @@ If the change cascades further than expected or breaks something:
 - If not, use `git stash` or `git diff > patch.diff` to save progress
 - Report what happened and get guidance before continuing
 
+## Verification
+
+- [ ] All affected call sites identified via grep
+- [ ] Every call site updated (no "will handle later")
+- [ ] No wildcard arms or catch-all branches introduced
+- [ ] Compilation passes after all sites updated
+
 ## Red Flags
 
 Stop and reassess if you observe:

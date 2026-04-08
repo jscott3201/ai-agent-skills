@@ -24,6 +24,28 @@ code (verification adds little for same-session plans). The user asks to
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior verification context:
+
+1. **Create session** with `skill: 'plan-verify'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior verifications on referenced files:
+   - Prior `:PlanClaim` nodes with `inaccuracy_type != 'none'` linked to
+     `:CodeLocation` nodes in the plan's scope
+   - Inaccuracy type distribution (naming vs mapping vs resource vs staleness)
+   - Any patterns in which modules produce the most plan drift
+
+3. If prior verification data exists, present it:
+
+> "Prior verification context:
+> - [Module] has had [N] naming inaccuracies in past plans
+> - Most common inaccuracy type in this area: [type]
+>
+> I'll prioritize checking [high-drift areas] first."
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 For each task in the plan, verify the following against the actual codebase.
 Use grep and read. Do not trust the plan's claims. See
 [verification-checklist.md](verification-checklist.md) for the complete
@@ -120,6 +142,36 @@ the highest blast-radius items:
 Summarize: "N confirmed, N inaccurate (N corrected), N missing context,
 N stale."
 
+#### Graph write: inaccuracy resolution (SeleneDB)
+
+After each user decision on an inaccuracy, write the claim to the graph:
+
+```gql
+INSERT (c:PlanClaim {
+  claim: $plan_claim,
+  actual: $codebase_state,
+  inaccuracy_type: $type,
+  blast_radius: $downstream_task_count
+})
+RETURN id(c) AS claim_id
+```
+
+Link to session and affected code location:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (c:PlanClaim) WHERE id(c) = $claim_id
+INSERT (s)-[:produced]->(c)
+
+MERGE (loc:CodeLocation {file: $file, function: $function})
+INSERT (c)-[:affects]->(loc)
+```
+
+Also write confirmed claims (with `inaccuracy_type: 'none'`) — these
+establish a baseline of plan accuracy for the codebase. Over time,
+the ratio of accurate to inaccurate claims per module reveals which
+areas of the codebase are most prone to plan drift.
+
 ### 9. Quality gate
 
 Based on findings, recommend one of:
@@ -133,9 +185,29 @@ Based on findings, recommend one of:
 
 Get alignment on the decision before any implementation begins.
 
+For **Fix and go** or **Go** decisions where inaccuracies were accepted,
+offer: "Note why this is acceptable? (optional)" If yes, create a
+`:Note {kind: 'rationale', author: 'user'}` linked to the `:Session`
+via `:annotates`. This captures risk acceptance reasoning for future
+verification sessions on the same plan.
+
+#### Graph write: quality gate (SeleneDB)
+
+After the quality gate decision, record it:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+SET s.outcome = $gate_decision
+```
+
+The quality gate decision (`go`, `fix_and_go`, `rewrite`, `kill`) becomes
+the session outcome, queryable across sessions. A history of `rewrite`
+and `kill` outcomes for a module signals persistent planning problems.
+
 ## Supporting files
 
 - [verification-checklist.md](verification-checklist.md) - complete mechanical verification checklist
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
 
 ## Common Rationalizations
 

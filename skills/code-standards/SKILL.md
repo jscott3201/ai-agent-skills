@@ -64,7 +64,22 @@ When invoked with `$ARGUMENTS`:
 1. Identify the target scope (file, directory, or full codebase)
 2. Detect the primary language
 3. Load the relevant language standards file
-4. Check every item in the standards against the target code
+4. **Load project conventions (SeleneDB).** If SeleneDB is available,
+   query active conventions scoped to the detected language or project:
+
+   ```gql
+   MATCH (c:Convention {active: true})
+   MATCH (c)<-[:produced]-(s:Session)
+   WHERE s.project = $project
+     AND (c.scope = $language OR c.scope = 'all')
+   RETURN c.rule, c.severity, c.rationale
+   ORDER BY c.severity
+   ```
+
+   Check these conventions alongside the built-in standards. Convention
+   violations use the severity recorded in the convention node.
+
+5. Check every item in the standards against the target code
 5. Triage findings with the user **one at a time**, starting with the
    highest-severity issues. For each finding:
 
@@ -108,6 +123,14 @@ When invoked with `$ARGUMENTS`:
 | "Almost at threshold, no need to refactor" | Thresholds exist because code just over them degrades fast. Respect the line. |
 | "Linter passed, standards are satisfied" | Linters check syntax. Standards check design, naming, and patterns that linters can't see. |
 | "Load all language files for completeness" | Irrelevant standards create noise and waste context. Load only what applies. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Applying fixes to code you didn't change (stay in scope)
+- Overriding project-specific conventions with generic rules
+- Flagging style issues that linters already catch
+- Adding type annotations or comments to unchanged code
 
 ## Verification
 

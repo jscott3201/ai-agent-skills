@@ -171,6 +171,23 @@ Save to `_agentskills/reviews/YYYY-MM-DD-env-audit.md`:
 | `API_KEY` | Real value in .env.example | Replaced with placeholder |
 ```
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Config files are up to date, skip code scan" | Config files reflect intention. Code reflects reality. They drift apart. |
+| "Only check production env" | Staging and dev configs with missing vars cause debugging time that a 2-minute audit prevents. |
+| "Secret detection is overkill for internal projects" | Internal projects get open-sourced, forked, or have logs scraped. Secrets in config are always a liability. |
+| "Unused vars are harmless" | Unused vars confuse onboarding and mask which vars are actually required. They become undeletable because nobody knows if something uses them. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Skipping secret detection patterns
+- Not checking all environments (dev, staging, prod)
+- Ignoring vars referenced in code but missing from config
+- Reporting mismatches without concrete fix options
+
 ## Verification
 
 - [ ] Code scanned for all env var references

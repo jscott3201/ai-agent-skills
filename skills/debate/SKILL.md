@@ -22,6 +22,30 @@ time for the user to accept, challenge, or override.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior debate context:
+
+1. **Create session** with `skill: 'debate'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior debates on related topics:
+   - Prior `:Decision` nodes (debate rulings) on similar topics
+   - Prior `:Perspective` nodes that addressed the same domain
+   - Any `:Document {doc_type: 'debate'}` on overlapping questions
+
+3. If relevant prior debates exist, present them:
+
+> "Prior debate context:
+> - [Date]: Debated '[topic]' — ruled [summary of ruling]
+> - [Any residual disagreements from prior debates on this topic]
+>
+> This prior analysis may inform the current debate."
+
+Prior rulings and residual disagreements are especially valuable —
+they prevent re-debating settled questions and surface unresolved tensions
+that may still apply.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### Setup
 
 1. If `$ARGUMENTS` was provided, use it as the decision to evaluate
@@ -119,6 +143,49 @@ The moderator (lead or main agent) evaluates the full debate trajectory.
 **Produce the output document.** See
 [debate-output-template.md](debate-output-template.md) for the format.
 
+#### Graph write: synthesis (SeleneDB)
+
+After synthesis is complete, write perspectives and the ruling:
+
+For each perspective:
+```gql
+INSERT (p:Perspective {
+  role: $role_name,
+  priority_focus: $focus,
+  claim: $claim,
+  grounds: $grounds,
+  warrant: $warrant,
+  qualifier: $qualifier,
+  rebuttal: $rebuttal,
+  score: $score
+})
+RETURN id(p) AS persp_id
+```
+
+For the ruling:
+```gql
+INSERT (d:Decision {
+  summary: $ruling,
+  rationale: $deciding_factor,
+  alternatives: $residual_disagreements,
+  confidence: $confidence
+})
+RETURN id(d) AS ruling_id
+```
+
+Link everything to the debate document:
+```gql
+MATCH (doc:Document) WHERE id(doc) = $doc_id
+MATCH (p:Perspective) WHERE id(p) = $persp_id
+INSERT (doc)-[:argued_by]->(p)
+
+MATCH (d:Decision) WHERE id(d) = $ruling_id
+INSERT (doc)-[:ruled_as]->(d)
+```
+
+Residual disagreements stored in `alternatives` surface in future debates
+on the same topic, seeding the adversarial exchange with known tensions.
+
 ### Save and report
 
 Save findings to `_agentskills/debates/`.
@@ -130,6 +197,15 @@ Present a summary: the decision, key arguments, and the ruling.
 ## Supporting files
 
 - [debate-output-template.md](debate-output-template.md) - output format for debate findings
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
+## Red Flags
+
+Stop and reassess if you observe:
+- All perspectives converging without genuine tension (groupthink)
+- Devil's Advocate only criticizing without proposing alternatives
+- Anchoring to the first perspective generated
+- Forcing consensus instead of documenting residual disagreements
 
 ## Common Rationalizations
 
@@ -167,3 +243,8 @@ here is what we should do instead."
 **Residual disagreements are valuable.** Do not force false consensus.
 Documenting what remains unresolved and under what conditions to revisit
 is more useful than a fabricated agreement.
+
+**SeleneDB prevents re-debating settled questions.** Prior rulings surface
+automatically when a similar decision comes up. Residual disagreements from
+past debates seed the adversarial exchange, ensuring known tensions get
+addressed rather than rediscovered.

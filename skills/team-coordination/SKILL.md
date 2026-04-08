@@ -214,6 +214,21 @@ teammates to check for pending tasks before going idle.
 - **Split large tasks** if one teammate is falling behind while others
   are idle
 
+## Verification
+
+- [ ] `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` checked before recommending teams
+- [ ] No parallel tasks touching the same files
+- [ ] Wave boundaries define clear synchronization points
+- [ ] Team size matches the number of genuinely independent tasks
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Assigning parallel tasks that touch the same files
+- Spawning a team without checking `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
+- No synchronization points between waves
+- Team size exceeding the number of truly independent tasks
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |

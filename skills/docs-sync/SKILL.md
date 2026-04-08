@@ -108,6 +108,14 @@ For approved fixes:
 | ".pyi stubs regenerate automatically" | They don't. They're the most commonly forgotten documentation surface after refactors. |
 | "Spot-check a few version numbers" | The one you miss is the one someone copies into their config. Check them all. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Scanning only README and ignoring other documentation surfaces
+- Fixing references without verifying the fix against current code
+- Presenting all stale references at once instead of one at a time
+- Skipping the final grep to confirm no remaining stale terms
+
 ## Verification
 
 - [ ] All documentation surfaces scanned (README, docs/, comments, .pyi, Dockerfile)

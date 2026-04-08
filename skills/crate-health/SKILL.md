@@ -152,6 +152,23 @@ maintenance tasks **one at a time**:
 3. After all tasks are triaged, summarize the approved work:
    > "Approved N tasks. Start with [first task], or adjust the order?"
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Only check the crate I changed" | Workspace health is systemic. A dependency change in one crate affects compile times and audit surface across all crates. |
+| "Duplicate crate versions are fine" | Each duplicate adds compile time and binary size. Two versions of `syn` can add 30+ seconds to a clean build. |
+| "Feature flags are correct by construction" | Feature combinations grow exponentially. Unintended feature interactions cause the bugs that single-feature testing misses. |
+| "Dead code will be cleaned up later" | Dead code accumulates. It increases grep noise, confuses onboarding, and masks actual usage patterns. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Skipping dependency depth analysis
+- Ignoring duplicate crate versions without checking compile time impact
+- Not running with `--all-features` for completeness
+- Reporting findings without prioritization
+
 ## Verification
 
 - [ ] Dependency graph analyzed (duplicates, depth, single-maintainer)

@@ -26,6 +26,30 @@ issue (not a code bug).
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior debugging context:
+
+1. **Create session** with `skill: 'debug'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior debug sessions on related code:
+   - Prior `:Hypothesis` nodes (confirmed or eliminated) near this scope
+   - Prior `:RootCause` chains linked to similar `:CodeLocation` nodes
+   - Bug classes previously found in this module
+
+3. If relevant history exists, present it:
+
+> "Prior debug context:
+> - [Module] had [N] previous debug sessions
+> - Known root causes in this area: [summary]
+> - [Any eliminated hypotheses to avoid re-testing]
+>
+> This may narrow the search space."
+
+Eliminated hypotheses from past sessions are especially valuable —
+they prevent re-testing theories that were already disproven.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Understand the bug
 
 From `$ARGUMENTS` and context, establish:
@@ -87,6 +111,43 @@ likely:
 4. **Eliminating a hypothesis is progress** - it narrows the search space.
    Disproving is more valuable than confirming because it removes
    multiple possibilities at once.
+5. For eliminated or inconclusive hypotheses, offer: "Note why this was
+   ruled out? (optional)" If yes, create a `:Note {kind: 'rationale',
+   author: 'user'}` linked to the `:Hypothesis` via `:annotates`.
+   This preserves elimination reasoning for future debug sessions on
+   the same module.
+
+#### Graph write: hypothesis resolution (SeleneDB)
+
+After each hypothesis is tested and the user confirms the result,
+write it to the graph:
+
+```gql
+INSERT (h:Hypothesis {
+  statement: $hypothesis,
+  prediction: $prediction,
+  test: $test_description,
+  result: $observed_result,
+  conclusion: $conclusion,
+  rank: $rank
+})
+RETURN id(h) AS hyp_id
+```
+
+Link to session and affected code:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (h:Hypothesis) WHERE id(h) = $hyp_id
+INSERT (s)-[:produced]->(h)
+
+MERGE (loc:CodeLocation {file: $file, module: $module})
+INSERT (h)-[:affects]->(loc)
+```
+
+Eliminated hypotheses are as valuable as confirmed ones in the graph.
+Future debug sessions on the same module will surface them via
+auto-recall, preventing redundant investigation.
 
 Structure hypotheses as **binary divisions** that bisect the problem space:
 "The bug is in the client, not the server" rather than "maybe something
@@ -128,6 +189,36 @@ The root cause is usually 3-5 levels deep. Stop when you reach a systemic
 cause (missing documentation, missing test, design flaw) rather than a
 surface symptom.
 
+#### Graph write: root cause chain (SeleneDB)
+
+After identifying the root cause, write the full 5 Whys chain:
+
+```gql
+// Create each level, linking deeper via :why edges
+INSERT (r1:RootCause {why: $why_1, level: 1, systemic: false})
+INSERT (r2:RootCause {why: $why_2, level: 2, systemic: false})
+INSERT (rN:RootCause {why: $why_N, level: $N, systemic: true})
+INSERT (r1)-[:why]->(r2)
+// ... chain continues to rN
+```
+
+Link the surface cause to the confirmed hypothesis and session:
+
+```gql
+MATCH (h:Hypothesis {conclusion: 'confirmed'}) WHERE id(h) = $hyp_id
+MATCH (r:RootCause {level: 1}) WHERE id(r) = $r1_id
+INSERT (h)-[:led_to]->(r)
+
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (r:RootCause) WHERE id(r) = $r1_id
+INSERT (s)-[:produced]->(r)
+```
+
+The deepest `:RootCause` node with `systemic: true` is the one that
+prevents recurrence. Future debug sessions can query for systemic
+root causes to detect patterns: "3 bugs in this module traced to
+missing documentation of load-bearing ordering."
+
 ### 6. Fix and verify
 
 1. Write a regression test that fails without the fix and passes with it
@@ -151,6 +242,19 @@ Record the debugging session results:
 
 If running as the `debugger` agent, save patterns to persistent memory
 for future sessions.
+
+#### Graph write: session record (SeleneDB)
+
+Write the session summary to the graph and update the session outcome:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+SET s.outcome = 'completed'
+```
+
+The session record (bug, root cause, fix, hypotheses tested) is
+captured across the hypothesis and root cause nodes already written.
+The session node ties them together for retrieval.
 
 ## Debugging anti-patterns
 
@@ -217,6 +321,10 @@ Stop and reassess if you observe:
 - [ ] Fix applied and regression test passes
 - [ ] Full test suite passes with no new failures
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Guidance
 
 **Reproduce first.** If you cannot trigger the bug, you cannot verify a fix.
@@ -233,3 +341,8 @@ was null.
 **After 3 failed fix attempts, step back.** If three hypotheses have been
 eliminated, the mental model of the code is probably wrong. Re-read the
 code from scratch or get a fresh perspective.
+
+**SeleneDB turns debugging into institutional knowledge.** Every eliminated
+hypothesis and root cause chain persists. Future debug sessions on the same
+module start with context instead of from scratch. Systemic root causes
+surface patterns that point to architectural issues, not just individual bugs.

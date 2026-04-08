@@ -116,6 +116,32 @@ messages, changelogs, and any other written content.
 - [docstring-conventions.md](docstring-conventions.md) - language-specific
   docstring formats for Rust, Python, and TypeScript
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "More detail is always better" | Excess detail obscures the key point. Lead with what matters, add context after. |
+| "Comments explain the code" | Comments that restate the code are noise. Comments that explain *why* are signal. |
+| "Commit messages are for developers, style doesn't matter" | Commit messages are read by future maintainers debugging at 2am. Clarity matters more here than anywhere. |
+| "Doc-tests are too much effort for internal code" | Internal code becomes external. Doc-tests verify examples work. The effort is 2 minutes per function. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Using AI-isms (delve, leverage, streamline, robust)
+- Em dashes or double hyphens as punctuation in prose
+- Sentences over 26 words that could be split
+- Code examples that are not copy-pasteable or runnable
+- Restating type signatures in doc strings instead of explaining semantics
+
+## Verification
+
+- [ ] Active voice, imperative mood for instructions
+- [ ] No AI-isms or hedging filler in output
+- [ ] No em dashes or double hyphens as punctuation
+- [ ] Sentences under 26 words
+- [ ] Code examples copy-pasteable and runnable
+
 ## Guidance
 
 This skill is background knowledge. Claude loads it when writing any prose.

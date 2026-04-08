@@ -21,6 +21,33 @@ ticket elsewhere (don't duplicate). The user explicitly says to drop it.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and load current deferred state from the graph:
+
+1. **Create session** with `skill: 'deferred-tracking'` and `scope: $ARGUMENTS`
+2. **Load deferred state** — query all active deferred items:
+
+```gql
+MATCH (d:DeferredItem)-[:gated_by]->(g:Gate)
+WHERE d.stale = false
+MATCH (d)<-[:produced]-(s:Session)
+WHERE s.project = $project
+RETURN d, g, s.date AS added_date
+ORDER BY d.priority, s.date
+```
+
+3. **Check gate proximity** — for items with temporal or milestone gates,
+   evaluate whether conditions are approaching or met.
+
+When SeleneDB is available, it becomes the primary store for deferred items.
+`_agentskills/DEFERRED.md` is still written as a human-readable snapshot
+but the graph is the source of truth.
+
+If SeleneDB is not available, fall back to `_agentskills/DEFERRED.md` as
+the sole store (current behavior).
+
 ### Auto-detection: when to capture
 
 This skill auto-triggers when deferral language appears during planning or
@@ -84,6 +111,75 @@ When detected, capture immediately. Do not wait for the user to ask.
 
 5. Do not commit files in `_agentskills/` unless the user explicitly asks.
 
+#### Graph write: new item (SeleneDB)
+
+When adding a deferred item and SeleneDB is available:
+
+```gql
+INSERT (d:DeferredItem {
+  item: $name,
+  description: $description,
+  priority: $priority,
+  category: $category,
+  kind: $kind,
+  status: 'open',
+  source: $source,
+  stale: false
+})
+RETURN id(d) AS item_id
+
+INSERT (g:Gate {
+  condition: $gate_condition,
+  met: false
+})
+RETURN id(g) AS gate_id
+```
+
+**Kind** classifies the nature of the deferred work:
+
+| Kind | When to use |
+|---|---|
+| `feature` | Deferred functionality or user-facing capability |
+| `bug` | Known issue deferred to a later phase |
+| `tech_debt` | Cleanup, refactoring, or structural improvement |
+| `research` | Investigation needed before a decision can be made |
+| `optimization` | Performance or efficiency improvement |
+
+Link item to gate, session, and any related code or other items:
+
+```gql
+MATCH (d:DeferredItem) WHERE id(d) = $item_id
+MATCH (g:Gate) WHERE id(g) = $gate_id
+INSERT (d)-[:gated_by]->(g)
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(d)
+```
+
+**Tag with topics.** If the deferred item relates to identifiable domain
+areas, link to `:Topic` nodes so it surfaces in topic-scoped queries
+(e.g., "What's deferred in the query engine?"):
+
+```gql
+MERGE (t:Topic {name: $topic_name})
+ON CREATE SET t.domain = $domain, t.description = $topic_description
+
+MATCH (d:DeferredItem) WHERE id(d) = $item_id
+MATCH (t:Topic {name: $topic_name})
+INSERT (d)-[:about]->(t)
+```
+
+For relationship tracking (blocks, related to, superseded by), create
+edges between `:DeferredItem` nodes:
+
+```gql
+MATCH (d:DeferredItem) WHERE id(d) = $item_id
+MATCH (other:DeferredItem) WHERE id(other) = $related_id
+INSERT (d)-[:blocks]->(other)
+```
+
+Still write to `_agentskills/DEFERRED.md` as a human-readable snapshot.
+
 ### Gate quality
 
 The gate field is what makes deferred tracking useful. **"Later" is not a
@@ -142,12 +238,37 @@ For each ready item, present:
 - Recommended action: tackle now, re-defer with new gate, or remove
 - Wait for the user's decision before presenting the next item
 
+#### Graph write: gate evaluation (SeleneDB)
+
+When a gate is evaluated as met:
+
+```gql
+MATCH (g:Gate) WHERE id(g) = $gate_id
+SET g.met = true, g.met_on = date(), g.evidence = $evidence
+```
+
+When the user decides to tackle a ready item, update its status:
+
+```gql
+MATCH (d:DeferredItem) WHERE id(d) = $item_id
+SET d.status = 'in_progress'
+```
+
 **Stale items (recommend removal):**
 For each stale item, present:
 - The item and why it is stale
 - Options: **keep** (with updated gate), **update** (revise scope/gate),
   or **remove**
 - Wait for the user's decision before presenting the next item
+
+#### Graph write: staleness triage (SeleneDB)
+
+After each stale item triage decision:
+
+- **keep**: update the gate condition on the `:Gate` node
+- **update**: update both `:DeferredItem` and `:Gate` properties
+- **remove**: set `d.stale = true` and `d.status = 'wont_do'` on the
+  `:DeferredItem` (preserve for history, do not delete from graph)
 
 After Ready and Stale items are triaged, summarize Approaching and Still
 Deferred items as a group (these require no immediate decision).
@@ -171,6 +292,10 @@ When adding items, note relationships:
 Add these as annotations in the Description field:
 `"Add vector search. Related to: #12 (HNSW index). Blocks: #15 (hybrid search)."`
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Categories
 
 Categories should match the project's natural grouping. Common patterns:
@@ -181,6 +306,30 @@ Categories should match the project's natural grouping. Common patterns:
 - **By type:** "Features", "Tech Debt", "Research", "Optimization"
 
 Pick one grouping style per project and use it consistently.
+
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "We'll remember to come back to this" | You won't. The cost of recording is seconds. The cost of forgetting is weeks of re-discovery. |
+| "'Later' is a good enough gate" | "Later" is not verifiable. Without a specific condition, the item is a wish, not a plan. |
+| "Too many deferred items, stop tracking" | That's a signal to triage, not stop. A long list means decisions are being deferred without review. |
+| "This is too small to track" | Small items compound. Three "too small" items become one blocked feature next quarter. |
+
+## Verification
+
+- [ ] Every deferred item has a specific, verifiable gate condition
+- [ ] Priority assigned using the High/Medium/Low framework
+- [ ] Summary counts updated after changes
+- [ ] Relationships noted (blocks, related to, superseded by)
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Recording items with vague gates ("later", "eventually", "when we have time")
+- Not updating the Summary counts after changes
+- Skipping staleness review during manual triage
+- Adding items without asking the user for a gate condition
 
 ## Guidance
 
@@ -198,3 +347,8 @@ graveyard. A list that is reviewed becomes a backlog.
 **Stale items should be removed, not ignored.** A deferred item that has
 been stale for 6+ months is noise. Remove it or update its gate to
 reflect current reality.
+
+**SeleneDB makes gates queryable across skills.** When deep-review defers
+a finding, it creates a `:DeferredItem` in the graph. When release-prep
+runs, it can check for items gated on "next release." This cross-skill
+visibility is impossible with flat-file tracking.

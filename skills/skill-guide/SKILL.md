@@ -9,7 +9,7 @@ description: >
 ## Purpose
 
 Help discover and select the right skill for the current task. This plugin
-has 35 skills — this guide routes by what you're trying to accomplish.
+has 38 skills — this guide routes by what you're trying to accomplish.
 
 Skills marked **(auto)** trigger automatically from their descriptions.
 Skills marked **(manual)** require `/justin-tools:<name>` to invoke.
@@ -84,6 +84,9 @@ skill (not everything needs a skill — sometimes just write the code).
 | Analyze Rust workspace health (deps, compile times, coverage) | **crate-health** | manual |
 | Onboard a new project for use with this plugin | **project-onboard** | manual |
 | Track deferred work items in DEFERRED.md | **deferred-tracking** | auto |
+| Track development milestones across sessions | **milestone-tracking** | auto |
+| Attach notes (TODOs, rationale, observations) to anything | **notes** | auto |
+| Review session history and search past work | **session-tracker** | auto |
 
 ### Process (background rules)
 
@@ -113,6 +116,8 @@ These apply automatically during all implementation work:
 | Assess overall workspace health | **crate-health** | dep-audit |
 | Production is down, need triage now | **incident-response** | debug |
 | Bug found in development, need root cause | **debug** | incident-response |
+| Track a named initiative across sessions | **milestone-tracking** | deferred-tracking |
+| Track individual deferred work items with gates | **deferred-tracking** | milestone-tracking |
 
 ## Agents
 
@@ -131,6 +136,29 @@ focus.
 | **release-manager** | Release preparation | release-prep, docs-sync |
 | **onboarder** | Project onboarding | project-onboard |
 | **debate-lead** | Multi-perspective debate | debate |
+
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "User didn't ask for a skill, don't suggest one" | Proactive recommendation is the point. Users don't know what 35 skills do — surface the right one. |
+| "Close enough, recommend the similar skill" | Similar skills have different scopes. debug vs perf-profile, modularize vs refactor — wrong pick wastes setup time. |
+| "Skip disambiguation, the right skill is obvious" | Obvious to you with full context. Present the choice so the user confirms rather than discovers mid-workflow. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Recommending a manual skill when the user's task matches an auto skill
+- Suggesting background rules as invocable skills
+- Listing all 35 skills instead of routing to the 1-2 relevant ones
+- Not checking the "Choosing Between Similar Skills" table for ambiguous cases
+
+## Verification
+
+- [ ] Task correctly categorized by workflow phase
+- [ ] Recommended skill matches the task (not a similar-sounding alternative)
+- [ ] Disambiguation provided when multiple skills could apply
+- [ ] Agent vs main-conversation recommendation appropriate for scope
 
 ## Guidance
 

@@ -184,6 +184,23 @@ cargo clippy -p <crate-name> -- -D warnings
 
 Report the crate is ready for development.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Start minimal, add structure later" | Structure added later means refactoring existing code. Structure from the start means building on it. |
+| "Feature flags add complexity" | Feature flags prevent dependency bloat. Without them, every consumer pays for every capability. |
+| "Tests can wait until there's something to test" | The test infrastructure (fixtures, helpers, module structure) is harder to add retroactively. |
+| "Copy the pattern from another crate" | Crate conventions evolve. Check the latest workspace conventions, not a crate that may be outdated. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Creating a crate without checking existing workspace conventions first
+- Using `unsafe` without explicit user approval and safety comments
+- Skipping feature flag setup for optional capabilities
+- No test infrastructure in the scaffold (tests should exist from the start)
+
 ## Verification
 
 - [ ] Requirements gathered (layer position, dependencies, features)

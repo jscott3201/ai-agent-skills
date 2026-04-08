@@ -179,6 +179,14 @@ report and ask: "Adopt, reject, or investigate alternatives?"
 | "MIT license, obviously compatible" | MIT is compatible with most, but dual licensing, patent clauses, and transitive copyleft can surprise you. |
 | "Just prototyping, full audit is overkill" | Prototype dependencies ship to production. Audit now or audit under pressure later. |
 
+## Red Flags
+
+Stop and reassess if you observe:
+- Recommending adoption without checking vulnerability databases
+- Skipping the build-vs-depend analysis for small packages
+- Not checking transitive dependency count and license chain
+- Evaluating based on star count alone without checking maintenance activity
+
 ## Verification
 
 - [ ] Build-vs-depend question answered before any package evaluation

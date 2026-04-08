@@ -17,6 +17,30 @@ decision documentation, not exploratory notes.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior research before starting:
+
+1. **Create session** with `skill: 'research'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior research on this topic:
+   - Prior `:Insight` and `:Decision` nodes matching the scope
+   - Prior `:Document {doc_type: 'research'}` on similar topics
+   - Any `:DeferredItem` nodes with research-related gates approaching
+
+3. If relevant prior research is found, present it:
+
+> "Prior research context:
+> - [Date]: [Topic] — [key finding or recommendation]
+> - [Any rejected approaches from prior 'Not Recommended' sections]
+>
+> This may inform the current investigation. Proceeding with research."
+
+This prevents re-investigating dead ends and builds on prior findings.
+If no prior context is found, skip silently.
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Select research mode
 
 If `$ARGUMENTS` was provided, use it as the research topic. Ask the user
@@ -159,6 +183,36 @@ a document that misses what the user actually needed.
 
 Skip this checkpoint for mode 4 (doc lookup), which is quick-turnaround.
 
+#### Graph write: checkpoint (SeleneDB)
+
+At checkpoint, write preliminary insights to the graph. These capture
+the research direction even if the user adjusts or stops here.
+
+For each key finding presented at checkpoint, create an `:Insight` node:
+
+```gql
+INSERT (i:Insight {
+  summary: $finding_summary,
+  sources: $cited_sources,
+  confidence: 'preliminary',
+  actionable: false
+})
+RETURN id(i) AS insight_id
+```
+
+Link each insight to the session and to relevant code locations if the
+finding references specific code:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (i:Insight) WHERE id(i) = $insight_id
+INSERT (s)-[:produced]->(i)
+```
+
+If the user chooses "Enough", update these insights to `confidence:
+'final'` and `actionable: true` where applicable, then update the
+session outcome to `completed`.
+
 ### 4. Save and report
 
 For modes 1-3, save the findings document to `_agentskills/research/`.
@@ -169,11 +223,78 @@ For mode 4 (doc lookup), output directly unless the user asks to save.
 
 Present a summary of key findings to the user after saving.
 
+#### Graph write: synthesis (SeleneDB)
+
+After the full document is saved, extract structured reasoning into the
+graph. What to extract depends on the research mode:
+
+**All modes:**
+- Create a `:Document` node with `doc_type` matching the mode
+  (`deep_dive`, `multi_perspective`, `landscape`) and `content` set to
+  the full markdown. Link to session via `:produced`.
+- Update checkpoint `:Insight` nodes from `preliminary` to `final`.
+  Set `actionable: true` for findings that directly inform decisions.
+- **Tag with topics.** Identify 1-5 domain areas the research covers.
+  For each, create/merge a `:Topic` node and link via `:about`:
+
+```gql
+MERGE (t:Topic {name: $topic_name})
+ON CREATE SET t.domain = $domain, t.description = $topic_description
+
+MATCH (doc:Document) WHERE id(doc) = $doc_id
+MATCH (t:Topic {name: $topic_name})
+INSERT (doc)-[:about]->(t)
+```
+
+  Also link individual `:Insight` nodes to their most relevant topic:
+
+```gql
+MATCH (i:Insight) WHERE id(i) = $insight_id
+MATCH (t:Topic {name: $topic_name})
+INSERT (i)-[:about]->(t)
+```
+
+  Topic names: lowercase, specific, reusable (`'embeddings'`, `'auth'`,
+  `'query-optimization'`). See [selene-patterns.md](../_selene/selene-patterns.md)
+  for naming conventions.
+
+**Mode 1 (deep-dive) additional extraction:**
+- Each trade-off row → `:Decision` node with `alternatives` capturing
+  both sides. Link to document via `:contains`.
+- Each risk row → `:Insight` with risk context in summary.
+- Recommended approach → `:Decision` with `confidence: 'high'` and
+  rationale from the analysis.
+- Each "Not Recommended" item → `:Decision` with rationale capturing
+  why it was rejected. These are high-value for future recall.
+
+**Mode 2 (multi-perspective) additional extraction:**
+- Each consensus item → `:Insight` with `confidence: 'high'`.
+- Each debate ruling → `:Decision` with `rationale` capturing the
+  deciding factor and `alternatives` capturing the losing position.
+- Each priority recommendation → `:Decision` with confidence level.
+- Each deferred item from the template → `:DeferredItem` with `:Gate`.
+  This bridges directly to deferred-tracking.
+
+**Mode 3 (landscape) additional extraction:**
+- Recommendation → `:Decision` with candidate details.
+- Build-vs-depend verdict → `:Decision`.
+- Each "Not Recommended" candidate → `:Decision` with rejection reason.
+- Each candidate profile → `:Insight` summarizing key strength/weakness.
+
+**Linking to code:**
+If the research references specific modules, files, or functions in the
+codebase, create `:CodeLocation` nodes and link via `:affects`.
+
+**Session completion:**
+Update session outcome to `completed` (or `partial` if the user chose
+"Enough" at checkpoint without full synthesis).
+
 ## Supporting files
 
 - [deep-dive-template.md](deep-dive-template.md) - technical deep-dive output format
 - [multi-perspective-template.md](multi-perspective-template.md) - multi-perspective analysis output format
 - [landscape-template.md](landscape-template.md) - competitive/landscape analysis output format
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
 
 ## Common Rationalizations
 
@@ -183,6 +304,14 @@ Present a summary of key findings to the user after saving.
 | "High-level findings are good enough" | Vague findings produce vague decisions. Every finding must be specific and cite sources. |
 | "Skip 'not recommended' section" | Knowing what to avoid is as valuable as knowing what to adopt. It prevents re-investigation. |
 | "Share findings in conversation, don't save" | Conversations disappear. Saved research persists for the team and future sessions. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Synthesizing without presenting the checkpoint to the user first
+- Findings without cited sources or specific evidence
+- Missing "Not Recommended" section (rejected approaches are as valuable as recommendations)
+- Skipping web search or academic sources when investigating a technology
 
 ## Verification
 
@@ -210,3 +339,8 @@ defer, and what to reject.
 **Use persistent memory.** If running as the researcher agent, save key
 findings (competitive landscapes, technology evaluations, API patterns)
 to memory so they are available in future sessions without re-researching.
+
+**SeleneDB amplifies "Not Recommended" value.** Rejected approaches
+stored in the graph surface automatically when future research covers
+the same topic. This directly prevents the re-investigation problem the
+skill's guidance warns about.

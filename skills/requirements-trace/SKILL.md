@@ -20,6 +20,31 @@ to address, accept, or defer.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior traceability context:
+
+1. **Create session** with `skill: 'requirements-trace'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior trace work:
+   - Prior `:Document {doc_type: 'plan'}` or `{doc_type: 'design'}` linked
+     to the feature being traced (from feature-design)
+   - Prior requirements-trace sessions that found gaps in this area
+   - `:Decision` nodes (including non-goals) from the design phase
+
+3. If prior context exists:
+
+> "Prior traceability context:
+> - [Feature-design produced a plan on date with N requirements]
+> - [Prior trace found N gaps, N were addressed, N deferred]
+> - [Design non-goals that should NOT appear in implementation]
+>
+> I'll use the design decisions as the requirements source."
+
+Design non-goals are especially valuable — code implementing a non-goal
+is scope creep that the trace should catch.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Locate the requirements source
 
 Check for requirements in this order:
@@ -119,6 +144,28 @@ Present each gap **one at a time**, starting with high severity:
 
 Wait for the user's decision before presenting the next gap.
 
+#### Graph write: gap triage (SeleneDB)
+
+After each gap triage decision:
+
+For **address now** gaps, write a `:Finding` with the resolution:
+```gql
+INSERT (f:Finding {
+  summary: $requirement_summary,
+  severity: $gap_severity,
+  category: 'requirements_gap',
+  triage: 'fix_now'
+})
+RETURN id(f) AS finding_id
+```
+
+For **defer** gaps, create a `:DeferredItem` bridging to deferred-tracking.
+
+For **accept** gaps, write a `:Decision` documenting why the gap is
+intentional.
+
+Link all to session and code locations.
+
 ### 6. Produce trace matrix
 
 After all gaps are triaged, save the full trace matrix to
@@ -156,6 +203,27 @@ After all gaps are triaged, save the full trace matrix to
 Summarize: "N requirements fully traced, N gaps addressed, N deferred,
 N untraced code items flagged."
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Tests exist, requirements must be covered" | Tests verify behavior, not intent. A passing test suite can miss entire requirements. |
+| "Small feature, skip formal tracing" | Small features have small scope — tracing takes minutes, not hours. Gaps compound regardless of feature size. |
+| "Code without requirements is fine if it works" | Untraced code is scope creep or a missing requirement. Either way, it needs acknowledgment. |
+| "Non-goals don't need verification" | Non-goals that appear in implementation are the most important trace finding — they indicate scope creep. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Accepting requirements without user confirmation
+- Skipping the untraced code check (step 4)
+- Presenting all gaps at once instead of by severity
+- Not producing a trace matrix at the end
+
 ## Verification
 
 - [ ] Requirements source located and confirmed with user
@@ -182,3 +250,9 @@ requirements creates accountability that was not there before.
 **Pair with deep-review.** This skill checks "did we build what we
 intended?" while deep-review checks "is what we built correct?" They
 complement each other — run both before considering a feature complete.
+
+**SeleneDB connects requirements to the full design pipeline.** When
+feature-design stores non-goals in the graph, requirements-trace can
+check that no implementation addresses a non-goal (scope creep detection).
+When gaps are deferred, they surface in deferred-tracking. When gaps are
+fixed, the `:fixed_by` commit link closes the traceability loop.

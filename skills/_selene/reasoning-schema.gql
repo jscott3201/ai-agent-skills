@@ -1,0 +1,351 @@
+// SeleneDB Reasoning Schema — GQL DDL
+//
+// Registers all node and edge types for the skill reasoning graph.
+// Run once per SeleneDB instance, then restart to initialize search indexes.
+//
+// Usage:
+//   selene gql < skills/_selene/reasoning-schema.gql
+//   # or via HTTP:
+//   curl -X POST http://localhost:8080/gql -H "Content-Type: application/json" \
+//     -d '{"query": "<each statement>"}'
+//
+// After running all statements, restart SeleneDB to build search indexes
+// for properties marked SEARCHABLE.
+
+// ── Session ────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Session (
+  date        :: DATE,
+  project     :: STRING NOT NULL INDEXED,
+  branch      :: STRING,
+  scope       :: STRING SEARCHABLE,
+  skill       :: STRING INDEXED,
+  outcome     :: STRING DEFAULT 'in_progress',
+  summary     :: STRING SEARCHABLE,
+  next_steps  :: STRING SEARCHABLE
+)
+
+// ── Document ───────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Document (
+  title      :: STRING SEARCHABLE,
+  doc_type   :: STRING NOT NULL INDEXED,
+  content    :: STRING SEARCHABLE,
+  mode       :: STRING
+)
+
+// ── Decision ───────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Decision (
+  summary      :: STRING NOT NULL SEARCHABLE,
+  rationale    :: STRING SEARCHABLE,
+  alternatives :: STRING,
+  confidence   :: STRING DEFAULT 'medium'
+)
+
+// ── Finding ────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Finding (
+  summary        :: STRING NOT NULL SEARCHABLE,
+  severity       :: STRING NOT NULL INDEXED,
+  category       :: STRING INDEXED,
+  why_it_matters :: STRING,
+  suggested_fix  :: STRING,
+  triage         :: STRING INDEXED
+)
+
+// ── Insight ────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Insight (
+  summary    :: STRING NOT NULL SEARCHABLE,
+  sources    :: STRING,
+  confidence :: STRING DEFAULT 'medium',
+  actionable :: BOOL DEFAULT false
+)
+
+// ── Hypothesis ─────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Hypothesis (
+  statement  :: STRING NOT NULL SEARCHABLE,
+  prediction :: STRING,
+  test       :: STRING,
+  result     :: STRING,
+  conclusion :: STRING INDEXED,
+  rank       :: INT
+)
+
+// ── RootCause ──────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :RootCause (
+  why      :: STRING NOT NULL SEARCHABLE,
+  level    :: INT NOT NULL,
+  systemic :: BOOL DEFAULT false
+)
+
+// ── DeferredItem ───────────────────────────────────────────────────────
+
+CREATE NODE TYPE :DeferredItem (
+  item        :: STRING NOT NULL SEARCHABLE,
+  description :: STRING SEARCHABLE,
+  priority    :: STRING NOT NULL INDEXED,
+  category    :: STRING INDEXED,
+  kind        :: STRING INDEXED,
+  status      :: STRING DEFAULT 'open' INDEXED,
+  source      :: STRING,
+  stale       :: BOOL DEFAULT false
+)
+
+// ── Gate ───────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Gate (
+  condition :: STRING NOT NULL SEARCHABLE,
+  met       :: BOOL DEFAULT false,
+  met_on    :: DATE,
+  evidence  :: STRING
+)
+
+// ── CoverageGap ────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :CoverageGap (
+  function    :: STRING NOT NULL,
+  gap_type    :: STRING NOT NULL INDEXED,
+  description :: STRING SEARCHABLE,
+  addressed   :: BOOL DEFAULT false
+)
+
+// ── Release ────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Release (
+  version             :: STRING NOT NULL INDEXED,
+  bump_type           :: STRING,
+  date                :: DATE,
+  changelog           :: STRING SEARCHABLE,
+  has_breaking_changes :: BOOL DEFAULT false
+)
+
+// ── CodeLocation ───────────────────────────────────────────────────────
+
+CREATE NODE TYPE :CodeLocation (
+  file       :: STRING NOT NULL INDEXED,
+  line_start :: INT,
+  line_end   :: INT,
+  function   :: STRING INDEXED,
+  module     :: STRING INDEXED
+)
+
+// ── Rationalization ────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Rationalization (
+  pattern           :: STRING NOT NULL SEARCHABLE,
+  skill             :: STRING NOT NULL INDEXED,
+  corrective_action :: STRING
+)
+
+// ── PlanClaim ──────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :PlanClaim (
+  claim           :: STRING NOT NULL SEARCHABLE,
+  actual          :: STRING,
+  inaccuracy_type :: STRING NOT NULL INDEXED,
+  blast_radius    :: INT DEFAULT 0
+)
+
+// ── Incident ───────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Incident (
+  title           :: STRING NOT NULL SEARCHABLE,
+  severity        :: STRING NOT NULL INDEXED,
+  blast_radius    :: STRING,
+  started_at      :: STRING,
+  resolved_at     :: STRING,
+  duration        :: STRING,
+  mitigation      :: STRING SEARCHABLE,
+  root_cause      :: STRING SEARCHABLE,
+  lessons_learned :: STRING SEARCHABLE
+)
+
+// ── Perspective ────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Perspective (
+  role           :: STRING NOT NULL,
+  priority_focus :: STRING,
+  claim          :: STRING SEARCHABLE,
+  grounds        :: STRING,
+  warrant        :: STRING,
+  qualifier      :: STRING,
+  rebuttal       :: STRING,
+  score          :: INT
+)
+
+// ── Note ──────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Note (
+  content :: STRING NOT NULL SEARCHABLE,
+  kind    :: STRING NOT NULL INDEXED,
+  author  :: STRING NOT NULL INDEXED
+)
+
+// ── Convention ────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Convention (
+  rule      :: STRING NOT NULL SEARCHABLE,
+  scope     :: STRING NOT NULL INDEXED,
+  severity  :: STRING NOT NULL INDEXED,
+  rationale :: STRING SEARCHABLE,
+  source    :: STRING,
+  active    :: BOOL DEFAULT true
+)
+
+// ── Milestone ─────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Milestone (
+  name          :: STRING NOT NULL SEARCHABLE,
+  description   :: STRING SEARCHABLE,
+  status        :: STRING DEFAULT 'planned' INDEXED,
+  started_on    :: DATE,
+  completed_on  :: DATE,
+  target_date   :: DATE
+)
+
+// ── Topic ─────────────────────────────────────────────────────────────
+
+CREATE NODE TYPE :Topic (
+  name        :: STRING NOT NULL SEARCHABLE,
+  domain      :: STRING INDEXED,
+  description :: STRING SEARCHABLE
+)
+
+// ── GitCommit ──────────────────────────────────────────────────────────
+// Note: "Commit" is a reserved keyword in ISO GQL.
+
+CREATE NODE TYPE :GitCommit (
+  sha           :: STRING NOT NULL UNIQUE INDEXED,
+  short_sha     :: STRING,
+  message       :: STRING SEARCHABLE,
+  author        :: STRING,
+  date          :: DATE,
+  branch        :: STRING,
+  files_changed :: INT
+)
+
+// ── Edge Types ─────────────────────────────────────────────────────────
+
+CREATE EDGE TYPE :produced (
+  FROM :Session TO :Decision, :Finding, :Insight, :Hypothesis,
+    :RootCause, :DeferredItem, :CoverageGap, :Release, :Incident,
+    :Perspective, :PlanClaim, :Document, :Rationalization, :GitCommit,
+    :Convention, :Milestone, :Note
+)
+
+CREATE EDGE TYPE :contains (
+  FROM :Document TO :Decision, :Finding, :Insight
+)
+
+CREATE EDGE TYPE :based_on (
+  FROM :Decision TO :Insight, :Finding, :Hypothesis
+)
+
+CREATE EDGE TYPE :affects (
+  FROM :Decision, :Finding, :Hypothesis, :Insight, :CoverageGap
+  TO :CodeLocation
+)
+
+CREATE EDGE TYPE :led_to (
+  FROM :Decision TO :Decision, :Finding
+)
+
+CREATE EDGE TYPE :resolved_by (
+  FROM :Finding, :DeferredItem TO :Decision
+)
+
+CREATE EDGE TYPE :gated_by (
+  FROM :DeferredItem TO :Gate
+)
+
+CREATE EDGE TYPE :blocks (
+  FROM :DeferredItem TO :DeferredItem
+)
+
+CREATE EDGE TYPE :supersedes ()
+
+CREATE EDGE TYPE :why (
+  FROM :RootCause TO :RootCause
+)
+
+CREATE EDGE TYPE :covers (
+  FROM :CoverageGap TO :CodeLocation
+)
+
+CREATE EDGE TYPE :continued_from (
+  FROM :Session TO :Session
+)
+
+CREATE EDGE TYPE :observed_in (
+  FROM :Rationalization TO :Session
+)
+
+CREATE EDGE TYPE :verified_as (
+  FROM :Document TO :Decision
+)
+
+CREATE EDGE TYPE :breaking_change (
+  FROM :Release TO :CodeLocation
+)
+
+CREATE EDGE TYPE :mitigated_by (
+  FROM :Incident TO :Decision
+)
+
+CREATE EDGE TYPE :caused_by (
+  FROM :Incident TO :RootCause
+)
+
+CREATE EDGE TYPE :postmortem (
+  FROM :Incident TO :Document
+)
+
+CREATE EDGE TYPE :argued_by (
+  FROM :Document TO :Perspective
+)
+
+CREATE EDGE TYPE :ruled_as (
+  FROM :Document TO :Decision
+)
+
+CREATE EDGE TYPE :non_goal (
+  FROM :Document TO :Decision
+)
+
+CREATE EDGE TYPE :implemented_by (
+  FROM :Decision, :Document TO :GitCommit
+)
+
+CREATE EDGE TYPE :fixed_by (
+  FROM :Finding, :RootCause TO :GitCommit
+)
+
+CREATE EDGE TYPE :introduced_by (
+  FROM :Incident TO :GitCommit
+)
+
+CREATE EDGE TYPE :released_in (
+  FROM :GitCommit TO :Release
+)
+
+CREATE EDGE TYPE :annotates ()
+
+CREATE EDGE TYPE :promoted_from (
+  FROM :Convention TO :Finding
+)
+
+CREATE EDGE TYPE :informs (
+  FROM :Document, :Insight TO :Document, :Decision
+)
+
+CREATE EDGE TYPE :about (
+  FROM :Document, :Insight, :DeferredItem, :Milestone TO :Topic
+)
+
+CREATE EDGE TYPE :part_of (
+  FROM :GitCommit, :Document, :Decision, :Session TO :Milestone
+)

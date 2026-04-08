@@ -20,6 +20,31 @@ investigation including profiling and optimization, use this skill.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior performance context:
+
+1. **Create session** with `skill: 'perf-profile'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior performance work:
+   - Prior `:Decision` nodes from perf-profile sessions on same code
+   - Prior baselines and optimization outcomes
+   - Any `:Hypothesis` nodes (from perf or debug) related to performance
+
+3. If prior performance data exists:
+
+> "Prior performance context:
+> - [Prior baseline for this operation: date, metrics]
+> - [Optimizations previously applied: what worked, what didn't]
+> - [Any performance-related hypotheses from debug sessions]
+>
+> This baseline history shows performance evolution over time."
+
+Prior baselines that are worse than current indicate regression since the
+last optimization. Prior baselines that are better indicate a new regression
+to investigate.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Define the question
 
 From `$ARGUMENTS`, clarify:
@@ -89,6 +114,29 @@ For each hot spot, hypothesize why it is slow:
 
 Rank by expected impact. Start with the highest.
 
+#### Graph write: baseline (SeleneDB)
+
+After establishing the baseline, store it as an `:Insight`:
+
+```gql
+INSERT (i:Insight {
+  summary: $operation + ' baseline: ' + $metrics_summary,
+  sources: 'measured on ' + $hardware + ' at ' + $data_size,
+  confidence: 'high',
+  actionable: true
+})
+RETURN id(i) AS baseline_id
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(i)
+
+MERGE (loc:CodeLocation {file: $file, function: $function})
+INSERT (i)-[:affects]->(loc)
+```
+
+Baselines stored in the graph enable cross-session comparison: "p50 was 12ms
+last month, now it is 18ms — a 50% regression since commit X."
+
 ### 4b. Confirm test order with user
 
 Present hypotheses to the user **one at a time**, starting with the highest
@@ -128,6 +176,29 @@ Optimization: [description]
 If an optimization did not help, revert it. Do not keep speculative
 optimizations.
 
+#### Graph write: optimization result (SeleneDB)
+
+After each optimization is measured:
+
+```gql
+INSERT (d:Decision {
+  summary: $optimization_description,
+  rationale: $before_after_metrics,
+  alternatives: $if_reverted_why,
+  confidence: $kept_or_reverted
+})
+RETURN id(d) AS opt_id
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(d)
+
+MERGE (loc:CodeLocation {file: $file, function: $function})
+INSERT (d)-[:affects]->(loc)
+```
+
+Reverted optimizations are as valuable as kept ones — they prevent
+re-trying approaches that were already measured and found ineffective.
+
 ### 6. Verify no regressions
 
 After all optimizations:
@@ -163,6 +234,10 @@ Save performance investigation results to
 `_agentskills/reviews/YYYY-MM-DD-perf-<topic>.md`.
 Do not commit files in `_agentskills/` unless the user explicitly asks.
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |
@@ -172,6 +247,14 @@ Do not commit files in `_agentskills/` unless the user explicitly asks.
 | "No formal baseline, but it's obviously slow" | Without a number, you can't prove you improved anything. Measure before and after. |
 | "Found hot spot, optimize without hypothesis" | Wrong hypothesis = wrong optimization = wasted effort. Predict before you change. |
 | "Optimization works, skip regression check" | Performance gains that break correctness are not gains. Run the full suite. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Optimizing without a measured baseline
+- Applying multiple optimizations before measuring each independently
+- Keeping an optimization that shows no measurable improvement
+- Skipping the full regression check after optimization
 
 ## Verification
 
@@ -195,3 +278,8 @@ with a naive inner loop at sufficient scale.
 
 **Know when to stop.** If the target performance is met, stop. Further
 optimization is speculative and may reduce readability.
+
+**SeleneDB tracks performance evolution.** Baselines stored in the graph
+show how performance changes over time. When a new perf-profile session
+starts, the auto-recall shows prior baselines — making regressions
+immediately visible and preventing redundant optimization attempts.

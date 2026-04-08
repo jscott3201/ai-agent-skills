@@ -117,6 +117,31 @@ Include:
 Only use numbers from this sequential run. Never mix numbers from different
 runs or parallel executions.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Run all benchmarks at once to save time" | Parallel benchmarks inflate times 15-40% from CPU contention. Numbers are unreliable and not comparable to prior runs. |
+| "10% regression is noise, ignore it" | 10% is the threshold for consumer hardware variance. Consistent 10%+ regression across runs is real. Re-run to confirm before dismissing. |
+| "No baseline exists, just record numbers" | Numbers without comparison are trivia. Establish the baseline so the next run has a comparison point. |
+| "Benchmark passed, skip regression check" | Passing means the code runs. Regression check means it runs as fast as before. Different questions. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Running multiple benchmark suites in parallel
+- Mixing numbers from different runs or environments
+- Dismissing regressions without re-running to confirm
+- Updating baselines without user approval
+
+## Verification
+
+- [ ] Benchmarks discovered and confirmed with user
+- [ ] Each suite ran sequentially (never parallel)
+- [ ] Results compared against existing baselines
+- [ ] Regressions >10% flagged and triaged with user
+- [ ] Results file updated with new numbers and date
+
 ## Guidance
 
 The 10% regression threshold accounts for normal run-to-run variance on

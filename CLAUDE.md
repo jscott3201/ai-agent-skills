@@ -1,17 +1,18 @@
 # justin-tools Plugin Development
 
 A Claude Code plugin providing a complete development lifecycle toolkit:
-35 skills, 9 agents, 8 hooks. Supports Rust, Python, and JavaScript/TypeScript.
+38 skills, 9 agents, 8 hooks. Supports Rust, Python, and JavaScript/TypeScript.
 
 ## Plugin Structure
 
 ```
 skills/<name>/SKILL.md     — skill with optional supporting files
+skills/_selene/            — shared SeleneDB integration (schema, patterns, detection)
+skills/_template/          — copy to create a new skill
 agents/<name>.md           — subagent definitions
 hooks/hooks.json           — event handlers
 scripts/                   — development utilities (rename-plugin.sh)
 docs/                      — getting-started, skills/agents/hooks reference
-skills/_template/          — copy to create a new skill
 .claude-plugin/            — plugin manifest + marketplace config
 ```
 
@@ -93,6 +94,47 @@ then applies this convention when presenting to the user.
 - Prompt-based hooks (type: prompt) use Haiku for fast evaluation
 - TeammateIdle hooks keep team agents productive
 
+## SeleneDB Integration
+
+Skills can persist reasoning to SeleneDB (an AI-first property graph
+database) for cross-session knowledge accumulation. SeleneDB is optional
+and purely additive — skills fall back to existing behavior when it is
+not available.
+
+**Architecture:**
+- User configures SeleneDB MCP server in project/user settings
+- Skills detect `gql_query` tool availability at runtime
+- Graph stores structured reasoning: decisions, findings, hypotheses,
+  root causes, deferred items, coverage gaps, releases
+- Skills write at decision points (user triage = graph commit)
+- Skills auto-recall relevant prior reasoning at start via scoped
+  vector search
+- Sessions auto-create and chain via `:continued_from` edges
+
+**Migrated skills (18):** research, deep-review, debug, plan-verify,
+release-prep, deferred-tracking, test-strategy, feature-design, debate,
+incident-response, refactor, perf-profile, modularize, project-onboard,
+requirements-trace, milestone-tracking, notes, session-tracker.
+
+**Integration files:**
+- `skills/_selene/selene-integration.md` — detection, sessions, auto-recall, fallback
+- `skills/_selene/selene-schema.md` — node types, edge types, properties
+- `skills/_selene/selene-patterns.md` — write patterns, read queries, rationalization tracking
+- `skills/_selene/reasoning-schema.gql` — GQL DDL for schema registration
+- `skills/_selene/setup-schema.sh` — one-command schema setup (run once, then restart SeleneDB)
+
+**Adding SeleneDB to a new skill:**
+1. Add `### 0. Context recall (SeleneDB)` section matching the skill's
+   numbering convention
+2. Add `#### Graph write: [name] (SeleneDB)` sections at each decision point
+3. Reference `selene-integration.md` in the Supporting Files section
+4. Add the skill to the fallback table in `selene-integration.md`
+
+**Cross-skill bridges:**
+- deep-review deferred findings auto-create `:DeferredItem` nodes
+- deep-review findings surface in test-strategy auto-recall
+- release-prep queries deferred items gated on "next release"
+
 ## Quality Checklist
 
 Before considering a skill or agent complete:
@@ -103,6 +145,7 @@ Before considering a skill or agent complete:
 - [ ] Supporting files referenced from SKILL.md
 - [ ] Multi-language examples where applicable (Rust, Python, JS/TS)
 - [ ] Output paths use `_agentskills/<subfolder>/`
+- [ ] SeleneDB integration follows `_selene/` patterns (if applicable)
 - [ ] Tested via `--plugin-dir .`
 
 ## Version Management

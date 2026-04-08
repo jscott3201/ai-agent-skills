@@ -102,6 +102,21 @@ Stop and reassess if you observe:
 | "User asked to commit, probably wants a push too" | Commit is local and reversible. Push is shared and permanent. Never conflate the two. |
 | "Just docs, skip the full suite" | Doc changes can break doc-tests, links, and build steps. Run the suite. |
 
+## Verification
+
+- [ ] Each commit represents one logical change
+- [ ] Tests pass before every commit
+- [ ] No push to remote without explicit user request
+- [ ] Commit message follows conventional format
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Pushing to remote without explicit user instruction
+- Committing without running the test suite first
+- Batching unrelated changes into a single commit
+- Using `--no-verify` to skip pre-commit hooks
+
 ## Guidance
 
 The commit-at-milestones rule serves two purposes: it creates clean rollback

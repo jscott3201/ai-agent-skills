@@ -24,6 +24,29 @@ refactored (wait until the refactoring stabilizes).
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior test coverage context:
+
+1. **Create session** with `skill: 'test-strategy'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior analysis of this module:
+   - Prior `:CoverageGap` nodes linked to `:CodeLocation` nodes in scope
+   - Whether previously identified gaps were addressed (`addressed: true`)
+   - Any `:Finding` nodes from deep-review in this module (review findings
+     often indicate where tests should exist)
+
+3. If prior coverage data exists, present it:
+
+> "Prior test context for this module:
+> - [N] coverage gaps previously identified, [N] addressed
+> - Recurring gap types: [top categories]
+> - [Any deep-review findings suggesting missing tests]
+>
+> I'll factor these into the test plan."
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Analyze the target
 
 For the target module or feature (`$ARGUMENTS`):
@@ -119,6 +142,21 @@ For each group in the approved plan:
 
 3. Wait for user decision before generating the next group
 4. Run each accepted group immediately to verify it passes
+
+#### Graph write: test group decision (SeleneDB)
+
+After each user decision on a test group:
+
+For **accepted** groups, record the coverage gaps that were addressed:
+
+```gql
+MATCH (g:CoverageGap)-[:covers]->(loc:CodeLocation {function: $function})
+WHERE g.addressed = false
+SET g.addressed = true
+```
+
+For **skipped** groups, the `:CoverageGap` nodes remain with
+`addressed: false` — they persist for future sessions.
 
 This incremental approach catches mismatches early. If the first group's
 style or approach is wrong, the user corrects before N more groups are
@@ -245,6 +283,30 @@ Coverage Gaps:
 - batch(): no test for concurrent access
 ```
 
+#### Graph write: coverage gaps (SeleneDB)
+
+When coverage gaps are identified, write each to the graph:
+
+```gql
+INSERT (g:CoverageGap {
+  function: $function_name,
+  gap_type: $category,
+  description: $gap_description,
+  addressed: false
+})
+RETURN id(g) AS gap_id
+
+MERGE (loc:CodeLocation {file: $file, function: $function_name})
+MATCH (g:CoverageGap) WHERE id(g) = $gap_id
+INSERT (g)-[:covers]->(loc)
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(g)
+```
+
+These gaps persist across sessions. When `test-strategy` runs again
+on the same module, auto-recall shows which gaps remain unaddressed.
+
 ### 8. Mutation testing (advanced)
 
 Use mutation testing to find tests that pass even when code is wrong:
@@ -348,6 +410,10 @@ test('form is accessible', async () => {
 Run in CI on every PR that touches frontend code. Focus on: forms,
 navigation, modals/dialogs, and dynamic content.
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |
@@ -400,3 +466,9 @@ match the convention.
 **Quarantine flaky tests immediately.** A flaky test that is normalized
 wastes developer hours and erodes trust in the entire suite. Fix or
 remove it.
+
+**SeleneDB creates a coverage memory.** Gaps identified but not addressed
+persist in the graph. Future test-strategy sessions start with "these gaps
+are still open" instead of rediscovering them. Deep-review findings also
+feed in — if a reviewer flagged "missing error path test," that appears
+in the next test-strategy session for that module.

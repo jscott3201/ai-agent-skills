@@ -1,10 +1,9 @@
 ---
 name: ci-pipeline
 description: >
-  Generate, audit, and diagnose CI/CD pipeline configurations. Covers
-  GitHub Actions, GitLab CI, and common patterns for Rust, Python, and
-  JS/TS. Use when creating pipelines, debugging failures, or optimizing
-  build times.
+  Generate, audit, and diagnose CI/CD pipelines. Covers GitHub Actions,
+  GitLab CI for Rust, Python, and JS/TS. Use when creating pipelines,
+  debugging failures, or optimizing build times.
 disable-model-invocation: true
 argument-hint: "[generate | audit | diagnose <url or log>]"
 ---
@@ -273,6 +272,14 @@ Wait for decision.
 | "Default features sufficient for CI" | Feature-gated code that isn't tested in CI breaks silently in production. Test all features. |
 | "@v4 is good enough for action versions" | Unpinned actions are a supply chain attack vector. Pin to SHA for production pipelines. |
 | "Small project doesn't need concurrency control" | Concurrent CI on the same branch produces race conditions regardless of project size. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Generating a pipeline without checking existing CI configuration first
+- No caching strategy for dependencies
+- Missing security hardening (pinned action versions, least-privilege permissions)
+- Skipping the validation step after generating or modifying a pipeline
 
 ## Verification
 

@@ -69,6 +69,31 @@ If any step fails:
 Report: "CI check passed - fmt, clippy, test, deny all clean."
 Files are ready to stage and commit.
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Small change, skip the full sequence" | Small changes cause big CI failures. A one-line change can trigger clippy lints under different features. |
+| "Clippy is too noisy, skip warnings" | `-D warnings` is the standard. Suppressing warnings accumulates tech debt that blocks future contributors. |
+| "Default features are fine, skip --all-features" | Feature-gated code is invisible under defaults. 40+ clippy errors can hide behind a single feature flag. |
+| "Tests pass locally, skip deny check" | cargo-deny catches license violations and security advisories that tests cannot detect. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Running clippy without `--all-features`
+- Skipping the full re-run after fixing a failure
+- Suppressing warnings instead of fixing them
+- Running only the failed step instead of the full sequence
+
+## Verification
+
+- [ ] `cargo fmt --all` ran (not just checked)
+- [ ] `cargo clippy` ran with `--all-features --all-targets -D warnings`
+- [ ] `cargo test` ran with `--all-features`
+- [ ] `cargo deny check` ran (or skipped if no deny.toml)
+- [ ] On failure: fix attempted, full sequence re-run from Step 1
+
 ## Guidance
 
 Never skip `--all-features`. This is the single most common source of CI

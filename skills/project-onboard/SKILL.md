@@ -20,6 +20,29 @@ why it matters, and wait for the user's approval before making changes.
 
 ## Instructions
 
+### Stage 0: Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and check for prior onboarding:
+
+1. **Create session** with `skill: 'project-onboard'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior onboarding sessions:
+   - Prior `:Session {skill: 'project-onboard'}` for this project
+   - Any `:Decision` nodes from prior onboarding (what was set up)
+   - Any `:Insight` nodes about project conventions
+
+3. If the project was previously onboarded:
+
+> "This project was onboarded on [date]. Previous setup included:
+> - [What was configured]
+> - [Key conventions discovered]
+>
+> Running a refresh to check for changes since then."
+
+A previously onboarded project gets a lighter touch — focus on what
+changed since last onboarding rather than a full assessment.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### Stage 1: Explore the project
 
 Before asking any questions, build a complete picture:
@@ -155,6 +178,36 @@ Offer to run relevant health checks:
 
 ### Stage 4: Save project profile
 
+#### Graph write: project assessment (SeleneDB)
+
+Write the project assessment and setup decisions to the graph:
+
+```gql
+INSERT (i:Insight {
+  summary: 'Project assessment: ' + $project_name,
+  sources: 'Detected from codebase exploration',
+  confidence: 'high',
+  actionable: true
+})
+RETURN id(i) AS insight_id
+
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(i)
+```
+
+For each setup step the user approved, write a `:Decision`:
+
+```gql
+INSERT (d:Decision {
+  summary: $setup_step,
+  rationale: $why_it_matters,
+  confidence: 'high'
+})
+```
+
+This replaces flat-file memory for onboarding context. Future onboarding
+sessions start with "this project was already set up with X, Y, Z."
+
 If running as the `onboarder` agent, save key findings to persistent memory:
 
 - Project name, languages, build system
@@ -177,6 +230,27 @@ Suggest concrete next steps based on the project's state:
 >
 > All skills work in this project now. Run `/reload-plugins` if you
 > add or change skills during this session."
+
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Present all 35 skills so the user knows what's available" | Information overload. Surface the 3-5 relevant skills based on the detected project type. |
+| "Skip exploration, the user knows their project" | The user knows the project. The agent does not. Exploration builds the context needed for accurate recommendations. |
+| "CLAUDE.md exists, skip assessment" | Existing doesn't mean complete. Scan for gaps — missing build commands, stale conventions, or missing CI guidance. |
+| "Full setup required for every project" | Skip what's already done. A project with comprehensive CLAUDE.md and gitignore needs a lighter onboarding. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Making changes without explicit user approval
+- Overriding existing project conventions with plugin defaults
+- Presenting all skills at once instead of routing by project type
+- Skipping the assessment and jumping to setup recommendations
 
 ## Verification
 

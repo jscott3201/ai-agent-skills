@@ -25,6 +25,44 @@ own completed work).
 
 ## Instructions
 
+### Phase 0: Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior review context:
+
+1. **Create session** with `skill: 'deep-review'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior reviews touching this scope:
+   - Prior `:Finding` nodes linked to `:CodeLocation` nodes in the review scope
+   - Severity and category distribution from past reviews
+   - Any recurring patterns (same category appearing across reviews)
+
+3. **Query active conventions** for the project scope:
+
+```gql
+MATCH (c:Convention {active: true})
+MATCH (c)<-[:produced]-(s:Session)
+WHERE s.project = $project
+RETURN c.rule, c.scope, c.severity
+ORDER BY c.severity
+```
+
+4. If relevant prior findings or conventions exist, present a brief summary:
+
+> "Prior review context for this scope:
+> - [N] findings from [N] previous reviews in this area
+> - Most common categories: [top 2-3 categories]
+> - [Any unresolved S1/S2 findings still open]
+> - [N] active project conventions to check against
+>
+> I'll pay extra attention to [recurring category] and project conventions."
+
+Active conventions supplement the 13 built-in review categories. Check
+them alongside the standard categories — a convention violation is at
+the severity recorded in the convention node.
+
+This focuses the review on historically problematic areas.
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### Phase 1: Research
 
 If `$ARGUMENTS` was provided, use it to focus the review scope. Otherwise,
@@ -178,11 +216,47 @@ Present findings to the user **one at a time**, starting with S1 Critical:
    - Options: **fix now**, **skip** (with noted risk), or **defer** (add to
      deferred tracking)
 2. Wait for the user's decision before presenting the next finding
-3. After all S1 findings are triaged, ask: "Move to S2 High findings, or
+3. If the user's decision involves a judgment call (e.g., skipping an S2,
+   deferring despite risk), offer: "Want to add a note on why? (optional)"
+   If yes, create a `:Note {kind: 'rationale', author: 'user'}` linked
+   to the `:Finding` via `:annotates`. If no, move on immediately.
+4. After all S1 findings are triaged, ask: "Move to S2 High findings, or
    stop here?" Repeat at each severity boundary.
 
 This prevents fixing low-value items when the user wants to focus on critical
 issues only.
+
+#### Graph write: triage decision (SeleneDB)
+
+After each user triage decision, write the finding to the graph:
+
+```gql
+INSERT (f:Finding {
+  summary: $what,
+  severity: $severity,
+  category: $category,
+  why_it_matters: $impact,
+  suggested_fix: $fix,
+  triage: $user_decision
+})
+RETURN id(f) AS finding_id
+```
+
+Link to session, code location, and parent document (if delegated
+review produced a report):
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (f:Finding) WHERE id(f) = $finding_id
+INSERT (s)-[:produced]->(f)
+
+MERGE (loc:CodeLocation {file: $file, function: $function})
+INSERT (f)-[:affects]->(loc)
+```
+
+If the user chooses **defer**, also create a `:DeferredItem` linked
+to the finding via `:resolved_by` (pending). This bridges to
+deferred-tracking without requiring manual re-entry.
 
 ### Phase 4: Fix
 
@@ -193,6 +267,90 @@ Work through approved fixes in the main context:
    and does not introduce new problems
 3. After all approved fixes are applied, do a final scan to confirm no
    remaining issues from the approved set
+
+### Phase 5: Convention graduation (SeleneDB)
+
+After all fixes are applied, check for recurring patterns that should
+become project conventions. This only runs when SeleneDB is available
+and has findings from prior sessions.
+
+#### 1. Detect recurring patterns
+
+Query for findings that recur across 3+ sessions with the same category
+and similar content:
+
+```gql
+MATCH (f:Finding)<-[:produced]-(s:Session)
+WHERE s.project = $project AND f.triage = 'fix_now'
+WITH f.category AS cat, count(DISTINCT s) AS sessions,
+  collect({summary: f.summary, id: id(f)}) AS findings
+WHERE sessions >= 3
+RETURN cat, sessions, findings
+ORDER BY sessions DESC
+```
+
+Also check that the pattern is not already covered by an existing
+convention:
+
+```gql
+MATCH (c:Convention {active: true})
+MATCH (c)<-[:produced]-(s:Session)
+WHERE s.project = $project
+RETURN c.rule, c.scope
+```
+
+#### 2. Suggest graduation
+
+For each recurring pattern not already covered by a convention, present
+to the user:
+
+> "**Recurring pattern detected:** [category] findings have appeared in
+> [N] separate reviews:
+> - [Finding 1 summary] ([date])
+> - [Finding 2 summary] ([date])
+> - [Finding 3 summary] ([date])
+>
+> This looks like a project convention. Proposed rule:
+> **[drafted convention rule]**
+> Scope: [scope] | Severity: [severity]
+>
+> Options:
+> 1. **Promote** — create this as a project convention
+> 2. **Adjust** — change the rule wording, scope, or severity
+> 3. **Skip** — not a convention, just coincidence"
+
+Wait for the user's decision before presenting the next candidate.
+
+#### Graph write: convention promotion (SeleneDB)
+
+When the user approves promotion:
+
+```gql
+INSERT (c:Convention {
+  rule: $rule,
+  scope: $scope,
+  severity: $severity,
+  rationale: $rationale,
+  source: 'Promoted from ' + $session_count + ' deep-review findings',
+  active: true
+})
+RETURN id(c) AS convention_id
+
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (c:Convention) WHERE id(c) = $convention_id
+INSERT (s)-[:produced]->(c)
+```
+
+Link to the findings that triggered the promotion:
+
+```gql
+MATCH (f:Finding) WHERE id(f) IN $finding_ids
+MATCH (c:Convention) WHERE id(c) = $convention_id
+INSERT (c)-[:promoted_from]->(f)
+```
+
+Future reviews will see this convention in Phase 0 auto-recall and check
+new code against it.
 
 ## Common Rationalizations
 
@@ -223,6 +381,7 @@ Stop and reassess if you observe:
 ## Supporting files
 
 - [review-patterns.md](review-patterns.md) - detailed patterns and examples for each review category
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
 
 ## Guidance
 
@@ -245,6 +404,10 @@ or a dependency workaround. Check git blame if the purpose is unclear.
 **Navigate before scanning.** Understanding intent and reviewing main files
 first catches design-level issues before you spend tokens on detail checks.
 If the architecture is wrong, flag it immediately.
+
+**SeleneDB enables review pattern detection.** Over multiple reviews, the
+graph reveals which categories and severities recur in specific modules.
+This turns reviews from isolated events into a continuous quality signal.
 
 This review is language-agnostic. Substitute equivalent concepts for
 your language (match arms for Rust, switch exhaustiveness for TypeScript,

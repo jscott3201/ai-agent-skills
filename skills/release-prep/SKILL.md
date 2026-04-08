@@ -20,6 +20,28 @@ changelog entries, documentation gaps) for user approval before acting.
 
 ## Instructions
 
+### 0. Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior release context:
+
+1. **Create session** with `skill: 'release-prep'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior releases:
+   - Prior `:Release` nodes for this project, ordered by date
+   - Any breaking changes from past releases
+   - Any `:DeferredItem` nodes gated on "next release"
+
+3. If release history exists, present it:
+
+> "Prior release context:
+> - Last release: v[version] on [date] ([bump type])
+> - [N] breaking changes in last [N] releases
+> - [Any deferred items gated on this release]
+>
+> Proceeding with release scope analysis."
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 ### 1. Determine scope
 
 From `$ARGUMENTS`:
@@ -76,6 +98,36 @@ Present the version bump as a decision with options:
 
 Wait for the user to confirm before proceeding.
 
+#### Graph write: version decision (SeleneDB)
+
+After the user confirms the version bump:
+
+```gql
+INSERT (r:Release {
+  version: $new_version,
+  bump_type: $bump_type,
+  date: date(),
+  has_breaking_changes: $has_breaking
+})
+RETURN id(r) AS release_id
+```
+
+Link to session:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (r:Release) WHERE id(r) = $release_id
+INSERT (s)-[:produced]->(r)
+```
+
+If there are breaking changes, link each to its code location:
+
+```gql
+MERGE (loc:CodeLocation {file: $file, function: $function})
+MATCH (r:Release) WHERE id(r) = $release_id
+INSERT (r)-[:breaking_change]->(loc)
+```
+
 ### 4. Generate changelog
 
 Compile changes from conventional commits since last release:
@@ -105,6 +157,15 @@ Present the generated changelog to the user for review:
 > verification."
 
 Wait for approval before proceeding.
+
+#### Graph write: changelog (SeleneDB)
+
+After changelog approval, update the release node:
+
+```gql
+MATCH (r:Release) WHERE id(r) = $release_id
+SET r.changelog = $changelog_content
+```
 
 ### 5. Verify documentation
 
@@ -174,6 +235,10 @@ tag, then push when ready."
 
 Do not push tags or publish. The user handles that.
 
+## Supporting files
+
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
+
 ## Common Rationalizations
 
 | Rationalization | Why It's Wrong |
@@ -183,6 +248,14 @@ Do not push tags or publish. The user handles that.
 | "Docs don't change for minor releases" | API docs, examples, and migration notes all drift. Verify every release. |
 | "Skip dry-run, package is fine" | Dry-runs catch packaging errors that tests don't cover. Minutes to run, hours to fix. |
 | "Breaking changes documented in git log" | Users don't read git logs. Write a migration guide they can find. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Bumping version without running semver-checks (or manual review for non-Rust)
+- Changelog entries that read like commit messages instead of user-facing language
+- Skipping the dry-run for package publishing
+- Tagging without completing the full pre-release checklist
 
 ## Verification
 

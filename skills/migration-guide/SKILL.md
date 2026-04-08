@@ -132,6 +132,23 @@ For simple renames and signature changes, offer:
 - The guide is tested: following the steps on example code produces
   a working result
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Changelog documents the breaking change" | Changelogs list what changed. Migration guides explain how to adapt. Different audience, different purpose. |
+| "Consumers can figure it out from the type errors" | Type errors tell you what broke, not how to fix it. A migration guide saves every consumer the same debugging work. |
+| "Deprecation period is unnecessary for internal crates" | Internal crates have consumers too. A deprecation period gives teams time to migrate without blocking releases. |
+| "Skip codemod, the changes are straightforward" | "Straightforward" for the author who made the change. A codemod saves every consumer from manual search-and-replace. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Cataloging breaking changes without checking semver-checks output
+- No before/after code examples in the migration guide
+- Skipping deprecation-first approach without justification
+- Not verifying the migration guide against an actual consumer codebase
+
 ## Verification
 
 - [ ] All breaking changes cataloged

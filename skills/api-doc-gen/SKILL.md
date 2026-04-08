@@ -1,9 +1,9 @@
 ---
 name: api-doc-gen
 description: >
-  Generate and update API documentation from code. Scans public items,
-  generates doc comments, module overviews, and verifies doc-tests.
-  Use when a crate or module needs documentation from scratch.
+  Generate API documentation from code. Scans public items, generates
+  doc comments and module overviews, verifies doc-tests. Use when a
+  module needs docs from scratch or docs are stale.
 disable-model-invocation: true
 argument-hint: "[crate or module path]"
 ---
@@ -127,6 +127,23 @@ Summary of what was generated:
 - Module overviews: N created
 - Doc-tests: N passing, M fixed
 - Any items where documentation was unclear (flag for human review)
+
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "Code is self-documenting" | Public API consumers need context that code alone cannot provide: when to use, what to expect, edge cases. |
+| "Doc comments slow down iteration" | Undocumented APIs generate support questions that cost more than writing docs. Write once, answer forever. |
+| "Skip doc-tests, they're slow" | Doc-tests are the only guarantee that examples compile and work. Stale examples mislead more than no examples. |
+| "Module overview isn't needed, items are documented" | Module docs explain the why and when. Item docs explain the what and how. Both are needed. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Restating type signatures in doc comments instead of explaining semantics
+- Skipping doc-test verification
+- Generating docs without reading existing code comments first
+- No examples for public API functions
 
 ## Verification
 

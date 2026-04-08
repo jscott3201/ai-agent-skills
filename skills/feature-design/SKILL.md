@@ -22,6 +22,45 @@ codebase, iterate with the user, and hand off to execution.
 
 ## Instructions
 
+### Stage 0: Context recall (SeleneDB)
+
+If SeleneDB is available (see [selene-integration.md](../_selene/selene-integration.md)),
+create a session and recall prior design context:
+
+1. **Create session** with `skill: 'feature-design'` and `scope: $ARGUMENTS`
+2. **Scoped auto-recall** — query for prior design work on related code:
+   - Prior `:Decision` nodes affecting `:CodeLocation` nodes in the feature's area
+   - Prior `:Document {doc_type: 'plan'}` or `{doc_type: 'design'}` on related topics
+   - Any `:DeferredItem` nodes that this feature might address
+   - Prior `:PlanClaim` inaccuracies from plan-verify on same modules (indicates
+     which areas drift most and need extra verification)
+   - **Prior research on related topics** — query `:Document` nodes linked to
+     matching `:Topic` nodes:
+
+   ```gql
+   MATCH (doc:Document)-[:about]->(t:Topic)
+   WHERE t.name CONTAINS $keyword OR t.description CONTAINS $keyword
+   MATCH (doc)<-[:produced]-(s:Session)
+   WHERE s.project = $project AND doc.doc_type IN ['deep_dive', 'multi_perspective', 'landscape']
+   RETURN doc.title, t.name AS topic, s.date
+   ORDER BY s.date DESC
+   LIMIT 5
+   ```
+
+   Capture the IDs of research documents that are relevant — they will be
+   linked to the plan via `:informs` in Stage 4.
+
+3. If relevant prior context exists, present it:
+
+> "Prior design context for this area:
+> - [Prior design decisions affecting these modules]
+> - [Any deferred items this feature might address]
+> - [Plan verification history: which modules drift most]
+>
+> This may inform the design. Proceeding with exploration."
+
+If SeleneDB is not available or no prior context exists, skip silently.
+
 Work through these stages in order. Each stage builds on the previous one.
 Do not skip stages, but scale the depth of each stage to the feature's
 complexity. Present one topic at a time and wait for the user before
@@ -61,6 +100,32 @@ Use an Explore subagent for large codebases to keep the main context clean.
 4. Assess scope: if the feature spans multiple independent subsystems, flag it
    immediately and help decompose into sub-features. Each sub-feature gets
    its own pass through this skill.
+
+#### Graph write: non-goals (SeleneDB)
+
+After non-goals are confirmed with the user, write each as a `:Decision`
+node with rejection rationale:
+
+```gql
+INSERT (d:Decision {
+  summary: $non_goal,
+  rationale: $why_excluded,
+  alternatives: 'Explicitly scoped out',
+  confidence: 'high'
+})
+RETURN id(d) AS decision_id
+```
+
+Link to session and the plan document (when created) via `:non_goal`:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (d:Decision) WHERE id(d) = $decision_id
+INSERT (s)-[:produced]->(d)
+```
+
+Non-goals stored in the graph surface in future feature-design sessions
+when similar scope is explored, preventing scope re-expansion.
 
 ### Stage 2: Capture workflow preferences
 
@@ -132,7 +197,37 @@ Present the user with a choice:
    - Wait for the user's input before moving to the next decision
 4. Explicitly state non-goals and what was rejected
 5. Identify risks: what could go wrong with the chosen approach?
-6. Summarize the confirmed design and get final approval before Stage 4
+6. For key decisions where the rationale isn't obvious from the choice
+   itself, offer: "Want to capture why this approach? (optional)"
+   If yes, create a `:Note {kind: 'rationale', author: 'user'}` linked
+   to the `:Decision` via `:annotates`. This preserves context that
+   "alternatives" and "rationale" fields may not fully capture.
+7. Summarize the confirmed design and get final approval before Stage 4
+
+#### Graph write: design decisions (SeleneDB)
+
+After each design decision is confirmed by the user:
+
+```gql
+INSERT (d:Decision {
+  summary: $decision_summary,
+  rationale: $why_chosen,
+  alternatives: $rejected_approaches,
+  confidence: $confidence
+})
+RETURN id(d) AS decision_id
+```
+
+Link to session and affected code:
+
+```gql
+MATCH (s:Session) WHERE id(s) = $session_id
+MATCH (d:Decision) WHERE id(d) = $decision_id
+INSERT (s)-[:produced]->(d)
+
+MERGE (loc:CodeLocation {file: $file, module: $module})
+INSERT (d)-[:affects]->(loc)
+```
 
 #### If formal:
 
@@ -147,6 +242,22 @@ Produce a structured document using the
 - What was explicitly not recommended and why
 
 Save to `_agentskills/design/`. Get user approval before proceeding.
+
+#### Graph write: formal design document (SeleneDB)
+
+If the formal path was chosen, write the design document to the graph:
+
+```gql
+INSERT (doc:Document {
+  title: $feature_name,
+  doc_type: 'design',
+  content: $document_content,
+  mode: 'formal'
+})
+RETURN id(doc) AS doc_id
+```
+
+Link design decisions from Stage 3 to this document via `:contains`.
 
 ### Stage 4: Write implementation plan
 
@@ -168,6 +279,73 @@ inherently cross-cutting, structure it as a sequence of focused tasks rather
 than one large task.
 
 Save the plan to `_agentskills/plans/`.
+
+#### Graph write: implementation plan (SeleneDB)
+
+Write the plan as a `:Document` node and link design decisions to it:
+
+```gql
+INSERT (doc:Document {
+  title: $feature_name,
+  doc_type: 'plan',
+  content: $plan_content
+})
+RETURN id(doc) AS plan_id
+
+// Link all design decisions from Stage 3 as contained
+MATCH (d:Decision)<-[:produced]-(s:Session)
+WHERE id(s) = $session_id
+INSERT (doc)-[:contains]->(d)
+
+// Link to session
+MATCH (s:Session) WHERE id(s) = $session_id
+INSERT (s)-[:produced]->(doc)
+```
+
+This creates the upstream node that plan-verify will later validate.
+The `:contains` edges connect the plan to the decisions that shaped it.
+
+**Link research provenance.** If prior research documents (from Stage 0
+auto-recall or from a research session earlier in this conversation)
+informed this plan, create `:informs` edges:
+
+```gql
+MATCH (research:Document) WHERE id(research) = $research_doc_id
+MATCH (plan:Document) WHERE id(plan) = $plan_id
+INSERT (research)-[:informs]->(plan)
+```
+
+This makes the provenance chain queryable: given a plan, you can find
+what research informed it. Given a research document, you can find what
+plans it fed into.
+
+**Create a milestone.** For medium and large features (2+ phases), create
+a `:Milestone` node to track the initiative across sessions:
+
+```gql
+INSERT (m:Milestone {
+  name: $feature_name,
+  description: $feature_description,
+  status: 'planned',
+  target_date: $target_date
+})
+RETURN id(m) AS milestone_id
+
+// Link plan to milestone
+MATCH (doc:Document) WHERE id(doc) = $plan_id
+MATCH (m:Milestone) WHERE id(m) = $milestone_id
+INSERT (doc)-[:part_of]->(m)
+
+// Tag with topics
+MERGE (t:Topic {name: $topic_name})
+MATCH (m:Milestone) WHERE id(m) = $milestone_id
+MATCH (t:Topic {name: $topic_name})
+INSERT (m)-[:about]->(t)
+```
+
+The milestone-tracking skill will handle commit linking and lifecycle
+from here. When execution begins, transition the milestone to
+`in_progress`.
 
 #### Plan self-review
 
@@ -223,6 +401,7 @@ After the user approves:
 - [exploration-checklist.md](exploration-checklist.md) - structured codebase exploration for Stage 1
 - [research-template.md](research-template.md) - formal research/design document format for Stage 3
 - [plan-template.md](plan-template.md) - implementation plan structure for Stage 4
+- [selene-integration.md](../_selene/selene-integration.md) - SeleneDB graph schema, detection, and persistence patterns
 
 ## Common Rationalizations
 
@@ -274,3 +453,9 @@ dictate the structure.
 **YAGNI ruthlessly.** When presenting approaches in Stage 3, remove features
 that solve hypothetical future problems. The right amount of complexity is
 what the feature actually requires.
+
+**SeleneDB connects the full design pipeline.** Design decisions stored here
+flow into plan-verify (which validates them against code), deep-review (which
+checks the implementation), and deferred-tracking (which captures what was
+scoped out). Non-goals are especially valuable — they surface when future
+features attempt to expand into explicitly excluded territory.

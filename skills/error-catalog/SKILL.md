@@ -121,6 +121,23 @@ Report:
 - Any gaps or issues found in existing error handling
 - Migration plan if redesigning existing error types
 
+## Common Rationalizations
+
+| Rationalization | Why It's Wrong |
+|---|---|
+| "One catch-all error type is simpler" | Catch-all errors force callers to pattern match on strings. Typed variants enable compiler-checked handling. |
+| "From impls can be added later" | Missing From impls cause `.map_err()` chains that obscure the actual error source. Design the conversion chain upfront. |
+| "Internal errors don't need structure" | Internal errors become external when the module is extracted to a library crate. Build the structure once. |
+| "Skip non_exhaustive, we control all consumers" | Today's internal crate is tomorrow's public API. `#[non_exhaustive]` costs nothing now and prevents breaking changes later. |
+
+## Red Flags
+
+Stop and reassess if you observe:
+- Proposing `anyhow::Error` as a library's public error type
+- Missing `From` impl for any error variant that wraps another error
+- No `Display` impl (or relying on `Debug` for user-facing messages)
+- Skipping the `?` propagation verification step
+
 ## Verification
 
 - [ ] Failure modes analyzed for the target crate/module
