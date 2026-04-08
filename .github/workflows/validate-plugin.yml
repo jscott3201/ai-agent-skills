@@ -30,7 +30,7 @@ jobs:
           failed=0
           for f in skills/*/SKILL.md; do
             skill=$(basename "$(dirname "$f")")
-            if [ "$skill" = "_template" ]; then continue; fi
+            if [[ "$skill" == _* ]]; then continue; fi
             if ! head -20 "$f" | grep -q "^name:"; then
               echo "FAIL: $f missing 'name' in frontmatter"
               failed=1
@@ -56,7 +56,7 @@ jobs:
           failed=0
           for dir in skills/*/; do
             skill=$(basename "$dir")
-            if [ "$skill" = "_template" ]; then continue; fi
+            if [[ "$skill" == _* ]]; then continue; fi
             for f in "$dir"*.md; do
               base=$(basename "$f")
               if [ "$base" = "SKILL.md" ]; then continue; fi
@@ -85,7 +85,7 @@ jobs:
 
       - name: Summary
         run: |
-          echo "Skills: $(ls -d skills/*/ | grep -v _template | wc -l)"
+          echo "Skills: $(ls -d skills/*/ | grep -v 'skills/_' | wc -l)"
           echo "Agents: $(ls agents/*.md 2>/dev/null | wc -l)"
           echo "Hooks: $(python3 -c "
           import json
