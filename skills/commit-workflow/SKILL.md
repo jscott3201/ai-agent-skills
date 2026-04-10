@@ -150,6 +150,32 @@ If the commit implements a Decision or fixes a Finding from the current
 session, create `:implemented_by` or `:fixed_by` edges per the patterns
 in [selene-patterns.md](../_selene/selene-patterns.md).
 
+### Context bridge: announce commit to peers
+
+After the graph write, share the commit with other active agents via the
+context bridge. This lets concurrent agents know what changed:
+
+```
+share_context(
+  author: "<my agent id>",
+  context_type: "decision",
+  scope: "<project>",
+  targets: ["<files changed>"],
+  content: "<commit message> (sha: <short_sha>)",
+  visibility: "project",
+  ttl_ms: 86400000
+)
+```
+
+Also release any intents that covered the committed files:
+
+```
+release_intent(agent_id: "<my agent id>")
+```
+
+This is automatic — no user action needed. The commit itself is the
+natural release point for file-level intents.
+
 ## Supporting files
 
 - [selene-patterns.md](../_selene/selene-patterns.md) — commit linking patterns

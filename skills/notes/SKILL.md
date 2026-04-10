@@ -78,6 +78,34 @@ MATCH (n:Note) WHERE id(n) = $note_id
 INSERT (n)-[:annotates]->(loc)
 ```
 
+### Context bridge: share cross-agent notes
+
+When the author is `agent` and the kind is `observation` or `warning`,
+check if other agents are active on the project. If so, share the note
+via the context bridge so peers benefit from the observation:
+
+```
+list_agents(project: "<project>")
+```
+
+If active peers exist:
+
+```
+share_context(
+  author: "<my agent id>",
+  context_type: "<'discovery' for observations, 'warning' for warnings>",
+  scope: "<project>",
+  targets: ["<target file or module if applicable>"],
+  content: "<note content>",
+  visibility: "project",
+  ttl_ms: 86400000
+)
+```
+
+Do NOT share `todo`, `bookmark`, or `rationale` notes — these are
+session-private context that doesn't help other agents. Only share
+observations and warnings that affect concurrent work.
+
 
 ### Listing notes
 

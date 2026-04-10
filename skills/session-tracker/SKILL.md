@@ -50,6 +50,67 @@ This gives the agent immediate awareness of:
 
 No user action needed. The agent starts informed.
 
+### Agent registration (context bridge)
+
+At session start, after creating the Session node, register with the
+context bridge so other agents can discover this session:
+
+```
+register_agent(
+  agent_id: "claude-<project>-<instance>",
+  project: "<project>",
+  working_on: "<initial task or 'starting session'>",
+  capabilities: "<skill being invoked>"
+)
+```
+
+Also query for active peers and recent shared context:
+
+```
+list_agents(project: "<project>")
+get_shared_context(scope: "<project>", since_ms: <last 30 minutes>)
+```
+
+If other agents are active, briefly note their presence:
+
+> **Peer awareness:** [agent_id] is active on [project], working on [working_on].
+
+### Heartbeat during long-running work
+
+During skills that run for extended periods (deep-review, research,
+feature-design), call `heartbeat` approximately every 60 seconds with
+updated `working_on` status. This prevents the reaper from marking the
+session stale during legitimate work.
+
+```
+heartbeat(
+  agent_id: "<my agent id>",
+  working_on: "<current task description>",
+  files_touched: ["<files being modified>"]
+)
+```
+
+### Deregistration on session end
+
+When writing the final session summary (the rolling checkpoint), also
+deregister from the context bridge and share the session summary:
+
+```
+share_context(
+  author: "<my agent id>",
+  context_type: "decision",
+  scope: "<project>",
+  content: "<session summary with key outcomes and next steps>",
+  visibility: "project",
+  ttl_ms: 86400000
+)
+
+deregister_agent(agent_id: "<my agent id>")
+```
+
+This ensures clean shutdown: intents are released, the session is
+marked done, and the summary is available to future agents for 24h.
+
 ## Instructions
 
 ### Viewing session history
